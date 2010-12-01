@@ -1,0 +1,10 @@
+svn checkout svn+ssh://drfuka@scm.r-forge.r-project.org/svnroot/ecohydrology
+cd EcoHydrology/
+R CMD build EcoHydrology
+R CMD check EcoHydrology_1.0.tar.gz 
+R CMD remove EcoHydrology
+R CMD install EcoHydrology_1.0.tar.gz 
+svn add EcoHydrology
+svn delete EcoHydrology/Read-and-delete-me 
+svn --force delete EcoHydrology/Read-and-delete-me 
+svn commit -m "First Commit of EcoHydrology"
