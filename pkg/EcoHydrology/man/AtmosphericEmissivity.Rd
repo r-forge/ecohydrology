@@ -2,7 +2,9 @@
 \alias{AtmosphericEmissivity}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+The emissivity of the atmsophere [-]
+
+
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
@@ -13,27 +15,26 @@ AtmosphericEmissivity(airtemp, cloudiness)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{airtemp}{
-%%     ~~Describe \code{airtemp} here~~
+Air temperature: air temperature [C]
 }
   \item{cloudiness}{
-%%     ~~Describe \code{cloudiness} here~~
+Cloudiness: fraction of the sky covered in clouds [-]
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+The emissivity of the atmsophere [-]
 }
 \references{
-%% ~put references to the literature/web site here ~
+Campbell, G. S., Norman, J.M., 1998. An Introduction to 
+Environmental Biophysics, seconded., Springer, New York, 
+p. 286.
+
 }
 \author{
-%%  ~~who you are~~
+Fuka, D.R., Walter, M.T.
 }
 \note{
 %%  ~~further notes~~
@@ -45,9 +46,12 @@ AtmosphericEmissivity(airtemp, cloudiness)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+
+temp=15
+clouds=.5
+AtmEm=AtmosphericEmissivity(temp,clouds)
+print(AtmEm)
+
 
 ## The function is currently defined as
 function(airtemp,cloudiness){

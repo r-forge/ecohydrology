@@ -1,10 +1,12 @@
 Package: EcoHydrology
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Principle equations used in Eco-Hydrology.
+Version: 0.1
 Date: 2010-12-01
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Fuka, DR, Walter, MT, and Easton, ZM
+Maintainer: Daniel Fuka <drf28@cornell.edu>
+Description: This package provides a flexible foundation for scientists, 
+  engineers, and policy makers to base teaching exercises as well as for 
+  more applied use to model complex eco-hydrological interactions. 
+License: GPL-2
 LazyLoad: yes
