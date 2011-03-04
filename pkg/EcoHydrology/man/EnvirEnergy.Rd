@@ -2,10 +2,10 @@
 \alias{EnvirEnergy}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+The Surface Net Energy Budget
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Net Energy=S+La-Lt+S+E+R+G, where S is the net incident solar radiation, La is the atmospheric long wave radiation, Lt is the terrestrial long wave radiation, H is the sensible heat exchange, E is the energy flux associated with the latent heats of vaporization and condensation, G is ground heat conduction, P is heat added by precipitation
 }
 \usage{
 EnvirEnergy(lat, Jday, Tx, Tn, wind, relativehumidity, cloudiness, albedo, forest, slope, aspect, surftemp, surfemissivity)
@@ -13,60 +13,57 @@ EnvirEnergy(lat, Jday, Tx, Tn, wind, relativehumidity, cloudiness, albedo, fores
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-%%     ~~Describe \code{lat} here~~
+latitdue [rad]
 }
   \item{Jday}{
-%%     ~~Describe \code{Jday} here~~
+Julian day / day of the year, 1-365 [day] 
 }
   \item{Tx}{
-%%     ~~Describe \code{Tx} here~~
+Maximum daily temperature [C]
 }
   \item{Tn}{
-%%     ~~Describe \code{Tn} here~~
+Minimum daily temperature [C]
 }
   \item{wind}{
-%%     ~~Describe \code{wind} here~~
+Average daily windspeed [m/s]
 }
   \item{relativehumidity}{
-%%     ~~Describe \code{relativehumidity} here~~
+Relative humidity; if negative, air vapor density will be approximated [-]
 }
   \item{cloudiness}{
-%%     ~~Describe \code{cloudiness} here~~
+Fraction of the sky covered in clouds,if negative, cloudiness will be approximated [-]
 }
   \item{albedo}{
-%%     ~~Describe \code{albedo} here~~
+#albedo: surface albedo or reflectivity [-]
 }
   \item{forest}{
-%%     ~~Describe \code{forest} here~~
+Forest or vegeation cover [-]
 }
   \item{slope}{
-%%     ~~Describe \code{slope} here~~
+Slope of the ground [rad]
 }
   \item{aspect}{
-%%     ~~Describe \code{aspect} here~~
+Ground aspect [rad from north]
 }
   \item{surftemp}{
-%%     ~~Describe \code{surftemp} here~~
+surface temperature [C]
 }
   \item{surfemissivity}{
-%%     ~~Describe \code{surfemissivity} here~~
+surfice emissivity: [-]
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
+\item{NetEnergy}{Surface net energy}
+.
 }
 \references{
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Walter, M.T.,Fuka, D.R.
+Maintainer: Daniel Fuka <drf28@cornell.edu>
 }
 \note{
 %%  ~~further notes~~
@@ -84,22 +81,6 @@ EnvirEnergy(lat, Jday, Tx, Tn, wind, relativehumidity, cloudiness, albedo, fores
 
 ## The function is currently defined as
 function(lat,Jday,Tx,Tn,wind,relativehumidity,cloudiness,albedo,forest,slope,aspect,surftemp,surfemissivity){
-# the total energy exchange between the surface and the surrounding air
-
-#lat: latitdue [rad]
-#Jday: Julian date or day of the year [day]
-#Tx: maximum daily temperature [C]
-#Tn: minimum daily temperature [C]
-#wind: average daily windspeed [m/s]
-#relativehumidity: relative humidity; if negative, air vapor density will be approximated [-]
-#cloudiness: fraction of the sky covered in clouds,if negative, cloudiness will be approximated [-]
-#albedo: surface albedo or reflectivity [-]
-#forest: forest or vegeation cover [-]
-#slope: slope of the ground [rad]
-#aspect: ground aspect [rad from north]
-#surftemp: surface temperature [C]
-#surfemissivity: [-]
-
 if(cloudiness<0){cloudiness<-EstCloudiness(lat,Jday,Tx,Tn)}
 
 airtemp<-(Tx+Tn)/2 #average daily air temperature [C]

@@ -1,8 +1,8 @@
 Package: EcoHydrology
 Type: Package
 Title: Principle equations used in Eco-Hydrology.
-Version: 0.1
-Date: 2010-12-01
+Version: 0.2
+Date: 2011-02-28
 Author: Fuka, DR, Walter, MT, and Easton, ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
 Description: This package provides a flexible foundation for scientists, 
