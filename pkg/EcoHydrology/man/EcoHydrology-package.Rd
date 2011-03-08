@@ -38,6 +38,9 @@ solarangle\cr
 solaraspect\cr
 transmissivity\cr
 
+Included data:\cr
+GSOD_history\cr
+
 }
 \author{
 Fuka, DR, Walter, MT, and Easton, ZM\cr
