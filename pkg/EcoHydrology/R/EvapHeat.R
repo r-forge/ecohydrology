@@ -1,6 +1,6 @@
 EvapHeat <-
 function(surftemp,airtemp,relativehumidity,Tn,wind){
-# evaporative heat exchange between a surface and the surrounding air; usually cooling [kJ m-2 d-1]
+# Evaporative heat exchange between a surface and the surrounding air; usually cooling [kJ m-2 d-1]
 # this function is only intended for wet surfaces, i.e., it assumes the vapor density at the surface is the saturation vapor density
 
 #surftemp: surface temperature [C]
