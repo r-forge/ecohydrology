@@ -19,7 +19,7 @@ Date: \tab 2011-03-08\cr
 License: \tab GPL-2\cr
 LazyLoad: \tab yes\cr
 }
-Included Functions:\cr
+Included Energy Budget Functions:\cr
 AtmosphericEmissivity\cr
 EnvirEnergy\cr
 EstCloudiness\cr
@@ -37,6 +37,10 @@ slopefactor\cr
 solarangle\cr
 solaraspect\cr
 transmissivity\cr
+
+Included Data Handeling Functions:\cr
+get_gsod_stn\cr
+build_gsod_forcing_data\cr
 
 Included data:\cr
 GSOD_history\cr

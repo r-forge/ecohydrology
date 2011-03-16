@@ -1,4 +1,7 @@
+mkdir ecohydrology
+cd ecohydrology
 svn checkout svn+ssh://drfuka@scm.r-forge.r-project.org/svnroot/ecohydrology
+svn checkout svn+ssh://{your-r-forge-name}@scm.r-forge.r-project.org/svnroot/ecohydrology
 cd EcoHydrology/
 R CMD build EcoHydrology
 R CMD check EcoHydrology_1.0.tar.gz 
