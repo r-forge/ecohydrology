@@ -100,8 +100,6 @@ Walter, M.T., Brooks, E.S., McCool, D.K., King, L.G., Molnau, M., Boll, J., 2005
 Wigmosta, M.S., B. Nijssen, P. Storck, and D.P. Lettenmaier, 2002. The Distributed Hydrology Soil Vegetation Model, In Mathematical Models of Small Watershed Hydrology and Applications, V.P. Singh, D.K. Frevert, eds., Water Resource Publications, Littleton, CO., p. 7-42.
 
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
-~~ the R documentation directory ~~
 \keyword{ package }
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
