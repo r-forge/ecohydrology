@@ -69,6 +69,7 @@
       close (6)
       close (0)
       close (5)
+      close (9999)
 
       return
       end
