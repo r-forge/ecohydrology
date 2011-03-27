@@ -130,7 +130,7 @@
       call closefiles
       call deallocate_parms
 !!      call rchkusr()
-      call intpr ("SWAT Run Successful", 19, intrflag, 1)
+!!      call intpr ("SWAT Run Successful", 19, intrflag, 1)
       return
 !!      end subroutine
       stop
