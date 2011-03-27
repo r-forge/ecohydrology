@@ -108,7 +108,7 @@ F90FLAGS = -fPIC -gdwarf-2 -O2
 LDFLAGS =  -dynamiclib -L$(R_LIBRARY_DIR) -framework R
 else 
 F90FLAGS = -fPIC -g -O2  
-LDFLAGS =  -shared -L$(R_LIBRARY_DIR) -framework R
+LDFLAGS =  -shared 
 endif
 
 all: $(PROG)
