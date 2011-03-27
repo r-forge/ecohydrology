@@ -66,10 +66,12 @@
       close (16)
       close (17)
       close (11123)
+      close (9996)
+      close (9995)
+      close (9999)
+      close (5)
       close (6)
       close (0)
-      close (5)
-      close (9999)
 
       return
       end

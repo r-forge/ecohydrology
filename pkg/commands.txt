@@ -11,3 +11,8 @@ svn add EcoHydrology
 svn delete EcoHydrology/Read-and-delete-me 
 svn --force delete EcoHydrology/Read-and-delete-me 
 svn commit -m "First Commit of EcoHydrology"
+
+
+library.dynam("swat","EcoHydrology")
+.Fortran("main")
+

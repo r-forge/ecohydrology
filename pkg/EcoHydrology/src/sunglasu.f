@@ -83,7 +83,7 @@ c      written by Ann van Griensven - University of California Riverside, april 
       parmx=-1.e10
       islc=0
 
-      write(*,*) 'objective function limit',objflim
+      write(9999,*) 'objective function limit',objflim
       write(18011,*) 'objective function limit',objflim      
       write(18011,*) 'maximum biases'
       write(18011,*) (biasmax(m),m=1,iobj)      
@@ -161,7 +161,7 @@ c      written by Ann van Griensven - University of California Riverside, april 
       write(18011,*) ' Limit on global objective function = ', objflim
 
       write(18011,*) ' number of selections', islc
-      write(*,*) ' number of selections', islc
+      write(9999,*) ' number of selections', islc
       write(18011,*)
 
       write(18011,*)'minimum parameter values'

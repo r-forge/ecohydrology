@@ -6,7 +6,7 @@
       common /iopar/ in,iprii
 
 c
-      write (*,*) ' ENTER THE SENSITIVITY ANALYSIS SUBROUTINE --- '
+      write (9999,*) ' ENTER THE SENSITIVITY ANALYSIS SUBROUTINE --- '
 c
 c
 c  INITIALIZE I/O VARIABLES

@@ -259,7 +259,7 @@
                 sum = sum + hrupstm(k,1,j) + hrupstm(k,2,j)
               end do
               if (sum > 0. .and. iprp == 1) then
-                write (5,5100) j, iyr, mo_chk,                          &
+                write (9995,5100) j, iyr, mo_chk,                          &
      &                     (hrupstm(k,1,j), hrupstm(k,2,j), k = 1, npmx) 
               end if
               end if

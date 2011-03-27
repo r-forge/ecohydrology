@@ -1,4 +1,4 @@
-PROG =	swat.so
+PROG =	rswat.so
 
 SRCS =	modparm.f addh.f albedo.f allocate_parms.f alph.f analyse.f anfert.f apex_day.f \
 	apply.f ascrv.f atri.f aunif.f autocal.f autoirr.f automet.f aveval.f \
@@ -44,7 +44,7 @@ SRCS =	modparm.f addh.f albedo.f allocate_parms.f alph.f analyse.f anfert.f apex
 	washp.f watbal.f watqual.f watqual2.f wattable.f watuse.f weatgn.f \
 	wetlan.f wmeas.f wndgen.f writea.f writeaa.f writed.f writem.f \
 	writeswatfile.f writeswatmain.f xisquare.f xiunc.f xmon.f ysed.f \
-	zero0.f zero1.f zero2.f zeroini.f closefiles.f
+	zero0.f zero1.f zero2.f zeroini.f closefiles.f deallocate_parms.f
 
 OBJS =	modparm.o addh.o albedo.o allocate_parms.o alph.o analyse.o anfert.o apex_day.o \
 	apply.o ascrv.o atri.o aunif.o autocal.o autoirr.o automet.o aveval.o \
@@ -90,9 +90,9 @@ OBJS =	modparm.o addh.o albedo.o allocate_parms.o alph.o analyse.o anfert.o apex
 	washp.o watbal.o watqual.o watqual2.o wattable.o watuse.o weatgn.o \
 	wetlan.o wmeas.o wndgen.o writea.o writeaa.o writed.o writem.o \
 	writeswatfile.o writeswatmain.o xisquare.o xiunc.o xmon.o ysed.o \
-	zero0.o zero1.o zero2.o zeroini.o closefiles.o
+	zero0.o zero1.o zero2.o zeroini.o closefiles.o deallocate_parms.o
 
-LIBS =	
+LIBS = 
 
 CC = cc
 CFLAGS = -O
@@ -100,27 +100,30 @@ FC = gfortran
 FFLAGS = -O
 F90 = gfortran
 
+DANFLAGS := `set`
+
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
 F90FLAGS = -fPIC -gdwarf-2 -O2
-LDFLAGS =  -dynamiclib 
+LDFLAGS =  -dynamiclib -L$(R_LIBRARY_DIR) -framework R
 else 
 F90FLAGS = -fPIC -g -O2  
-LDFLAGS =  -shared 
+LDFLAGS =  -shared -L$(R_LIBRARY_DIR) -framework R
 endif
 
 all: $(PROG)
 
 $(PROG): $(OBJS)
+	@echo ${DANFLAGS}
 	$(F90) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(PROG) $(OBJS) *.mod
+test:
+	@echo ${DANFLAGS}
 
 .SUFFIXES: $(SUFFIXES) .f
 
-.f.o:
-	$(F90) $(F90FLAGS) -c $<
 
 addh.o: modparm.o
 albedo.o: modparm.o

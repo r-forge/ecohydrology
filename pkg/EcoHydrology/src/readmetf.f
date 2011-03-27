@@ -72,7 +72,7 @@ c  READ THE OBJECTIVE FUNCTIONS CONTROL PARAMETERS
 c
 c
 c  READ THE CONTROL PARAMETERS
-      write (*,*) ' READING RESPONSE CONTROL PARAMETERS'
+      write (9999,*) ' READING RESPONSE CONTROL PARAMETERS'
 
         do mm=1,isens
 !     !  !         !         !         !         !         !         ! !

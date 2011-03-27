@@ -70,7 +70,7 @@
 
 !! process input
 
-        write(*,*) 'simulation ',iitel
+        write(9999,*) 'simulation ',iitel
         do  ii = 1,2000 
         rewind(ii)
         end do

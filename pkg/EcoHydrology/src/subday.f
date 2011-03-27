@@ -100,10 +100,10 @@
         do ii = 1, itotb
           pdvb(ii) = pdvab(ipdvab(ii))
         end do
-        write (6,1000) sb, subgis(sb), iida, sub_km(sb),                &
+        write (9996,1000) sb, subgis(sb), iida, sub_km(sb),             &
      &                                        (pdvb(ii), ii = 1, itotb)
       else
-        write (6,1000) sb, subgis(sb), iida, sub_km(sb),                &
+        write (9996,1000) sb, subgis(sb), iida, sub_km(sb),             &
      &                                        (pdvab(ii), ii = 1, msubo)
       end if
 

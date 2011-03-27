@@ -190,8 +190,8 @@
 
 !!    opens database files
       open (4,file=plantdb)
-      open (5,file=tilldb)
-      open (6,file=pestdb)
+      open (9995,file=tilldb)
+      open (9996,file=pestdb)
       open (7,file=fertdb)
       open (8,file=urbandb)
 
@@ -272,7 +272,7 @@
       mpdb = 0
       do
         ipnum = 0
-        read (6,6200,iostat=eof) ipnum
+        read (9996,6200,iostat=eof) ipnum
         if (eof < 0) exit
         mpdb = Max(mpdb,ipnum)
       end do
@@ -283,7 +283,7 @@
       mtil = 0
       do
         itnum = 0
-        read (5,6300,iostat=eof) itnum
+        read (9995,6300,iostat=eof) itnum
         if (eof < 0) exit
         mtil = Max(mtil,itnum)
       end do
@@ -383,8 +383,8 @@
       close (1)
       close (3)
       close (4)
-      close (5)
-      close (6)
+      close (9995)
+      close (9996)
       close (7)
       close (8)
       return

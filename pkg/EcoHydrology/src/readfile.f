@@ -547,8 +547,8 @@
       open (2,file="output.std")
       open (3,file="output.hru",recl=800)
       open (4,file="output.wtr",recl=800)
-      open (5,file="output.pst",recl=600)
-      open (6,file="output.sub",recl=600)
+      open (9995,file="output.pst",recl=600)
+      open (9996,file="output.sub",recl=600)
       open (7,file="output.rch",recl=800)
       open (8,file="output.rsv",recl=800)
 !! srin output file from watqual.f  

@@ -109,7 +109,7 @@ c      calling subroutine to optimise for all the objective functions
 c      calling subroutine to analyse selection to compute uncertainty
 
 c  START RUNNING GOODPAR.OUT
-      write(*,*) 'start rerunning goodpar.out parameter sets....'
+      write(9999,*) 'start rerunning goodpar.out parameter sets....'
       open(18011,file='batchout.dat',status='unknown')
       open(18012, file='batchobjf.out')
       open(18013, file='batchpar.out')
@@ -160,7 +160,7 @@ c  START RUNNING GOODPAR.OUT
       close(18119)
 
       end if
-      write(*,*) "ParaSol is rerunning the best parameter set"
+      write(9999,*) "ParaSol is rerunning the best parameter set"
       open(18020,file='bestpar.out')
       read(18020,8013) iitel, (xxo(ii), ii=1,nopt)
       ipr=1

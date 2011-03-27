@@ -19,7 +19,7 @@ c
       data ysflg/'YES '/
       data noflg/'NO  '/
 c
-      write (*,*) ' ENTER THE SCEIN SUBROUTINE --- '
+      write (9999,*) ' ENTER THE SCEIN SUBROUTINE --- '
 c
 
 c

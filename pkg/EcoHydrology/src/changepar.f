@@ -20,7 +20,7 @@ c     ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    iinr(:)      !              |number of HRUs to change for parameter (:)
 !!    inrhru(:,:)  |none          |list of HRU numbers to change  
 
-       write(*,*) 'changing parameters'
+       write(9999,*) 'changing parameters'
       do iopt= 1,nopt
 
        iimet=imet(iopt)

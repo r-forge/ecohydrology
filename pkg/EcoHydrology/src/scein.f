@@ -42,7 +42,7 @@ c
      &' X86',' X87',' X88',' X89',' X90',' X91',' X92',' X93',' X94',
      &' X95',' X96',' X97',' X98',' X99','X100'/
 c
-      write (*,*) ' ENTER THE SCEIN SUBROUTINE --- '
+      write (9999,*) ' ENTER THE SCEIN SUBROUTINE --- '
 c
 c
 c  INITIALIZE I/O VARIABLES

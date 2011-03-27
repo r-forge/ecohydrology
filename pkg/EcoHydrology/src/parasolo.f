@@ -129,7 +129,7 @@ c  LOCAL ARRAYS
 c
 cc
 
-      write (*,*) ' ENTER THE SCEUA SUBROUTINE --- '     
+      write (9999,*) ' ENTER THE SCEUA SUBROUTINE --- '     
 
 
 c  ALGORITHM GENERATE A NEW POINT(S) FROM A SUB-COMPLEX
@@ -164,7 +164,7 @@ c  COMPUTE THE TOTAL NUMBER OF POINTS IN INITIAL POPUALTION
       npt1 = npt
 c
       write(18011,400)
-      write (*,*) ' ***  Evolution Loop Number ',nloop
+      write (9999,*) ' ***  Evolution Loop Number ',nloop
 c
 c  COMPUTE THE BOUND FOR PARAMETERS BEING OPTIMIZED
       do j = 1, nopt
@@ -293,7 +293,7 @@ c  BEGIN THE MAIN LOOP ----------------
  1000 continue
       nloop = nloop + 1
 c
-      write (*,*) ' ***  Evolution Loop Number ',nloop
+      write (9999,*) ' ***  Evolution Loop Number ',nloop
 
       vartot=0.
       do mm=1,igoc

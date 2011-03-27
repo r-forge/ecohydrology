@@ -19,7 +19,7 @@ c
       common /iopar/ in,iprii
 
 c
-      write (*,*) ' ENTER THE BATCH RUN SUBROUTINE --- '
+      write (9999,*) ' ENTER THE BATCH RUN SUBROUTINE --- '
 c
 c
 c  INITIALIZE I/O VARIABLES
@@ -34,7 +34,7 @@ c
      &       /,10x,46(1h=))
 
 
-      write (*,*) ' READING CHANGEPAR.DAT '
+      write (9999,*) ' READING CHANGEPAR.DAT '
 
         do mm=1,100
 !     !  !         !         !         !         !         !         ! !

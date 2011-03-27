@@ -43,10 +43,10 @@ c
 1815  format(13x,100a10)
 c      go to 4
       call sample(nopt,nintval,iseed, bbound,dt)
-      write (*,*)
-      write (*,*) 'WARNING: the program will run ',nintval*(nopt+1),
+      write (9999,*)
+      write (9999,*) 'WARNING: the program will run ',nintval*(nopt+1),
      * ' times!!!'
-      write (*,*)      
+      write (9999,*)      
       icd=0
 
       iitel=0

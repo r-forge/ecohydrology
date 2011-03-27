@@ -17,13 +17,8 @@
       real::esti_ksat,perc_clay,xc,exksat
       exksat=5.0
 
-!      print *,"Enter the % clay in the soil layer"
-!      read *,perc_clay
-
       xc=100.0-perc_clay
       esti_ksat=12.7*xc/(xc+exp(11.45-0.097*xc))+1.0
-
-!      print *,"The estimated ksat value is ",min(esti_ksat,exksat)
 
       return
 

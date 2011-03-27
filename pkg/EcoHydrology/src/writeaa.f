@@ -485,10 +485,10 @@
 
 !! write average annual pesticide data (output.pst)
       if (iprp == 1) then
-        write (5,5500)
+        write (9995,5500)
         do j = 1, nhru
           if (hrupest(j) == 1) then
-                write (5,5600) j, yrs,                                  &
+                write (9995,5600) j, yrs,                               &
      &                     (hrupsta(k,1,j), hrupsta(k,2,j), k = 1, npmx)
           end if
         end do

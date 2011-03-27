@@ -100,7 +100,7 @@
 
 
       do curyr = 1, nbyr
-        write (*,1234) curyr
+        write (9999,1234) curyr
 
         !! initialize annual variables
         call sim_inityr

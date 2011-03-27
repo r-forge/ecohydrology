@@ -1,4 +1,4 @@
-PROG =	swat.so
+PROG =	rswat.so
 
 SRCS =	modparm.f addh.f albedo.f allocate_parms.f alph.f analyse.f anfert.f apex_day.f \
 	apply.f ascrv.f atri.f aunif.f autocal.f autoirr.f automet.f aveval.f \
@@ -100,27 +100,30 @@ FC = gfortran
 FFLAGS = -O
 F90 = gfortran
 
+DANFLAGS := `set`
+
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
 F90FLAGS = -fPIC -gdwarf-2 -O2
-LDFLAGS =  -dynamiclib 
+LDFLAGS =  -dynamiclib -L$(R_LIBRARY_DIR) -framework R
 else 
 F90FLAGS = -fPIC -g -O2  
-LDFLAGS =  -shared 
+LDFLAGS =  -shared -L$(R_LIBRARY_DIR) -framework R
 endif
 
 all: $(PROG)
 
 $(PROG): $(OBJS)
+	@echo ${DANFLAGS}
 	$(F90) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(PROG) $(OBJS) *.mod
+test:
+	@echo ${DANFLAGS}
 
 .SUFFIXES: $(SUFFIXES) .f
 
-.f.o:
-	$(F90) $(F90FLAGS) -c $<
 
 addh.o: modparm.o
 albedo.o: modparm.o

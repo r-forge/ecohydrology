@@ -1,6 +1,6 @@
+      subroutine swat2005(intrflag)
 !!      include 'modparm.f'
 !!      program main
-      subroutine swat
 !!    this is the main program that reads input, calls the main simulation
 !!    model, and writes output.
 !!    comment changes to test merging with trunk and c:\branch_test code
@@ -56,9 +56,10 @@
 
       use parm
       implicit none
+      integer intrflag
       prog = "SWAT  Sept '05 VERSION2005"
-
-      write (*,1000)
+      open(9999,file='stdio.out')
+      write (9999,1000)
  1000 format(1x,"               SWAT2005               ",/,             &
      &          "      Soil & Water Assessment Tool    ",/,             &
 !     &          "              UNIX Version            ",/,             &
@@ -121,12 +122,17 @@
       do i = 1, 9
         close (i)
       end do
-      write (*,1001)
+      write (9999,1001)
  1001 format (/," Execution successfully completed ")
-      
 
         iscen=1
         if (iclb > 0) call automet
       call closefiles
+      call deallocate_parms
+!!      call rchkusr()
+      call intpr ("SWAT Run Successful", 19, intrflag, 1)
+      return
+!!      end subroutine
       stop
       end
+

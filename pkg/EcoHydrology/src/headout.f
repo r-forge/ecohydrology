@@ -90,13 +90,13 @@
 
 
 !! write headings to subbasin output file (output.sub)
-      write (6,1000) prog, values(2), values(3), values(1), values(5),  &
+      write (9996,1000) prog,values(2),values(3),values(1), values(5),  &
      &                values(6), values(7)
-      write (6,1010) title
+      write (9996,1010) title
       if (ipdvab(1) > 0) then
-        write (6,1030) (hedb(ipdvab(j)), j = 1, itotb) !!custom printout
+        write (9996,1030) (hedb(ipdvab(j)), j = 1, itotb) !!custom printout
       else
-        write (6,1030) (hedb(j), j = 1, msubo)         !!default printout
+        write (9996,1030) (hedb(j), j = 1, msubo)         !!default printout
       endif
 
 !! write headings to VB interface subbasin output file (sub.dat)
@@ -169,13 +169,13 @@
 
 !! write headings to pesticide output file (output.pst)
       if (iprp /= 0) then
-        write (5,1000) prog, values(2), values(3), values(1), values(5),&
+        write (9995,1000) prog,values(2),values(3),values(1),values(5), &
      &                values(6), values(7)
-        write (5,1010) title
-        write (5,3000)
-        write (5,3001) (npno(j),npno(j), j = 1, npmx)
-        write (5,3002) (pname(npno(j)),pname(npno(j)), j = 1, npmx)
-        write (5,3003) (("SOLUBLE mg       SORBED mg"), j = 1, npmx)
+        write (9995,1010) title
+        write (9995,3000)
+        write (9995,3001) (npno(j),npno(j), j = 1, npmx)
+        write (9995,3002) (pname(npno(j)),pname(npno(j)), j = 1, npmx)
+        write (9995,3003) (("SOLUBLE mg       SORBED mg"), j = 1, npmx)
       end if
 
       return

@@ -18,13 +18,13 @@ c               BEGIN SENSITIVITY PART BY AVG
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
         if (iclb.eq.1) then
-      write(*,*) 'starting sensitivity analysis...'      
-      write(*,*) ' written by Ann van Griensven'
-      write(*,*) '         at University of California Riverside'
+      write(9999,*) 'starting sensitivity analysis...'      
+      write(9999,*) ' written by Ann van Griensven'
+      write(9999,*) '         at University of California Riverside'
 
       call sensmain(nopt,iobj,isens)
     
-      write(*,*) 'sensitivity analysis completed!'      
+      write(9999,*) 'sensitivity analysis completed!'      
       end if      
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -33,12 +33,12 @@ c               BEGIN OPTIMISATION AND UNCERTAINTY
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
         continue
         if (iclb.eq.2.or.iclb.eq.3) then
-      write(*,*) ' starting PARASOL method...'
-      write(*,*) ' written by Ann van Griensven'
-      write(*,*) '         at University of California Riverside'
+      write(9999,*) ' starting PARASOL method...'
+      write(9999,*) ' written by Ann van Griensven'
+      write(9999,*) '         at University of California Riverside'
         call parasol(nopt,iobj,isens)
 c       end autocalibration section
-      write(*,*) 'PARASOL method completed!'
+      write(9999,*) 'PARASOL method completed!'
 
         end if
 
@@ -50,7 +50,7 @@ c               BEGIN RERUN
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
         if (iclb.eq.4) then
-        write(*,*) 'RERUN best parameter file...'
+        write(9999,*) 'RERUN best parameter file...'
 
       call rerunfile(nopt,iobj,isens)
 c       end autocalibration section
@@ -62,11 +62,11 @@ c
 c               BEGIN BATCHRUN PART BY AVG
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 1003        if (iclb.eq.5) then
-      write(*,*) 'rerun good parameter sets...'      
-      write(*,*) ' written by Ann van Griensven'
-      write(*,*) '         at University of California Riverside'
+      write(9999,*) 'rerun good parameter sets...'      
+      write(9999,*) ' written by Ann van Griensven'
+      write(9999,*) '         at University of California Riverside'
       call batchmain(nopt)
-      write(*,*) 'Batchruns completed!'
+      write(9999,*) 'Batchruns completed!'
       end if
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
@@ -74,7 +74,7 @@ c              RERUN UNCERTAINTY LOOP BY AVG
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 1004        continue
         if (iclb.eq.6) then
-        write(*,*) 'rerun uncertainty analysis'
+        write(9999,*) 'rerun uncertainty analysis'
        call rerunPS(nopt,iobj,isens)
 c       end autocalibration section
         end if
@@ -84,7 +84,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
         if (iclb.eq.8) then
-        write(*,*) 'start sunglasses method'
+        write(9999,*) 'start sunglasses method'
 !       call sunglasses(iclb,nopt)
         call sunglasses(nopt,iobj,isens)
         end if
@@ -93,7 +93,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
         if (iclb.eq.9) then
-        write(*,*) 'rerun uncertainty analysis'
+        write(9999,*) 'rerun uncertainty analysis'
        call sunglasrerun(nopt,iobj,isens)
               end if
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

@@ -16,7 +16,7 @@ c
       real*8 x(m,ip), bbound(2,200),dt
       integer ix(m,ip), ip, m, iseed
       integer isample(m)
-      write (*,*) 'starting sampling       ....'
+      write (9999,*) 'starting sampling       ....'
 
       do ii=1,ip
       call sample1(isample,m,iseed)      
