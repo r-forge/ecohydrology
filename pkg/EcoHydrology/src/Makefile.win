@@ -38,7 +38,7 @@ SRCS =	modparm.f addh.f albedo.f allocate_parms.f alph.f analyse.f anfert.f apex
 	std1.f std2.f std3.f stdaa.f storeinitial.f structure.f subaa.f \
 	subbasin.f subday.f submon.f substor.f subwq.f subyr.f sumv.f \
 	sunglasr.f sunglass.f sunglasu.f surface.f surfst_h2o.f surfstor.f \
-	surq_daycn.f surq_greenampt.f swbl.f sweep.f swu.f tair.f telobjre.f \
+	surq_daycn.f surq_greenampt.f surq_waterbalance.f swbl.f sweep.f swu.f tair.f telobjre.f \
 	telobs.f telpar.f tgen.f theta.f tillmix.f tmeas.f tran.f transfer.f \
 	tstr.f ttcoef.f urban.f varinit.f vbl.f virtual.f volq.f vrval.f \
 	washp.f watbal.f watqual.f watqual2.f wattable.f watuse.f weatgn.f \
@@ -84,7 +84,7 @@ OBJS =	modparm.o addh.o albedo.o allocate_parms.o alph.o analyse.o anfert.o apex
 	std1.o std2.o std3.o stdaa.o storeinitial.o structure.o subaa.o \
 	subbasin.o subday.o submon.o substor.o subwq.o subyr.o sumv.o \
 	sunglasr.o sunglass.o sunglasu.o surface.o surfst_h2o.o surfstor.o \
-	surq_daycn.o surq_greenampt.o swbl.o sweep.o swu.o tair.o telobjre.o \
+	surq_daycn.o surq_greenampt.o surq_waterbalance.o swbl.o sweep.o swu.o tair.o telobjre.o \
 	telobs.o telpar.o tgen.o theta.o tillmix.o tmeas.o tran.o transfer.o \
 	tstr.o ttcoef.o urban.o varinit.o vbl.o virtual.o volq.o vrval.o \
 	washp.o watbal.o watqual.o watqual2.o wattable.o watuse.o weatgn.o \
@@ -317,6 +317,7 @@ surfst_h2o.o: modparm.o
 surfstor.o: modparm.o
 surq_daycn.o: modparm.o
 surq_greenampt.o: modparm.o
+surq_waterbalance.o: modparm.o
 swbl.o: modparm.o
 sweep.o: modparm.o
 swu.o: modparm.o

@@ -475,4 +475,7 @@
 ! Modifications to Pesticide and Water routing routines by Balaji Narasimhan
         real, dimension (:), allocatable :: lkpst_mass, lkspst_mass
         real, dimension (:), allocatable :: vel_chan
+!! additional variables for Cornell Water Bal
+      real, dimension (:), allocatable :: sol_availst,sol_totpor,edc
+ 
       end module parm

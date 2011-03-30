@@ -24,9 +24,13 @@
 
 
       use parm
-
+      character*1 wbflag
 
 !! Compute surface runoff for day
+      read(snam(ihru),'(a1)') wbflag
+      if(wbflag .eq. "1") then
+         call surq_waterbalance
+      else
       select case (ievent)
         case (0)
           call surq_daycn
@@ -36,7 +40,7 @@
         !case (3)
         !  call surq_hourly
       end select
-
+      endif
 
       return
       end

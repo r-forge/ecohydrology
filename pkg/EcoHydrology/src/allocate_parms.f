@@ -1195,5 +1195,10 @@
       call zero2
       call zeroini
 !! additional var by Ann
+!! additional variables for Cornell Water Bal
+      allocate (edc(mhru)) 
+      allocate (sol_availst(mhru)) 
+      allocate (sol_totpor(mhru))  
+
       return
       end

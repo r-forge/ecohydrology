@@ -115,7 +115,7 @@
 
       !! compute shallow water table depth and tile flow
       qtile = 0.
-      if (sol_tmp(2,j) > 0.) then
+      if (sol_tmp(2,j) > -5.) then
         por_air = 0.5
         d = dep_imp(j) - ddrain(j)
         if (sol_sw(j) > sol_sumfc(j)) then
