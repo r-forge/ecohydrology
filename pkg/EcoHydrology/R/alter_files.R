@@ -16,21 +16,26 @@ for(ft in unique(change_params$filetype)){
                         multi=file_change_params[i,"multi"]
                         alter_type=file_change_params[i,"alter_type"]
                         frformat=unlist(strsplit(as.character(file_change_params[i,"frformat"]),","))
+                        fwformat=unlist(strsplit(as.character(file_change_params[i,"fwformat"]),","))
                         if(multi==F & alter_type=="new"){
                                 junk=gsub(paste(".*",param,".*",sep=""),sprintf("%s%16.4f%s",startstr,as.real(current),endstr),junk)
                         }
-                        if(multi==T & alter_type=="percent"){
+                        if(alter_type=="percent"){
                                 junkline=grep(param,junk,value=T)
-                                #print(paste(i,junkline,frformat))
-                                a=read.fortran(con1<-textConnection(junkline),frformat)
-                                close(con1)
-                                stringb=sprintf("%s",a[1])
-                                j=2
-                                while ( !is.na(a[j])) {
-                                        stringb=paste(stringb,sprintf("%12.2f",a[j]*current),sep="")
-                                        j=j+1
-                                }
+	                        fread_tmp=read.fortran(con1<-textConnection(junkline),frformat,as.is=T)
+				close(con1)
+				fwrite_tmp=as.vector(1:length(fread_tmp[1,]))
+				for (j in 1:length(fread_tmp[1,])) {
+				   if(is.na(fread_tmp[, j])){lastj=j-1;break}
+				   if(is.numeric(fread_tmp[,j])){ 
+				      fwrite_tmp[j]=sprintf(fwformat[j],fread_tmp[,j]*current)
+				   } else {
+				      fwrite_tmp[j]=sprintf(fwformat[j],fread_tmp[,j])
+				   }
+				}
+                                stringb=paste(fwrite_tmp[1:lastj],sep="",collapse="")
                                 junk=gsub(paste(".*",param,".*",sep=""),stringb,junk)
+
                         }
                 }
                 cat(junk,file=file,sep="\n")
