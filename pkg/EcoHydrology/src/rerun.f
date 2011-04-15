@@ -82,7 +82,8 @@
       call getallo2
       call zero0
       call zero1
-      call zero2
+      call zero2a
+      call zero2b
       call zeroini
       call readfile
 !     call date_and_time (date, time, zone, values)

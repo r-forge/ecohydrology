@@ -1192,7 +1192,8 @@
       allocate (itelyrs(nsave))
       call zero0
       call zero1
-      call zero2
+      call zero2a
+      call zero2b
       call zeroini
 !! additional var by Ann
 !! additional variables for Cornell Water Bal
