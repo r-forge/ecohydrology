@@ -18,7 +18,22 @@ for(ft in unique(change_params$filetype)){
                         frformat=unlist(strsplit(as.character(file_change_params[i,"frformat"]),","))
                         fwformat=unlist(strsplit(as.character(file_change_params[i,"fwformat"]),","))
                         if(multi==F & alter_type=="new"){
-                                junk=gsub(paste(".*",param,".*",sep=""),sprintf("%s%16.4f%s",startstr,as.real(current),endstr),junk)
+                                junkline=grep(param,junk,value=T)
+				print(junkline)
+                                fread_tmp=read.fortran(con1<-textConnection(junkline),frformat,as.is=T)
+                                close(con1)
+                                fwrite_tmp=as.vector(1:length(fread_tmp[1,]))
+                                for (j in 1:length(fread_tmp[1,])) {
+				   lastj=j
+                                   if(is.na(fread_tmp[, j])){lastj=j-1;break}
+                                   if(is.numeric(fread_tmp[,j])){
+                                      fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],as.real(current))
+                                   } else {
+                                      fwrite_tmp[j]=sprintf(fwformat[j],fread_tmp[,j])
+                                   }
+                                }
+                                stringb=paste(fwrite_tmp[1:lastj],sep="",collapse="")
+                                junk=gsub(paste(".*",param,".*",sep=""),stringb,junk)
                         }
                         if(alter_type=="percent"){
                                 junkline=grep(param,junk,value=T)
@@ -26,9 +41,10 @@ for(ft in unique(change_params$filetype)){
 				close(con1)
 				fwrite_tmp=as.vector(1:length(fread_tmp[1,]))
 				for (j in 1:length(fread_tmp[1,])) {
+				   lastj=j
 				   if(is.na(fread_tmp[, j])){lastj=j-1;break}
 				   if(is.numeric(fread_tmp[,j])){ 
-				      fwrite_tmp[j]=sprintf(fwformat[j],fread_tmp[,j]*current)
+				      fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],fread_tmp[,j]*current)
 				   } else {
 				      fwrite_tmp[j]=sprintf(fwformat[j],fread_tmp[,j])
 				   }
