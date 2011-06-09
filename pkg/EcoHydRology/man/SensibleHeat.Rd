@@ -2,9 +2,11 @@
 \alias{SensibleHeat}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Sensible Heat Exchange
 }
 \description{
+Sensible heat exchange between a surface and the surrounding air [kJ m-2 d-1]
+
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -13,13 +15,15 @@ SensibleHeat(surftemp, airtemp, wind)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{surftemp}{
+ surface temperature [C]
 %%     ~~Describe \code{surftemp} here~~
 }
   \item{airtemp}{
+ average dailiy air temperature [C]
 %%     ~~Describe \code{airtemp} here~~
 }
   \item{wind}{
-%%     ~~Describe \code{wind} here~~
+ average daily windspeed [m/s]
 }
 }
 \details{
@@ -36,7 +40,7 @@ SensibleHeat(surftemp, airtemp, wind)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

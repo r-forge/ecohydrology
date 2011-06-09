@@ -2,10 +2,10 @@
 \alias{Solar}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Solar Radiation
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Solar radiation at the ground surface [kJ m-2 d-1]
 }
 \usage{
 Solar(lat, Jday, Tx, Tn, albedo, forest, slope, aspect)
@@ -13,37 +13,33 @@ Solar(lat, Jday, Tx, Tn, albedo, forest, slope, aspect)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-%%     ~~Describe \code{lat} here~~
+ latitdue [rad]
 }
   \item{Jday}{
-%%     ~~Describe \code{Jday} here~~
+ Julian date or day of the year [day]
 }
   \item{Tx}{
-%%     ~~Describe \code{Tx} here~~
+ maximum daily temperature [C]
 }
   \item{Tn}{
-%%     ~~Describe \code{Tn} here~~
+ minimum daily temperature [C]
 }
   \item{albedo}{
-%%     ~~Describe \code{albedo} here~~
+ surface albedo or reflectivity [-]
 }
   \item{forest}{
-%%     ~~Describe \code{forest} here~~
+ forest or vegeation cover [-]
 }
   \item{slope}{
-%%     ~~Describe \code{slope} here~~
+ slope of the ground [rad]
 }
   \item{aspect}{
-%%     ~~Describe \code{aspect} here~~
+ ground aspect [rad from north]
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
 }

@@ -2,9 +2,11 @@
 \alias{solaraspect}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Solar Aspect
 }
 \description{
+Aspect angle of sun from north at solar noon [rad]
+
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -13,10 +15,10 @@ solaraspect(lat, Jday)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-%%     ~~Describe \code{lat} here~~
+ latitdue [rad]
 }
   \item{Jday}{
-%%     ~~Describe \code{Jday} here~~
+ Julian date or day of the year [day]
 }
 }
 \details{

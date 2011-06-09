@@ -3,11 +3,9 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 A function to alter files called from swat_objective_function
-%%  ~~function to do ... ~~
 }
 \description{
 A function to alter files called from swat_objective_function
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
 alter_files(change_params)
@@ -32,7 +30,7 @@ alter_files(change_params)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+Daniel R. Fuka
 }
 \note{
 %%  ~~further notes~~

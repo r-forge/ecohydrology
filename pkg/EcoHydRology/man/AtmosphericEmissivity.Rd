@@ -2,12 +2,10 @@
 \alias{AtmosphericEmissivity}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-The emissivity of the atmsophere [-]
-
-
+Atmospheric Emissivity
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+The emissivity of the atmsophere [-]
 }
 \usage{
 AtmosphericEmissivity(airtemp, cloudiness)

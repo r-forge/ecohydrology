@@ -2,10 +2,11 @@
 \alias{transmissivity}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Transmissivity
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Transmissivity
+Fraction of direct solar radiation passing through the atmosphere based on the Bristow-Campbell eqn
 }
 \usage{
 transmissivity(lat, Jday, Tx, Tn)
@@ -13,16 +14,16 @@ transmissivity(lat, Jday, Tx, Tn)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-%%     ~~Describe \code{lat} here~~
+latitdue [rad]
 }
   \item{Jday}{
-%%     ~~Describe \code{Jday} here~~
+Julian date or day of the year [day]
 }
   \item{Tx}{
-%%     ~~Describe \code{Tx} here~~
+maximum daily temperature [C]
 }
   \item{Tn}{
-%%     ~~Describe \code{Tn} here~~
+minimum daily temperature [C]
 }
 }
 \details{
@@ -39,7 +40,7 @@ transmissivity(lat, Jday, Tx, Tn)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

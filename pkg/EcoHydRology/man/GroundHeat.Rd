@@ -2,10 +2,10 @@
 \alias{GroundHeat}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Heat conducted to the bottom of a snowpack
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+The heat conducted to the bottom of a snowpack, assumed constant [kJ m-2 d-1]
 }
 \usage{
 GroundHeat()
@@ -25,7 +25,7 @@ GroundHeat()
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

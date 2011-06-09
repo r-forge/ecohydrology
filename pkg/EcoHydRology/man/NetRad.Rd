@@ -3,9 +3,10 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Title to be replaced
+Daily Net Radiation
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Daily net radiation [kJ m-2 d-1]
 }
 \usage{
 NetRad(lat, Jday, Tx, Tn, albedo, forest, slope, aspect, airtemp, cloudiness, surfemissivity, surftemp)
@@ -63,7 +64,7 @@ NetRad(lat, Jday, Tx, Tn, albedo, forest, slope, aspect, airtemp, cloudiness, su
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

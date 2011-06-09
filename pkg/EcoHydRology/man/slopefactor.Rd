@@ -2,10 +2,11 @@
 \alias{slopefactor}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Slope Factor
+
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Adjusts solar radiation for land slope and aspect relative to the sun, 1=level ground
 }
 \usage{
 slopefactor(lat, Jday, slope, aspect)
@@ -13,16 +14,16 @@ slopefactor(lat, Jday, slope, aspect)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-%%     ~~Describe \code{lat} here~~
+ latitdue [rad]
 }
   \item{Jday}{
-%%     ~~Describe \code{Jday} here~~
+ Julian date or day of the year [day]
 }
   \item{slope}{
-%%     ~~Describe \code{slope} here~~
+ slope of the ground [rad]
 }
   \item{aspect}{
-%%     ~~Describe \code{aspect} here~~
+ ground aspect [rad from north]
 }
 }
 \details{
@@ -39,7 +40,7 @@ slopefactor(lat, Jday, slope, aspect)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

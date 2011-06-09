@@ -2,10 +2,10 @@
 \alias{solarangle}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Solar Angle
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Angle of solar inclination from horizontal at solar noon [rad]
 }
 \usage{
 solarangle(lat, Jday)
@@ -13,10 +13,12 @@ solarangle(lat, Jday)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
+ latitdue [rad]
 %%     ~~Describe \code{lat} here~~
 }
   \item{Jday}{
 %%     ~~Describe \code{Jday} here~~
+ Julian date or day of the year [day]
 }
 }
 \details{

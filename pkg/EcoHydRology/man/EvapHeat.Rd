@@ -2,9 +2,13 @@
 \alias{EvapHeat}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Evaporative heat exchange between a surface and the surrounding air
 }
 \description{
+Evaporative heat exchange between a surface and the surrounding air;
+usually cooling [kJ m-2 d-1]
+this function is only intended for wet surfaces, i.e., it assumes the vapor density at the surface is the saturation vapor density
+
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -13,19 +17,19 @@ EvapHeat(surftemp, airtemp, relativehumidity, Tn, wind)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{surftemp}{
-%%     ~~Describe \code{surftemp} here~~
+ surface temperature [C]
 }
   \item{airtemp}{
-%%     ~~Describe \code{airtemp} here~~
+ average dailiy air temperature [C]
 }
   \item{relativehumidity}{
-%%     ~~Describe \code{relativehumidity} here~~
+ relative humidity [-]
 }
   \item{Tn}{
-%%     ~~Describe \code{Tn} here~~
+ minimum dailiy air temperature, assumed to be the dewpoint temperature [C]
 }
   \item{wind}{
-%%     ~~Describe \code{wind} here~~
+ average daily windspeed [m/s]
 }
 }
 \details{
@@ -42,7 +46,7 @@ EvapHeat(surftemp, airtemp, relativehumidity, Tn, wind)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

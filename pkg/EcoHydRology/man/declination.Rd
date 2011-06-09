@@ -2,10 +2,10 @@
 \alias{declination}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Solar Declination
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Solar declination for a given day of the year.
 }
 \usage{
 declination(Jday)
@@ -13,7 +13,7 @@ declination(Jday)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{Jday}{
-%%     ~~Describe \code{Jday} here~~
+Julian date or day of the year [day]
 }
 }
 \details{
@@ -30,7 +30,7 @@ declination(Jday)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

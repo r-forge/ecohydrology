@@ -2,9 +2,13 @@
 \alias{PotentialSolar}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+ Potential Solar Radiation 
 }
 \description{
+Potential solar radiation at the edge of the atmospher [kJ m-2 d-1]
+
+#lat: latitdue [rad]
+#Jday: Julian date or day of the year [day]
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
@@ -33,7 +37,7 @@ PotentialSolar(lat, Jday)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~

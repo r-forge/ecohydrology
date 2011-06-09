@@ -2,10 +2,11 @@
 \alias{SatVaporDensity}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
+Saturated Vapor Density
 }
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Saturated vapor density at a given temperature
+
 }
 \usage{
 SatVaporDensity(temp)
@@ -13,7 +14,7 @@ SatVaporDensity(temp)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{temp}{
-%%     ~~Describe \code{temp} here~~
+ temperature [C]
 }
 }
 \details{
@@ -30,7 +31,7 @@ SatVaporDensity(temp)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter
 }
 \note{
 %%  ~~further notes~~
