@@ -1,7 +1,0 @@
-      subroutine zero2
-!!    ~ ~ ~ PURPOSE ~ ~ ~
-!!    this subroutine zeros all array values
-      use parm
-REPLACE
-      return
-      end
