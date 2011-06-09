@@ -2,7 +2,7 @@
 \alias{readSWAT}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-A function to read output.* files from SWAT2005 runs.
+Read output.* files from SWAT2005
 }
 \description{
 A function to read output.* files from SWAT2005 runs.
@@ -12,7 +12,8 @@ readSWAT(outfile_type)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{outfile_type ie. "sub","rch","etc"}{
+  \item{outfile_type}{
+ outfile_type ie. "sub","rch","etc"
 }
 }
 \details{

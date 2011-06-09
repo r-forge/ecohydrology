@@ -3,11 +3,9 @@
 \docType{data}
 \title{
 Example dataframe of parameters, ranges, and search strings for optimizing swat2005
-%%   ~~ data name/kind ... ~~
 }
 \description{
 Example dataframe of parameters, ranges, and search strings for optimizing swat2005
-%%  ~~ A concise (1-5 lines) description of the dataset. ~~
 }
 \usage{data(change_params)}
 \format{
@@ -20,12 +18,11 @@ Example dataframe of parameters, ranges, and search strings for optimizing swat2
     \item{\code{max}}{a numeric vector}
     \item{\code{current}}{a numeric vector}
     \item{\code{multi}}{a logical vector}
-    \item{\code{startstr}}{a factor with levels \code{} \code{Ave. AW Incl. Rock Frag  :} \code{Bulk Density Moist [g/cc]:} \code{Depth                [mm]:} \code{Ksat. (est.)      [mm/hr]:}}
-    \item{\code{endstr}}{a factor with levels \code{} \code{    | ALPHA_BF} \code{    | CN2} \code{    | ESCO} \code{    | GW_DELAY} \code{    | GWQMN} \code{    | SFTMP} \code{    | SMFMN} \code{    | SMFMX} \code{    | SMTMP} \code{    | SURLAG} \code{    | TIMP}}
     \item{\code{frformat}}{a factor with levels \code{} \code{A27,10f12}}
     \item{\code{fwformat}}{a factor with levels \code{F16.4} \code{F20}}
   }
 }
+
 \details{
 %%  ~~ If necessary, more details than the __description__ above ~~
 }

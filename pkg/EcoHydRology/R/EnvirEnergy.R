@@ -1,5 +1,5 @@
 EnvirEnergy <-
-function(lat,Jday,Tx,Tn,wind,relativehumidity,cloudiness,albedo,forest,slope,aspect,surftemp,surfemissivity){
+function(lat,Jday,Tx,Tn,wind,relativehumidity,cloudiness,albedo,forest,slope,aspect,surftemp,surfemissivity,rain){
 # the total energy exchange between the surface and the surrounding air
 
 #lat: latitdue [rad]
@@ -15,6 +15,7 @@ function(lat,Jday,Tx,Tn,wind,relativehumidity,cloudiness,albedo,forest,slope,asp
 #aspect: ground aspect [rad from north]
 #surftemp: surface temperature [C]
 #surfemissivity: [-]
+#rain: precipitation [mm/day]
 
 if(cloudiness<0){cloudiness<-EstCloudiness(lat,Jday,Tx,Tn)}
 
