@@ -1,7 +1,7 @@
 Package: EcoHydRology
 Type: Package
 Title: A community modeling foundation for Eco-Hydrology.
-Version: 0.3.7
+Version: 0.3.8
 Date: 2011-06-15
 Author: Fuka, DR, Walter, MT, and Easton, ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
