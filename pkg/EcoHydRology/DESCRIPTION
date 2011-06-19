@@ -1,11 +1,11 @@
 Package: EcoHydRology
 Type: Package
-Title: Principle equations used in Eco-Hydrology.
-Version: 0.3.6
+Title: A community modeling foundation for Eco-Hydrology.
+Version: 0.3.7
 Date: 2011-06-15
 Author: Fuka, DR, Walter, MT, and Easton, ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
-Depends: operators, topmodel, DEoptim
+Depends: R (>= 2.10), operators, topmodel, DEoptim
 Description: This package provides a flexible foundation for scientists, 
   engineers, and policy makers to base teaching exercises as well as for 
   more applied use to model complex eco-hydrological interactions. 
