@@ -18,7 +18,7 @@ r CMD install EcoHydRology_0.3.4.tgz
 Windows Commands from Jo
 r CMD REMOVE EcoHydRology
 r CMD build EcoHydRology
-r CMD INSTALL EcoHydRology
+r CMD INSTALL EcoHydRology_0.3.8.tar.gz
 
 library(EcoHydrology)
 library.dynam("swat","EcoHydrology")
