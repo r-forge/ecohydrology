@@ -15,6 +15,11 @@ r CMD build --binary EcoHydRology
 r CMD delete EcoHydRology
 r CMD install EcoHydRology_0.3.4.tgz
 
+Windows Commands from Jo
+r CMD REMOVE EcoHydRology
+r CMD build EcoHydRology
+r CMD INSTALL EcoHydRology
+
 library(EcoHydrology)
 library.dynam("swat","EcoHydrology")
 .Fortran("main")
