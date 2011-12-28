@@ -1,18 +1,18 @@
 hydrograph <-
-function(input=matrix(ncol=2,nrow=2),streamflow=input[,2],timeSeries=input[,1],streamflow2=NULL,P=NULL,begin=1,
+function(input=matrix(ncol=2,nrow=2),streamflow=input[,2],timeSeries=input[,1],streamflow2=NULL,precip=NULL,begin=1,
 endindex=length(streamflow), P.units="",S.units=P.units, S1.col="black", S2.col="red", stream.label=paste("Streamflow ",S.units)){
 if (is.null(streamflow2) & (ncol(input)>3)) streamflow2<-input[,4]## allows data frame to be entered with one parameter
-if (is.null(P) & (ncol(input)>2)){ 
-P<-input[,2]
+if (is.null(precip) & (ncol(input)>2)){ 
+precip<-input[,2]
 streamflow<-input[,3]
-}## assumes that if P is included in the input data, it is in the second column, and streamflow is in third
-if (is.null(P)) NULL##If no precip, then skip the first step
+}## assumes that if precip is included in the input data, it is in the second column, and streamflow is in third
+if (is.null(precip)) NULL##If no precip, then skip the first step
 else{
 par(mar=c(3, 5,1,4))
-barplot(P[begin:endindex],yaxt="n",space=NULL,ylim = rev(c(0,4*max(P[begin:endindex]))), xaxt="n")
+barplot(precip[begin:endindex],yaxt="n",space=NULL,ylim = rev(c(0,4*max(precip[begin:endindex]))), xaxt="n")
 axis(side=3, pos=0, tck=0)
-axis(side=4, at = seq(0,floor(max(P[begin:endindex])+1),length=(1+ifelse(floor(max(P[begin:endindex])+1)<10,floor(max(P[begin:endindex])+1),4))), 
-labels=as.integer(seq(0,floor(max(P[begin:endindex])+1),length=(1+ifelse(floor(max(P[begin:endindex])+1)<10,floor(max(P[begin:endindex])+1),4)))))
+axis(side=4, at = seq(0,floor(max(precip[begin:endindex])+1),length=(1+ifelse(floor(max(precip[begin:endindex])+1)<10,floor(max(precip[begin:endindex])+1),4))), 
+labels=as.integer(seq(0,floor(max(precip[begin:endindex])+1),length=(1+ifelse(floor(max(precip[begin:endindex])+1)<10,floor(max(precip[begin:endindex])+1),4)))))
 mtext(paste("Precipitation ",P.units),4,line=2, cex=0.9, adj=1)
 par(new=T)
 }
