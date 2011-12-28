@@ -47,6 +47,7 @@ Josephine Archibald
 }
 \examples{
 #########	Look at a dataset for Owasco Lake in NY:
+data(OwascoInlet)
 summary(OwascoInlet)
 
 ##	Get an approximation for baseflow using a 3 pass filter:

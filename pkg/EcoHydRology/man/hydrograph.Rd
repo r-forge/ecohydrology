@@ -5,10 +5,10 @@
 Plot a hydrograph
 }
 \description{
-Creates a hydrograph with one or two streamflow data sets, and can include a precipitation hyetograph
+Creates a hydrograph with one or two streamflow data sets, and can include a precipitation hyetograph.  
 }
 \usage{
-hydrograph(input = matrix(ncol = 2, nrow = 2), streamflow = input[, 2], timeSeries = input[, 1], streamflow2 = NULL, P = NULL, begin = 1, endindex = length(streamflow), P.units = "", S.units = P.units, S1.col = "black", S2.col = "red", stream.label = paste("Streamflow ", S.units))
+hydrograph(input = matrix(ncol = 2, nrow = 2), streamflow = input[, 2], timeSeries = input[, 1], streamflow2 = NULL, precip = NULL, begin = 1, endindex = length(streamflow), P.units = "", S.units = P.units, S1.col = "black", S2.col = "red", stream.label = paste("Streamflow ", S.units))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,7 +28,7 @@ vector of time series values - not necessary if using "input"
   \item{streamflow2}{
 optional vector of streamflow values - not necessary if using "input"
 }
-  \item{P}{
+  \item{precip}{
 vector of precipitation values - not necessary if using "input"
 }
   \item{begin}{
@@ -71,15 +71,19 @@ Josephine Archibald
 }
 \note{
 If you chose to use the input argument but are not including precipitation, input must only have two columns - you will
-need to add the second streamflow dataset using the "streamflow2" argument
+need to add the second streamflow dataset using the "streamflow2" argument.
 }
 
+\section{Warning }{
+This function does not allow NA values.  Remove rows with NA values before running.
+}
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##	Look at the OwascoInlet dataset:
+data(OwascoInlet)
 head(OwascoInlet)
 hydrograph(OwascoInlet)
+}

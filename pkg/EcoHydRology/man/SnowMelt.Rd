@@ -8,7 +8,7 @@ Snow Melt Calculator
 Calculates snow pack accumulation and melt
 }
 \usage{
-SnowMelt(Date, precip_mm, Tmax_C, Tmin_C, lat_deg, slope = 0, aspect = 0, tempHt = 1, windHt = 2, groundAlbedo = 0.25, SurfEmissiv = 0.5, windSp = 2, forest = 0, startingSnowDepth_m = 0)
+SnowMelt(Date, precip_mm, Tmax_C, Tmin_C, lat_deg, slope = 0, aspect = 0, tempHt = 1, windHt = 2, groundAlbedo = 0.25, SurfEmissiv = 0.95, windSp = 2, forest = 0, startingSnowDepth_m = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -43,13 +43,13 @@ height of wind measurements (m)
 Ground Albedo (-)
 }
   \item{SurfEmissiv}{
-Surface Enissivity (-)
+Surface Emissivity (-)
 }
   \item{windSp}{
 Wind speed - either a vector of measured values or a single value of average wind speed for the site (m/s)
 }
   \item{forest}{
-Forest cover - use this only when deturmining snowmelt under a canopy (-)
+Forest cover - use this only when determining snowmelt under a canopy (-)
 }
   \item{startingSnowDepth_m}{
 The depth of the snow pack initially (m)
