@@ -10,7 +10,7 @@ function(lat,Jday,Tx,Tn){
 trans<-transmissivity(lat,Jday,Tx,Tn)
 
 if(1-(trans-0.15)/(0.75-0.15)<0){return(0)}
-else{return(1-(trans-0.15)/(0.75-0.15))
+else{return(min(1,(1-(trans-0.15)/(0.75-0.15))))
 }
 }
 
