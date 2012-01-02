@@ -1,0 +1,31 @@
+PET_fromTemp <-
+function(Jday, Tmax_C, Tmin_C, lat_radians, AvgT=(Tmax_C+Tmin_C)/2, albedo=0.18, TerrestEmiss=0.97, aspect=0, 
+slope=0, forest=0){
+##forest = Forest cover, but will always be left at zero for watershed-wide processes.  Only need to put
+## actual percent forest when calculating eg. PET under canopy.
+#lat_radians: in radians (degLat*pi/180)
+#albedo can be a vector or single value
+
+if (length(Jday)!=length(Tmax_C) | length(Jday)!=length(Tmin_C)){ print ("Warning, input vectors unequal length.  
+/nLonger data sets truncated")
+length(Jday)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
+length(Tmax_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
+length(Tmin_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
+}
+
+cloudiness<-EstCloudiness(lat_radians,Jday, Tmax_C,Tmin_C)
+DailyRad<-NetRad(lat_radians,Jday,Tmax_C,Tmin_C,albedo,forest,slope,aspect,AvgT,cloudiness,TerrestEmiss,AvgT)
+
+Qn<-0.9*DailyRad	## Assumes that the Ground heat flux is 10% of net radiation
+
+#####Constants
+PTconstant<-1.26 # [-] Generic Priestly-Taylor constant
+LatentHtEvap<-2500 # [kJ/kg]
+DensityWater<-1000 # [kg/m3]
+PsychConstant<-0.066#[kPa/K]
+
+potentialET<-PTconstant*SatVapPresSlope(AvgT)*Qn/((SatVapPresSlope(AvgT)+PsychConstant)*(LatentHtEvap*DensityWater))
+potentialET[which(potentialET<0)]<-0
+potentialET[which(Tmax_C==-999 | Tmin_C==-999)]<-(-999)
+return(potentialET)
+}
