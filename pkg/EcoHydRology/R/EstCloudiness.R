@@ -6,11 +6,10 @@ function(lat,Jday,Tx,Tn){
 #Jday: Julian date or day of the year [day]
 #Tx: maximum daily temperature [C]
 #Tn: minimum daily temperature [C]
-
 trans<-transmissivity(lat,Jday,Tx,Tn)
-
-if(1-(trans-0.15)/(0.75-0.15)<0){return(0)}
-else{return(min(1,(1-(trans-0.15)/(0.75-0.15))))
-}
+cloudiness<-1-(trans-0.15)/(0.75-0.15)
+cloudiness[which(cloudiness>1)]<-1
+cloudiness[which(cloudiness<0)]<-0
+return(cloudiness)		
 }
 
