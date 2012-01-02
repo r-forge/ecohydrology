@@ -14,7 +14,7 @@ transmissivity(lat, Jday, Tx, Tn)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-latitdue [rad]
+latitude [rad]
 }
   \item{Jday}{
 Julian date or day of the year [day]
