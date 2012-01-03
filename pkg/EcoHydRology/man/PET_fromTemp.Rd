@@ -62,7 +62,7 @@ Mon. Weath. Rev. 100: 81-92
 Josephine Archibald, M. Todd Walter
 }
 \note{
-We are assuming that the Ground flux is 10% of the Daily Net Radiation.  
+We are assuming that the Ground heat flux on a daily time-step is zero  
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~

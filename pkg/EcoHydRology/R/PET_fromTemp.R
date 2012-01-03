@@ -6,8 +6,8 @@ slope=0, forest=0){
 #lat_radians: in radians (degLat*pi/180)
 #albedo can be a vector or single value
 
-if (length(Jday)!=length(Tmax_C) | length(Jday)!=length(Tmin_C)){ print ("Warning, input vectors unequal length.  
-/nLonger data sets truncated")
+if (length(Jday)!=length(Tmax_C) | length(Jday)!=length(Tmin_C)){ 
+cat("Warning, input vectors unequal length:  Longer data sets truncated.\n")
 length(Jday)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
 length(Tmax_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
 length(Tmin_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
@@ -16,7 +16,7 @@ length(Tmin_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
 cloudiness<-EstCloudiness(lat_radians,Jday, Tmax_C,Tmin_C)
 DailyRad<-NetRad(lat_radians,Jday,Tmax_C,Tmin_C,albedo,forest,slope,aspect,AvgT,cloudiness,TerrestEmiss,AvgT)
 
-Qn<-0.9*DailyRad	## Assumes that the Ground heat flux is 10% of net radiation
+Qn<-DailyRad	## Assumes that the Ground heat flux on daily time-step is zero
 
 #####Constants
 PTconstant<-1.26 # [-] Generic Priestly-Taylor constant
