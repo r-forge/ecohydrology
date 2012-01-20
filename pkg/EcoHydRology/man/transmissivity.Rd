@@ -27,7 +27,7 @@ minimum daily temperature [C]
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
+Can accept either single values or vectors for Jday, Tx and Tn.  
 }
 \value{
 %%  ~Describe the value returned
@@ -37,10 +37,12 @@ minimum daily temperature [C]
 %% ...
 }
 \references{
-%% ~put references to the literature/web site here ~
+Bristow KL, Campbell GS. 1984. 
+On the relationship between incoming solar radiation and daily maximum and minimum temperature. 
+Agric Forest Meteorol; 31:150-166.
 }
 \author{
-M. Todd Walter
+M. Todd Walter, Josephine Archibald
 }
 \note{
 %%  ~~further notes~~
