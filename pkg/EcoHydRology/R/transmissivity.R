@@ -2,19 +2,16 @@ transmissivity <-
 function(lat,Jday,Tx,Tn){
 # fraction of direct solar radiation passing through the atmosphere based on the Bristow-Campbell eqn
 
-#lat: latitdue [rad]
-#Jday: Julian date or day of the year [day]
-#Tx: maximum daily temperature [C]
-#Tn: minimum daily temperature [C]
-
-# B constant based on work by Ndlvou
-B<-rep(0.170*lat^-0.979, length(Jday))		#winter
-B[which(Jday>80 & Jday<262)]<-0.282*lat^-0.431		#summer
-
-#Potential solar radiation 30 days ago
-PotSolar<-PotentialSolar(lat,(Jday-30))
-PotSolar[which(Jday<31)]<-PotentialSolar(lat,(365-(30-Jday[which(Jday<31)])))
-
-return(0.75*(1-exp(-B*(Tx-Tn)^2/(PotSolar/1000))))
+len<-length(Jday)
+if(len<30){ avDeltaT<-mean(Tx-Tn)
+}else {avDeltaT<-vector(length=len)
+	avDeltaT[1:14]<-mean(Tx[1:30]-Tn[1:30])
+	avDeltaT[(len-14:len)]<-mean(Tx[(len-30:len)]-Tn[(len-30:len)])
+	for (i in 15:(len-15)){
+		avDeltaT[i]<-mean(Tx[(i-14):(i+15)]-Tn[(i-14):(i+15)])
+	}
+}
+B<-0.036*exp(-0.154*avDeltaT)
+return(0.75*(1-exp(-B*(Tx-Tn)^2.4)))
 }
 
