@@ -14,8 +14,8 @@ This package provides a flexible foundation for scientists,
 \tabular{ll}{
 Package: \tab EcoHydRology\cr
 Type: \tab Package\cr
-Version: \tab 0.3.8\cr
-Date: \tab 2011-06-19\cr
+Version: \tab 0.3.85\cr
+Date: \tab 2011-12-22\cr
 License: \tab GPL-2\cr
 LazyLoad: \tab yes\cr
 }
