@@ -1,5 +1,5 @@
 \name{SatVapPresSlope}
-\alias{Delta}
+\alias{SatVapPresSlope}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 Slope of the relationship between Saturation Vapor Pressure and Temperature
