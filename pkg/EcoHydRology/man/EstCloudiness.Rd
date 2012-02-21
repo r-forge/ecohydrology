@@ -8,16 +8,10 @@ Estimated Cloudiness
 Estimates the cloudiness of the atmosphere by scaling to atmospheric transmissivity
 }
 \usage{
-EstCloudiness(lat, Jday, Tx, Tn)
+EstCloudiness(Tx, Tn)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{lat}{
- latitdue [rad]
-}
-  \item{Jday}{
- Julian date or day of the year [day]
-}
   \item{Tx}{
  maximum daily temperature [C]
 }
@@ -39,7 +33,7 @@ EstCloudiness(lat, Jday, Tx, Tn)
 %% ~put references to the literature/web site here ~
 }
 \author{
-%%  ~~who you are~~
+M. Todd Walter, Josephine Archibald
 }
 \note{
 %%  ~~further notes~~
@@ -51,25 +45,7 @@ EstCloudiness(lat, Jday, Tx, Tn)
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function(lat,Jday,Tx,Tn){
-# estimates the cloudiness of the atmosphere by scaling to atmospheric transmissivity
-
-#lat: latitdue [rad]
-#Jday: Julian date or day of the year [day]
-#Tx: maximum daily temperature [C]
-#Tn: minimum daily temperature [C]
-
-trans<-transmissivity(lat,Jday,Tx,Tn)
-
-if(1-(trans-0.15)/(0.75-0.15)<0){return(0)}
-else{return(1-(trans-0.15)/(0.75-0.15))
-  }
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -1,8 +1,6 @@
 transmissivity <-
-function(lat,Jday,Tx,Tn){
-# fraction of direct solar radiation passing through the atmosphere based on the Bristow-Campbell eqn
-
-len<-length(Jday)
+function(Tx,Tn){
+len<-length(Tx)
 if(len<30){ avDeltaT<-mean(Tx-Tn)
 }else {avDeltaT<-vector(length=len)
 	avDeltaT[1:14]<-mean(Tx[1:30]-Tn[1:30])
