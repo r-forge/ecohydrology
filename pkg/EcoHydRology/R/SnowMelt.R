@@ -22,12 +22,7 @@ SnowMelt<-function(Date, precip_mm, Tmax_C, Tmin_C, lat_deg, slope=0, aspect=0, 
 	rh<-log((windHt+0.001)/0.001)*log((tempHt+0.0002)/0.0002)/(0.41*0.41*windSp*86400)	# (day/m) Thermal Resistance	 
 	if (length(windSp)==1) rh<-rep(rh,length(precip_mm))	##	creates a vector of rh values
 	cloudiness<-vector(length=length(precip_mm))
-	Cloudiness<-function(lat_radians,Jday,Tmax_C,Tmin_C){
-		return(max(min(1,(1-transmissivity(lat_radians,Jday,Tmax_C,Tmin_C)/0.75))))
-	}
-	for (i in 1:length(JDay)){				##	(-) Back-calculating cloudiness from Atmospheric Transmissivity
-		cloudiness[i]<-Cloudiness(lat,JDay[i],Tmax_C[i],Tmin_C[i])
-	}
+	cloudiness<-EstCloudiness(Tmax_C,Tmin_C)
 	AE<-AtmosphericEmissivity(Tav, cloudiness)	# (-) Atmospheric Emissivity
 	
 	SnowTemp<-rep(0,length(precip_m)) 	# Degrees C
