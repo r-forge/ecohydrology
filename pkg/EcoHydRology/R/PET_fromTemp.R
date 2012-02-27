@@ -13,7 +13,7 @@ length(Tmax_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
 length(Tmin_C)<-min(length(Jday), length(Tmax_C), length(Tmin_C))
 }
 
-cloudiness<-EstCloudiness(lat_radians,Jday, Tmax_C,Tmin_C)
+cloudiness<-EstCloudiness(Tmax_C,Tmin_C)
 DailyRad<-NetRad(lat_radians,Jday,Tmax_C,Tmin_C,albedo,forest,slope,aspect,AvgT,cloudiness,TerrestEmiss,AvgT)
 
 Qn<-DailyRad	## Assumes that the Ground heat flux on daily time-step is zero
