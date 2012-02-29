@@ -8,7 +8,7 @@ The Surface Net Energy Budget
 Net Energy=S+La-Lt+S+E+R+G, where S is the net incident solar radiation, La is the atmospheric long wave radiation, Lt is the terrestrial long wave radiation, H is the sensible heat exchange, E is the energy flux associated with the latent heats of vaporization and condensation, G is ground heat conduction, P is heat added by precipitation
 }
 \usage{
-EnvirEnergy(lat, Jday, Tx, Tn, wind, relativehumidity, cloudiness, albedo, forest, slope, aspect, surftemp, surfemissivity,rain)
+EnvirEnergy(lat, Jday, Tx, Tn, wind, rain, relativehumidity, albedo=0, cloudiness=NULL, forest=0, slope=0, aspect=0, surftemp=(Tx+Tn)/2, surfemissivity=0.97)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,15 +27,18 @@ Minimum daily temperature [C]
   \item{wind}{
 Average daily windspeed [m/s]
 }
+  \item{rain}{
+precipitation [mm/day]
+}
   \item{relativehumidity}{
 Relative humidity; if negative, air vapor density will be approximated [-]
-}
-  \item{cloudiness}{
-Fraction of the sky covered in clouds,if negative, cloudiness will be approximated [-]
 }
   \item{albedo}{
 #albedo: surface albedo or reflectivity [-]
 }
+  \item{cloudiness}{
+Fraction of the sky covered in clouds,if no value provided, cloudiness will be approximated [-]
+} 
   \item{forest}{
 Forest or vegeation cover [-]
 }
@@ -51,9 +54,7 @@ surface temperature [C]
   \item{surfemissivity}{
 surfice emissivity: [-]
 }
-  \item{rain}{
-precipitation [mm/day]
-}
+
 
 }
 \details{
