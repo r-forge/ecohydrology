@@ -1,10 +1,10 @@
 PET_fromTemp <-
 function(Jday, Tmax_C, Tmin_C, lat_radians, AvgT=(Tmax_C+Tmin_C)/2, albedo=0.18, TerrestEmiss=0.97, aspect=0, 
 slope=0, forest=0){
-##forest = Forest cover, but will always be left at zero for watershed-wide processes.  Only need to put
-## actual percent forest when calculating eg. PET under canopy.
-#lat_radians: in radians (degLat*pi/180)
-#albedo can be a vector or single value
+# Returns PET in mm
+# forest = canopy cover [-]
+# lat_radians: in radians (degLat*pi/180)
+# albedo can be a vector or single value
 
 if (length(Jday)!=length(Tmax_C) | length(Jday)!=length(Tmin_C)){ 
 cat("Warning, input vectors unequal length:  Longer data sets truncated.\n")
