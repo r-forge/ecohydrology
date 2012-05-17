@@ -1,0 +1,17 @@
+#-*- Makefile -*-
+#
+
+DIRS	= SWAT2005
+CD	= cd
+RM	= rm
+ECHO	= echo
+MFLAGS	= -f Makefile.win
+all: swat05
+
+swat05:
+	@(cd SWAT2005 && $(MAKE) $(MFLAGS) )
+
+clean :
+	-$(RM) -f $(EXE) $(OBJS) $(OBJLIBS)
+	-for d in $(DIRS); do (cd $$d; $(MAKE) $(MFLAGS) clean ); done
+
