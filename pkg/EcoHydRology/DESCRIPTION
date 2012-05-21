@@ -1,8 +1,6 @@
 Package: EcoHydRology
-Type: Package
+Version: 0.3.98
 Title: A community modeling foundation for Eco-Hydrology.
-Version: 0.3.85
-Date: 2011-06-15
 Author: Fuka, DR, Walter, MT, and Easton, ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
 Depends: R (>= 2.10), operators, topmodel, DEoptim
@@ -10,4 +8,5 @@ Description: This package provides a flexible foundation for scientists,
   engineers, and policy makers to base teaching exercises as well as for 
   more applied use to model complex eco-hydrological interactions. 
 License: GPL-2
-LazyLoad: yes
+Repository: CRAN
+Date/Publication: 2012-02-20 20:06:18
