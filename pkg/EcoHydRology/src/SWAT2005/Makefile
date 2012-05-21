@@ -1,4 +1,4 @@
-PROG =	../swat2005.exe
+PROG =	../rswat2005
 
 SRCS =	addh.f albedo.f allocate_parms.f alph.f analyse.f anfert.f apex_day.f \
 	apply.f ascrv.f atri.f aunif.f autocal.f autoirr.f automet.f aveval.f \

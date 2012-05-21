@@ -1,14 +1,18 @@
-DIRS	= SWAT2005
+DIRS	= SWAT2005 SWAT2009
 CD	= cd
 RM	= rm
 #SHELL	= /bin/sh
 ECHO	= echo
 
-all : swat2005
+all : swat05 swat09
 
-swat2005 : force_look
+swat05 : force_look
 	$(ECHO) looking into swat2005: $(MAKE) $(MFLAGS)
 	cd SWAT2005; $(MAKE) $(MFLAGS)
+
+swat09 : force_look
+	$(ECHO) looking into swat2005: $(MAKE) $(MFLAGS)
+	cd SWAT2009; $(MAKE) $(MFLAGS)
 
 clean :
 	$(ECHO) cleaning up in .
