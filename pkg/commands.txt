@@ -24,3 +24,7 @@ library(EcoHydrology)
 library.dynam("swat","EcoHydrology")
 .Fortran("main")
 
+
+R CMD build --resave-data 
+R CMD check --as-cran on the .tar.gz
+

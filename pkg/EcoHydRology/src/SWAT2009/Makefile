@@ -1,4 +1,4 @@
-PROG =	../rswat2009
+PROG =	../rswat2009.exe
 
 SRCS =	addh.f albedo.f allocate_parms.f alph.f anfert.f apex_day.f apply.f \
 	ascrv.f atri.f aunif.f autoirr.f aveval.f bacteria.f biozone.f \
