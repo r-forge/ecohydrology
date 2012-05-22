@@ -165,12 +165,12 @@
  
             !!critical shear stress for grain Froude number
             ycoeff = (sqrt(particle_specific_gravity - 1.) * 
-     &                  Reynolds_g) ** -0.6
+     &                  Reynolds_g) ** (-0.6)
             shear_stress = 0.22 * ycoeff + 0.06 * 10 ** (-7.7 * ycoeff)
 
             !! critical grain Froude number
-            fr_gc = 4.596 * shear_stress ** 0.5293 * ch_s(2,jrch) ** -0.1405 
-     &               * sig_g ** -0.1606
+            fr_gc =4.596*shear_stress**0.5293*ch_s(2,jrch)**(-0.1405)
+     &               * sig_g ** (-0.1606)
 
             !! grain Froude number
             fr_g = vc / sqrt((particle_specific_gravity - 1.) * 
@@ -179,7 +179,7 @@
             !! sediment concentration at the channel outlet [ppm, or g/m3]
             if(fr_g>fr_gc) then
               sedcon = 7115 * 1.268 * (fr_g - fr_gc) ** 1.978 * 
-     &          ch_s(2,jrch) ** 0.6601 * (rhy(ii) / channel_d50) ** -0.3301
+     &          ch_s(2,jrch) ** 0.6601 *(rhy(ii)/channel_d50)**(-0.3301)
             else
               sedcon = 0.
             endif
