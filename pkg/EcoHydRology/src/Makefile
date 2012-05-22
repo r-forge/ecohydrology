@@ -1,7 +1,4 @@
 DIRS	= SWAT2005 SWAT2009
-CD	= cd
-RM	= rm
-#SHELL	= /bin/sh
 ECHO	= echo
 
 all : swat05 swat09
@@ -16,7 +13,7 @@ swat09 : force_look
 
 clean :
 	$(ECHO) cleaning up in .
-	-$(RM) -f $(EXE) $(OBJS) $(OBJLIBS)
+	-rm -f $(EXE) $(OBJS) $(OBJLIBS)
 	-for d in $(DIRS); do (cd $$d; $(MAKE) clean ); done
 
 force_look :

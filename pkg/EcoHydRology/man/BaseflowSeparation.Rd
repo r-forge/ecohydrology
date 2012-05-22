@@ -22,9 +22,6 @@ The value recommended by Chapman (1991) is 0.925, however, the user might want t
 The number of times you want the filter to pass over your data.  1-3
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 This will return a 2 column data frame with nrow = length of input streamflow data.  The first column contains
 baseflow, while the second contains quickflow, both in the same units as the input.  
@@ -35,15 +32,6 @@ by R.J. Nathan and T.A. McMahon.  Water Resources Research, Vol. 27, No 7. p. 17
 }
 \author{
 Josephine Archibald
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 #########	Look at a dataset for Owasco Lake in NY:

@@ -1,3 +1,4 @@
+include $(R_HOME)/etc$(R_ARCH)/Makeconf
 PROG =	../rswat2009.exe
 
 SRCS =	addh.f albedo.f allocate_parms.f alph.f anfert.f apex_day.f apply.f \
@@ -92,11 +93,6 @@ OBJS =	addh.o albedo.o allocate_parms.o alph.o anfert.o apex_day.o apply.o \
 	weatgn.o wetlan.o wmeas.o wndgen.o writea.o writeaa.o writed.o \
 	writem.o xmon.o ysed.o zero0.o zero1.o zero2a.o zero2b.o zero_urbn.o zeroini.o
 
-
-RHOME= $(shell R RHOME)
-FC = $(shell R CMD config FC)
-FCFLAGS = $(shell R CMD config FCFLAGS)
-
 all: $(PROG)
 
 $(PROG): $(OBJS)
@@ -110,7 +106,6 @@ clean:
 .f.o:
 	$(FC) $(FCFLAGS) -c $<
 
-main.o: modparm.f
 addh.o:modparm.o
 albedo.o:modparm.o
 allocate_parms.o:modparm.o

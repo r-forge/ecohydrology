@@ -55,16 +55,6 @@ Forest cover - use this only when determining snowmelt under a canopy (-)
 The depth of the snow pack initially (m)
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
 \references{
 Walter, M.T. , E.S. Brooks, D.K. McCool, L.G. King, M. Molnau, J. Boll. 2005. 
 Process-based snowmelt modeling: Does it require more input data than temperature-index modeling? 
@@ -73,19 +63,3 @@ Journal of Hydrology 300(1-4): 65-75
 \author{
 Josephine Archibald, M. Todd Walter
 }
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
-\examples{
-
-}
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

@@ -103,6 +103,11 @@ $(PROG): $(OBJS)
 clean:
 	rm -f $(PROG) $(OBJS) *.mod
 
+.SUFFIXES: $(SUFFIXES) .f
+
+.f.o:
+	$(FC) $(FCFLAGS) -c $<
+
 addh.o:modparm.o
 albedo.o:modparm.o
 allocate_parms.o:modparm.o

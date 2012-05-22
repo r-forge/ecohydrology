@@ -19,9 +19,6 @@ Streamflow and temperature data for Owasco Inlet from USGS and NRCC
     \item{\code{Tmin_C}}{a numeric vector}
   }
 }
-\details{
-%%  ~~ If necessary, more details than the __description__ above ~~
-}
 \source{
 http://www.usgs.gov/
 http://www.nrcc.cornell.edu/

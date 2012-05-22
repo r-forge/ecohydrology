@@ -1,3 +1,4 @@
+include $(R_HOME)/etc$(R_ARCH)/Makeconf
 PROG =	../rswat2005.exe
 
 SRCS =	addh.f albedo.f allocate_parms.f alph.f analyse.f anfert.f apex_day.f \
@@ -94,26 +95,10 @@ OBJS =	addh.o albedo.o allocate_parms.o alph.o analyse.o anfert.o apex_day.o \
 	writem.o writeswatfile.o writeswatmain.o xisquare.o xiunc.o xmon.o \
 	ysed.o zero0.o zero1.o zero2a.o zero2b.o zeroini.o
 
-
-LIBS =	
-
-RHOME= $(shell R RHOME)
-FC = $(shell R CMD config FC)
-FCFLAGS = $(shell R CMD config FCFLAGS)
-
-#UNAME := $(shell uname)
-#ifeq ($(UNAME), Linux)
-#F90FLAGS = -O
-## do something Linux-y
-#endif
-#ifeq ($(UNAME), Darwin)
-#F90FLAGS = -O2 -gdwarf-2
-#endif
-
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(FC) $(FCFLAGS) -o $@ $(OBJS) $(LIBS)
+	$(FC) $(FCFLAGS) -o $@ $(OBJS) 
 
 clean:
 	rm -f $(PROG) $(OBJS) *.mod

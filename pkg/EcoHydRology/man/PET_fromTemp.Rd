@@ -44,9 +44,6 @@ Average daily temperature (degrees C) (if not known, will be taken as the averag
 (-) Forest cover.  Always set to zero for landscape-wide processes.  Only change if calculating PET under a canopy
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{
 PET (potential evapotranspiration) in m
 %%  If it is a LIST, use

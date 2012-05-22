@@ -53,19 +53,6 @@ color of the line representing second streamflow data
 character string - Label for vertical axis
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{
-%%  ~Describe the value returned
-%%  If it is a LIST, use
-%%  \item{comp1 }{Description of 'comp1'}
-%%  \item{comp2 }{Description of 'comp2'}
-%% ...
-}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{
 Josephine Archibald
 }
@@ -76,11 +63,6 @@ need to add the second streamflow dataset using the "streamflow2" argument.
 
 \section{Warning }{
 This function does not allow NA values.  Remove rows with NA values before running.
-}
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 data(OwascoInlet)

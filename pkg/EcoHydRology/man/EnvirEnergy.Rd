@@ -57,27 +57,13 @@ surfice emissivity: [-]
 
 
 }
-\details{
-}
 \value{
 \item{NetEnergy}{Surface net energy}
 .
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{
 Walter, M.T.,Fuka, D.R.
 Maintainer: Daniel Fuka <drf28@cornell.edu>
-}
-\note{
-%%  ~~further notes~~
-}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 ##---- Should be DIRECTLY executable !! ----
@@ -93,7 +79,3 @@ airtemp<-(Tx+Tn)/2 #average daily air temperature [C]
 return(Solar(lat,Jday,Tx,Tn,albedo,forest,slope,aspect)+Longwave(AtmosphericEmissivity(airtemp,cloudiness),airtemp)-Longwave(surfemissivity,surftemp)+SensibleHeat(surftemp,airtemp,wind)+EvapHeat(surftemp,airtemp,relativehumidity,Tn,wind)+RainHeat(airtemp,rain)+GroundHeat())
   }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
