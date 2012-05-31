@@ -47,7 +47,7 @@ GSOD_history\cr
 
 }
 \author{
-Fuka, DR, Walter, MT, and Easton, ZM\cr
+Fuka DR, Walter MT, Archibald JA, and Easton ZM\cr
 Maintainer: Daniel Fuka <drf28@cornell.edu>
 }
 \keyword{ package }
