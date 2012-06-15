@@ -30,7 +30,49 @@
 <h2>Welcome to the EcoHydRology project!</h2>
 <p>A collection of R packages for Community Environmental Modeling in R<br>
 	<a href="http://r-forge.r-project.org/R/?group_id=956"><img src="http://r-forge.r-project.org/images/downloadbar.gif" alt="image"></a>
+<br>
+<br>
+The EcoHydRology package was started in 2010  by the members of the Cornell University Soil and Water group as a 
+collection of useful functions related to hydrology and earth systems.  
+Here is brief overview of some of the functions we have already added as of June 2012:
+<br>
+<br>
+	<strong>Radiation Approximations based on temperature:</strong>  <br>
+	Since we often only have temperature and precipitation data for a site, 
+	we have put together some functions that allow us to approximate terrestrial radiation  based on more 
+	easily-accessible data such as daily temperature, latitude, day of the year (Jday), and geographical parameters such as aspect 
+	and forest cover:
+<br>
+    Solar radiation, including potential solar radiation at the edge of the atmosphere, atmospheric transmissivity<br>
+    Atmospheric and terrestrial longwave radiation
+<br>
+<br>
+<strong>Modeling important hydrologic processes based on radiation.</strong>  <br>
+We use the radiation approximation functions to help us estimate important hydrologic processes:
+<br>
+    approximating snow melt: SnowMelt <br>
+    potential evapo-transpiration (PET) using the Priestley-Taylor (1972) method:  PET_fromTemp
+<br>
+<br>
+<strong>Producing simple hydrological output:</strong><br>
 
+    Making a hydrograph:   hydrograph <br>
+    Baseflow separation:   BaseflowSeparation   
+<br>
+<br>
+<strong>Data Collection:</strong>
+<br>
+    Access reanalysis of NCEP (National Centers for Environmental Prediction) output: get_cfsr
+<br>
+<br>
+<strong>Legacy Hydrology Packages</strong> <br>
+
+    SWATmodel <br>
+    MODFLOW (in development)
+	
+<br>	
+<br>	
+<br>	
 <p> The <strong>project summary page</strong> is located <a href="http://r-forge.r-project.org/projects/ecohydrology/"><strong>here</strong></a>. </p>
 <p> The <strong>binary download page</strong> is located <a href="http://ecohydrology.r-forge.r-project.org/packages/"><strong>here</strong></a>. </p>
 
