@@ -6,5 +6,5 @@ runSWAT2009<-function () {
         paste("libs", version$arch, sep = "/")
     else "libs"
     swatbin <- "rswat2009.exe"
-    system(paste(path.package("EcoHydRology"),libarch,swatbin, sep = "/"))
+    system(paste(path.package("SWATmodel"),libarch,swatbin, sep = "/"))
 }

@@ -1,6 +1,17 @@
 #build_swat_basic(dirname="junkTB",iyr="1990",nbyr=13,flowgage$area,flowgage$elev,flowgage$declat,flowgage$declon,hist_wx)
 # Function for example
+# 
+#
 build_swat_basic<-function(dirname,iyr,nbyr,wsarea,elev,declat,declon,hist_wx){
+#
+# Removing the global variables Note. Delete the first line when past supported versions are past v15.1
+#
+swat_general<- NULL; rm(swat_general);  # A code dummy
+# Correct way to let code know about global variables post 2.15.1
+if(getRversion() >= "2.15.1") {
+   globalVariables(c("swat_general"))
+} 
+
 data(swat_general)
 dir.create(dirname)
 setwd(dirname)
