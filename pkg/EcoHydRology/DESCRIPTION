@@ -1,7 +1,7 @@
 Package: EcoHydRology
-Version: 0.4.2
+Version: 0.4.3
 Title: A community modeling foundation for Eco-Hydrology.
-Author: Fuka DR, Walter MT, Archibald JA, and Easton ZM
+Author: Fuka DR, Walter MT, Archibald JA, Steenhuis TS, and Easton ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
 Depends: R (>= 2.10), operators, topmodel, DEoptim, XML
 Description: This package provides a flexible foundation for scientists, 

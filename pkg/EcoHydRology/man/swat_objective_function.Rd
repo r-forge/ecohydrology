@@ -7,7 +7,7 @@ A simple example objective function to be modified by user
 A simple example objective function to be modified by user
 }
 \usage{
-swat_objective_function(x, calib_range, calib_params)
+swat_objective_function(x, calib_range, calib_params,flowgage)
 }
 \arguments{
   \item{x}{
@@ -17,6 +17,9 @@ swat_objective_function(x, calib_range, calib_params)
 \code{calib_range} This will in the future be a range for calibration.
 }
   \item{calib_params}{
+See other function to make sure you have this right.
+}
+  \item{flowgage}{
 See other function to make sure you have this right.
 }
 }
