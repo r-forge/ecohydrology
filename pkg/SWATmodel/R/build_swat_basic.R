@@ -8,10 +8,10 @@ build_swat_basic<-function(dirname,iyr,nbyr,wsarea,elev,declat,declon,hist_wx){
 #
 swat_general<- NULL; rm(swat_general);  # A code dummy
 # Correct way to let code know about global variables post 2.15.1
-if(getRversion() >= "2.15.1") {
-   globalVariables(c("swat_general"))
-} 
-
+#if(getRversion() >= "2.15.1") {
+#   globalVariables(c("swat_general"))
+#} 
+#
 data(swat_general)
 dir.create(dirname)
 setwd(dirname)
