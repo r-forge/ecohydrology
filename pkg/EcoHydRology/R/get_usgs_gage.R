@@ -16,7 +16,7 @@ elev = tempdf$alt_va* 12/25.4
 if(is.na(elev)) {elev=0;print("warning, no elevation associated with gage, setting to 0\n")}
 
 gagename = tempdf$station_nm
-url = paste("http://nwis.waterdata.usgs.gov/nwis/dv?format=rdb&begin_date=",begin_date,"&end_date=",end_date,"&site_no=", flowgage_id, sep = "")
+url = paste("http://nwis.waterdata.usgs.gov/nwis/dv?cb_00060=on&format=rdb&begin_date=",begin_date,"&end_date=",end_date,"&site_no=", flowgage_id, sep = "")
 flowdata_tsv=gage_tsv=readLines(url)
 flowdata_tsv=flowdata_tsv[grep("^#",flowdata_tsv,invert=T)][c(3:length(flowdata_tsv))]
 flowdata = read.delim(text=flowdata_tsv,header=F,sep="\t",col.names = c("agency", "site_no", "date", "flow", "quality"), colClasses = c("character", "numeric", "character", "character", "character"), fill = T)
