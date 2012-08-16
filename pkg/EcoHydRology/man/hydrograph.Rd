@@ -66,13 +66,14 @@ optional vector of a second precip gage data if you are interested in comparing 
 Josephine Archibald
 }
 \note{
+This function can now take NA values.
 If you chose to use the input argument but are not including precipitation, input must only have two columns - you will
 need to add the second streamflow dataset using the "streamflow2" argument.
 }
 
-%%\section{Warning }{
-%%
-%%}
+\section{Warning }{
+The date series should be continuous and evenly spaced.  If not, the dates will not line up accurately on the x-axis.  
+}
 \examples{
 data(OwascoInlet)
 head(OwascoInlet)
