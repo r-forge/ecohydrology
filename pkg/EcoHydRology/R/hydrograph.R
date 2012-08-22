@@ -16,7 +16,7 @@ function (input = matrix(ncol = 2, nrow = 2), streamflow = input[,
         barplot(precip[begin:endindex], yaxt = "n", space = NULL, 
             ylim = rev(c(0, 4 * max(na.omit(precip[begin:endindex])))), 
             xaxt = "n")
-        axis(side = 3, pos = 0, tck = 0)
+        axis(side = 3, pos = 0, tck = 0,xaxt = "n")
         axis(side = 4, at = seq(0, floor(max(na.omit(precip[begin:endindex])) + 
             1), length = (1 + ifelse(floor(max(na.omit(precip[begin:endindex])) + 
             1) < 10, floor(max(na.omit(precip[begin:endindex])) + 1), 
