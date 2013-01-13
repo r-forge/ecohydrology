@@ -10,3 +10,4 @@ Description: This package provides a flexible foundation for scientists,
 License: GPL-2
 Repository: CRAN
 Date/Publication: 2012-02-20 20:06:18
+KeepSource: TRUE
