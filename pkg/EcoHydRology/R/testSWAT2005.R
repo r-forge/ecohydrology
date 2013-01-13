@@ -42,7 +42,7 @@ runSWAT2005=function (hist_wx = NULL, elev = 100, rch = 3) {
 
 try(build_swat_basic("testswat"),silent=F)
 test=runSWAT2005()
-if(sum(test$FLOW_OUTcms)> 200){print("Your computer is having SWAT array issues, please contact drf28@cornell.edu\n")}
+if(sum(test$FLOW_OUTcms) < 200){print("Your computer is having SWAT array issues, please contact drf28@cornell.edu as we would like to figure why this is happening.\n")}
 file.remove(list.files("../testswat/"))
 setwd("../")
 file.remove("testswat/")
