@@ -1,7 +1,7 @@
 # Function for example
 # 
 #
-build_swat_basic<-function(dirname,iyr=2000,nbyr2,wsarea=45,elev=500,declat=45.7,declon=-76,hist_wx=NULL){
+build_swat_basic<-function(dirname,iyr=2000,nbyr=2,wsarea=45,elev=500,declat=45.7,declon=-76,hist_wx=NULL){
 #
 # Removing the global variables Note. Delete the first line when past supported versions are past v15.1
 #
