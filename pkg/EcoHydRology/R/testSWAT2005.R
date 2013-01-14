@@ -1,5 +1,4 @@
 testSWAT2005=function(){
-library(SWATmodel)
 runSWAT2005=function (hist_wx = NULL, elev = 100, rch = 3) {
      Sys.setenv(GFORTRAN_STDIN_UNIT = -1)
      Sys.setenv(GFORTRAN_STDOUT_UNIT = -1)
@@ -39,8 +38,17 @@ runSWAT2005=function (hist_wx = NULL, elev = 100, rch = 3) {
          1, "-12-31", sep = ""))
      return(temp2)
  }
+dirname="testswat"
+swat_general <- NULL
+rm(swat_general)
+load(paste(path.package("SWATmodel"),"data/swat_general.rda", sep = "/"))
+dir.create(dirname)
+setwd(dirname)
+for (file in names(swat_general)) {
+   print(file)
+   cat(unlist(swat_general[file]), file = file, sep = "\n")
+}
 
-try(build_swat_basic("testswat"),silent=F)
 test=runSWAT2005()
 if(sum(test$FLOW_OUTcms) < 200){
   print("Your computer is having SWAT array issues, please contact drf28@cornell.edu as we would like to figure why this is happening.\n")

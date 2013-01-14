@@ -9,10 +9,6 @@ A function to test the numerical correctness of the SWAT2005 exe due to bad resu
 \usage{
 testSWAT2005()
 }
-\arguments{
-}
 \author{
 Daniel Fuka drf28@cornell.edu
-}
-\examples{
 }

@@ -19,5 +19,3 @@ alter_files(change_params)
 \author{
 Daniel R. Fuka
 }
-\examples{
-}
