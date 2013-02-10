@@ -23,8 +23,6 @@
 !!    ~ ~ ~ OUTGOING VARIABLES ~ ~ ~
 !!    name         |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!    hhsubp(:,:)  |mm H2O        |precipitation falling during hour in day in
-!!                                |HRU
 !!    rainsub(:)   |mm H2O        |rainfall during time step
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -131,7 +129,7 @@
       xkp1 = dur * xk1 
       xkp2 = dur * xk2
 
-      pt = 0.
+      pt = 0
       pt = idt
       itime = 1
       sumrain = 0.
@@ -170,17 +168,6 @@
         rainsub(jj,itime) = subp(jj) - sumrain
       end if
 
-      itime = 1
-      nhour = 0
-      nhour = nstep / 24
-      do ihour = 1, 24
-       do k = 1, nhour
-         hhsubp(jj,ihour) = hhsubp(jj,ihour) + rainsub(jj,itime)
-         itime = itime + 1
-       end do
-      end do
-      
- 
       return
       end
 

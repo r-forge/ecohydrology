@@ -78,7 +78,7 @@
         wshd_pstdg(k) = wshd_pstdg(k) * 1.e6
 
         if (iscen == 1) then
-        write (2,5000) kk, pname(kk), wshd_pstap(k), wshd_pstdg(k),     &
+        write (26,5000) kk, pname(kk), wshd_pstap(k), wshd_pstdg(k),    &
      &            wpstaao(k,1), wpstaao(k,2), wpstaao(k,3), wpstaao(k,4)
         else if (isproj == 1) then
         write (19,5000) kk, pname(kk), wshd_pstap(k), wshd_pstdg(k),    &
@@ -100,7 +100,7 @@
         pfp = pfp * 1.e6
         pfg = pfg * 1.e6
         if (iscen == 1) then
-        write (2,5100) pfp, pfg
+        write (26,5100) pfp, pfg
         else if (isproj == 1) then
         write (19,5100) pfp, pfg
         endif

@@ -143,7 +143,39 @@
       j = 0
       j = ihru
 
+      if (ievent<3) then
+         surf_bs(2,j) = Max(1.e-9, surf_bs(2,j) + sedyld(j))
+         sedyld(j) = surf_bs(2,j) * brt(j)
+         surf_bs(2,j) = surf_bs(2,j) - sedyld(j)
+
+      else !subdaily time steps, Jaehak Jeong 2011
+            sedprev = hhsurf_bs(2,j,nstep)
+
+         do k=1,nstep
+
+      !! Left-over (previous timestep) + inflow (current  timestep)
+          hhsurf_bs(2,j,k) = Max(0., sedprev + hhsedy(j,k))
+      
+      !! new estimation of sediment reaching the main channel
+          hhsedy(j,k) = hhsurf_bs(2,j,k) * brt(j)! tons
+           hhsurf_bs(2,j,k) = hhsurf_bs(2,j,k) - hhsedy(j,k)
+        
+      !! lagged at the end of time step  
+          sedprev = hhsurf_bs(2,j,k)
       surf_bs(2,j) = Max(1.e-9, surf_bs(2,j) + sedyld(j))
+
+         end do
+
+      !! daily total sediment yield from the HRU
+         sedyld(j) = sum(hhsedy(j,:))
+      endif
+      
+      surf_bs(13,j) = Max(1.e-6, surf_bs(13,j) + sanyld(j))
+      surf_bs(14,j) = Max(1.e-6, surf_bs(14,j) + silyld(j))
+      surf_bs(15,j) = Max(1.e-6, surf_bs(15,j) + clayld(j))
+      surf_bs(16,j) = Max(1.e-6, surf_bs(16,j) + sagyld(j))
+      surf_bs(17,j) = Max(1.e-6, surf_bs(17,j) + lagyld(j))
+
       surf_bs(3,j) = Max(1.e-9, surf_bs(3,j) + sedorgn(j))
       surf_bs(4,j) = Max(1.e-9, surf_bs(4,j) + sedorgp(j))
       surf_bs(5,j) = Max(1.e-9, surf_bs(5,j) + surqno3(j))
@@ -156,14 +188,26 @@
       surf_bs(12,j) = Max(0., surf_bs(12,j) + bactsedp)
       if (hrupest(j) == 1) then
         do k = 1, npmx
-          pst_lag(k,1,j) = pst_lag(k,1,j) + pst_surq(k,j)
+          !MFW, 3/15/12: Modified to account for decay during lag
+          !pst_lag(k,1,j) = pst_lag(k,1,j) + pst_surq(k,j)
+          pst_lag(k,1,j) = (pst_lag(k,1,j) * EXP(-1. *                  &
+     &                      chpst_rea(inum1))) + pst_surq(k,j)
           if (pst_lag(k,1,j) < 1.e-10) pst_lag(k,1,j) = 0.0
-          pst_lag(k,2,j) = pst_lag(k,2,j) + pst_sed(k,j)
+          !pst_lag(k,2,j) = pst_lag(k,2,j) + pst_sed(k,j)
+          pst_lag(k,2,j) = (pst_lag(k,2,j) * EXP(-1. *                  &
+     &                      sedpst_rea(inum1))) + pst_sed(k,j)
           if (pst_lag(k,2,j) < 1.e-10) pst_lag(k,2,j) = 0.0
         end do
       end if
 
-      sedyld(j) = surf_bs(2,j) * brt(j)
+ !!     sedyld(j) = surf_bs(2,j) * brt(j)    <----line of code in x 2.  fixes sedyld low prob
+
+      sanyld(j) = surf_bs(13,j) * brt(j)
+      silyld(j) = surf_bs(14,j) * brt(j)
+      clayld(j) = surf_bs(15,j) * brt(j)
+      sagyld(j) = surf_bs(16,j) * brt(j)
+      lagyld(j) = surf_bs(17,j) * brt(j)
+
       sedorgn(j) = surf_bs(3,j) * brt(j)
       sedorgp(j) = surf_bs(4,j) * brt(j)
       surqno3(j) = surf_bs(5,j) * brt(j)
@@ -182,6 +226,13 @@
       end if
      
       surf_bs(2,j) = surf_bs(2,j) - sedyld(j)
+
+      surf_bs(13,j) = surf_bs(13,j) - sanyld(j)
+      surf_bs(14,j) = surf_bs(14,j) - silyld(j)
+      surf_bs(15,j) = surf_bs(15,j) - clayld(j)
+      surf_bs(16,j) = surf_bs(16,j) - sagyld(j)
+      surf_bs(17,j) = surf_bs(17,j) - lagyld(j)
+
       surf_bs(3,j) = surf_bs(3,j) - sedorgn(j)
       surf_bs(4,j) = surf_bs(4,j) - sedorgp(j)
       surf_bs(5,j) = surf_bs(5,j) - surqno3(j)

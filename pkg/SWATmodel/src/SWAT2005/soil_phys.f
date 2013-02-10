@@ -23,7 +23,7 @@
 !!                                 |3 sub-daily rainfall/Green&Ampt/hourly 
 !!                                 |routing
 !!    rock(:)       |%             |percent of rock fragments in soil layer
-!!    silt(:)       |%             |percent silt content in soil material
+!!    sol_silt(:,:) |%             |percent silt content in soil material
 !!    sol_awc(:,:)  |mm H20/mm soil|available water capacity of soil layer
 !!    sol_bd(:,:)   |Mg/m**3       |bulk density of the soil
 !!    sol_clay(:,:) |%             |percent clay content in soil material
@@ -86,7 +86,7 @@
 !!    j           |none          |counter
 !!    nly         |none          |number of soil layers
 !!    pormm       |mm            |porosity in mm depth
-!!    sand        |%             |percent sand content in soil material
+!!    sol_sand(:,:) |%             |percent sand content in soil material
 !!    sumpor      |mm            |porosity of profile
 !!    xx          |none          |variable to hold value
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -106,27 +106,61 @@
     
       nly = sol_nly(i)
 
-
 !!    calculate composite usle value
-      rock(i) = Exp(-.053 * rock(i))
-      usle_mult(i) = rock(i) * usle_k(i) * usle_p(i) * usle_ls(i) * 11.8
+      sol_rock(1,i) = Exp(-.053 * sol_rock(1,i))
+      usle_mult(i) = sol_rock(1,i) * usle_k(i) * usle_p(i)              &
+     &     * usle_ls(i) * 11.8
 
 
 !!    calculate water content of soil at -1.5 MPa and -0.033 MPa
       do j = 1, nly
         sol_wp(j,i) = 0.4 * sol_clay(j,i) * sol_bd(j,i) / 100.
         if (sol_wp(j,i) <= 0.) sol_wp(j,i) = .005
-        sol_up(j,i) = sol_wp(j,i) + sol_awc(j,i)
-        sol_por(j,i) = 1. - sol_bd(j,i) / 2.65
+          sol_up(j,i) = sol_wp(j,i) + sol_awc(j,i)
+          sol_por(j,i) = 1. - sol_bd(j,i) / 2.65
         if (sol_up(j,i) >= sol_por(j,i)) then
           sol_up(j,i) = sol_por(j,i) - .05
           sol_wp(j,i) = sol_up(j,i) - sol_awc(j,i)
-          if (sol_wp(j,i) <= 0.) then
-            sol_up(j,i) = sol_por(j,i) * .75
-            sol_wp(j,i) = sol_por(j,i) * .25
-          end if
+        if (sol_wp(j,i) <= 0.) then
+          sol_up(j,i) = sol_por(j,i) * .75
+          sol_wp(j,i) = sol_por(j,i) * .25
         end if
-      end do
+        end if
+        !! compute drainable porosity and variable water table factor - Daniel
+        drpor = sol_por(j,i) - sol_up(j,i)
+        vwt(j,i) = (437.13 * drpor**2) - (95.08 * drpor) + 8.257             
+       end do
+
+      sa = sol_sand(1,i) / 100.
+      cl = sol_clay(1,i) / 100.
+      si = sol_silt(1,i) / 100.
+!!    determine detached sediment size distribution
+!!    typical for mid-western soils in USA (Foster et al., 1980)
+!!    Based on SWRRB
+       det_san(i) = 2.49 * sa * (1. - cl)   !! Sand fraction
+       det_sil(i) = 0.13 * si               !! Silt fraction
+       det_cla(i) = 0.20 * cl               !! Clay fraction   
+       if (cl < .25) then
+         det_sag(i) = 2.0 * cl              !! Small aggregate fraction                    
+       else if (cl > .5) then
+         det_sag(i) = .57
+       else
+         det_sag(i) = .28 * (cl - .25) + .5
+       end if
+
+       det_lag(i) = 1. - det_san(i) - det_sil(i) - det_cla(i)
+     & - det_sag(i)                                           !! Large Aggregate fraction
+
+!!      Error check. May happen for soils with more sand
+!!    Soil not typical of mid-western USA
+!!    The fraction wont add upto 1.0
+      if (det_lag(i) < 0.) then
+        det_san(i) = det_san(i)/(1 - det_lag(i)) 
+        det_sil(i) = det_sil(i)/(1 - det_lag(i)) 
+        det_cla(i) = det_cla(i)/(1 - det_lag(i)) 
+        det_sag(i) = det_sag(i)/(1 - det_lag(i)) 
+        det_lag(i) = 0.
+      end if
 
 
 !!    initialize water/drainage coefs for each soil layer
@@ -153,12 +187,20 @@
      &       (sol_fc(j,i))
         xx = sol_z(j,i)
       end do
+      !! initialize water table depth and soil water for Daniel
+      sol_swpwt(i) = sol_sw(i)
+      if (ffc(i) > 1.) then
+        wat_tbl(i) = (sol_sumul(i) - ffc(i) * sol_sumfc(i)) /           &
+     &                                                      sol_z(nly,i)
+      else
+        wat_tbl(i) = 0.
+      end if
       sol_avpor(i) = sumpor / sol_z(nly,i)
       sol_avbd(i) = 2.65 * (1. - sol_avpor(i))
 
 
 !!    define soil layer that the drainage tile is in
-      if (ddrain(i) > 0) then
+      if (ddrain(i) > 0.) then
         do j = 1, nly
           if (ddrain(i) < sol_z(j,i)) ldrain(i) = j
           if (ddrain(i) < sol_z(j,i)) exit
@@ -169,16 +211,17 @@
 
 !!    calculate infiltration parameters for subdaily time step
       if (ievent > 0) then
-        sand = 0.
-        sand = 100. - sol_clay(1,i) - silt(i)
+        sol_sand = 0.
+        sol_sand(1,i) = 100. - sol_clay(1,i) - sol_silt(1,i)
         wfsh(i) = 10. * Exp(6.5309 - 7.32561 * sol_por(1,i) +           &
      &    3.809479 * sol_por(1,i) ** 2 + 0.001583 * sol_clay(1,i) ** 2 +&
-     &    0.000344 * sand * sol_clay(1,i) - 0.049837 * sol_por(1,i) *   &
-     &    sand + 0.001608 * sol_por(1,i) ** 2 * sand ** 2 +             &
+     &    0.000344 * sol_sand(1,i) * sol_clay(1,i) - 0.049837 *         &
+     &    sol_por(1,i) * sol_sand(1,i)                                  &
+     &    + 0.001608 * sol_por(1,i) ** 2 * sol_sand(1,i) ** 2 +         &
      &    0.001602 * sol_por(1,i) ** 2 * sol_clay(1,i) ** 2 -           &
-     &    0.0000136 * sand ** 2 * sol_clay(1,i) -                       &
+     &    0.0000136 * sol_sand(1,i) ** 2 * sol_clay(1,i) -              &
      &    0.003479 * sol_clay(1,i) ** 2 * sol_por(1,i) -                &
-     &    0.000799 * sand ** 2 * sol_por(1,i))
+     &    0.000799 * sol_sand(1,i) ** 2 * sol_por(1,i))
       end if
 
 
@@ -187,7 +230,8 @@
       wshd_snob = wshd_snob + sno_hru(i) * hru_dafr(i)
 
 
-      call curno(cn2(i),i)
+      call curno(cn2(i),i) !! J.Jeong 4/18/2008
+!      call curno_subd(cn2(i),i)  !! changed for URBAN
 
       return
       end

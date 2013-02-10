@@ -7,7 +7,7 @@
       use parm
 
       character (len=80) :: titldum
-      integer :: idum, ii
+      integer :: ii
 
 !! reset output arrays/variables
       aairr = 0.
@@ -40,6 +40,7 @@
       sno3up = 0.
       spadyev = 0.
       spadyo = 0.
+      spadyosp = 0.
       spadyrfv = 0.
       spadysp = 0.
       subaao = 0.
@@ -65,6 +66,7 @@
       wshd_pas = 0.
       wshd_plch = 0.
       wshd_pstrs = 0.
+      wshd_astrs = 0.
       wshd_pup = 0.
       wshd_raino3 = 0.
       wshd_rmn = 0.
@@ -137,7 +139,6 @@
       igen = 0
       igen = ogen
 
-
 !! HRU variables
       snoeb = 0.
       snoeb = orig_snoeb
@@ -204,6 +205,12 @@
       sol_nh3 = 0.
       sol_orgn = 0.
       sol_orgn = orig_solorgn
+      ! Armen March 5, 2009
+      sol_n = 0.
+      sol_mn = 0.
+      sol_mp = 0.
+      sol_mc = 0.
+      ! Armen March 5, 2009
       sol_orgp = 0.
       sol_orgp = orig_solorgp
       sol_solp = 0.
@@ -268,12 +275,28 @@
       pot_sed = orig_potsed
       pot_no3 = 0.
       pot_no3 = orig_potno3
+      pot_san = orig_potsed * 0. 
+      pot_sil = orig_potsed * 1. 
+      pot_cla = orig_potsed * 0. 
+      pot_sag = orig_potsed * 0. 
+      pot_lag = orig_potsed * 0. 
       potflwi = 0.
       potsedi = 0.
+      potsani = 0.
+      potsili = 0.
+      potclai = 0.
+      potsagi = 0.
+      potlagi = 0.
+
       pnd_vol = 0.
       pnd_vol = orig_pndvol
       pnd_sed = 0.
       pnd_sed = orig_pndsed
+      pnd_san = orig_pndsed * 0. 
+      pnd_sil = orig_pndsed * 1. 
+      pnd_cla = orig_pndsed * 0. 
+      pnd_sag = orig_pndsed * 0. 
+      pnd_lag = orig_pndsed * 0. 
       pnd_no3 = 0.
       pnd_no3 = orig_pndno3
       pnd_solp = 0.
@@ -288,10 +311,16 @@
       pnd_seci = 0.
       pnd_psed = 0.
       pnd_solpg = 0.
+
       wet_vol = 0.
       wet_vol = orig_wetvol
       wet_sed = 0.
       wet_sed = orig_wetsed
+      wet_san = orig_wetsed * 0. 
+      wet_sil = orig_wetsed * 1. 
+      wet_cla = orig_wetsed * 0. 
+      wet_sag = orig_wetsed * 0. 
+      wet_lag = orig_wetsed * 0. 
       wet_no3 = 0.
       wet_no3 = orig_wetno3
       wet_orgn = 0.
@@ -344,6 +373,12 @@
       res_vol = orig_resvol
       res_sed = 0.
       res_sed = orig_ressed
+      res_san = orig_ressed * 0. 
+      res_sil = orig_ressed * 1. 
+      res_cla = orig_ressed * 0. 
+      res_sag = orig_ressed * 0. 
+      res_lag = orig_ressed * 0. 
+      res_gra = 0.
       lkpst_conc = 0.
       lkpst_conc = orig_lkpstconc
       lkspst_conc = 0.

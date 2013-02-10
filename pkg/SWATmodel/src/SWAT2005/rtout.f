@@ -276,13 +276,15 @@
       implicit none
 
       integer :: jrch, ii
-      real :: sedcon, bedvol, sedpest
+      real :: sedcon, bedvol, sedpest, wtmp
 
       jrch = 0
       jrch = inum1
 
+      wtmp = 0.
+      wtmp = 5.0 + 0.75 * tmpav(jrch)
 !! set values for routing variables
-      varoute(1,ihout) = 0.
+      varoute(1,ihout) = wtmp
       varoute(2,ihout) = rtwtr
       varoute(3,ihout) = sedrch
       varoute(8,ihout) = 0.
@@ -299,6 +301,7 @@
       varoute(25,ihout) = rch_cla
       varoute(26,ihout) = rch_sag
       varoute(27,ihout) = rch_lag
+      varoute(28,ihout) = rch_gra
       if (ievent < 3) then
        varoute(4,ihout) = organicn(jrch) * rtwtr / 1000. + ch_orgn(jrch)
        varoute(5,ihout) = organicp(jrch) * rtwtr / 1000. + ch_orgp(jrch)
@@ -312,29 +315,33 @@
        varoute(16,ihout) = rch_cbod(jrch) *  rtwtr/ 1000.
        varoute(17,ihout) = rch_dox(jrch) *  rtwtr/ 1000.
       else
-        do ii = 1, 24
+       do ii = 1, nstep 
+          hhvaroute(2,ihout,ii) = hrtwtr(ii)     ! urban modeling by J.Jeong
+          hhvaroute(3,ihout,ii) = hsedyld(ii)  ! urban modeling by J.Jeong 
+
+      ! From this point, check each variables if it is simulated at subdaily interval before using the output - Jaehak 9/11/09
          hhvaroute(1,ihout,ii) = 0.
-         hhvaroute(2,ihout,ii) = hrtwtr(ii)
-         hhvaroute(3,ihout,ii) = hsedyld(ii)
-         hhvaroute(4,ihout,ii) = horgn(ii) * hrtwtr(ii) / 1000.
-         hhvaroute(5,ihout,ii) = horgp(ii) *  hrtwtr(ii) / 1000.
-         hhvaroute(6,ihout,ii) = hno3(ii) * hrtwtr(ii) / 1000.
-         hhvaroute(7,ihout,ii) = hsolp(ii) * hrtwtr(ii) / 1000.
-         hhvaroute(8,ihout,ii) = 0.
-         hhvaroute(9,ihout,ii) = 0.
-         hhvaroute(10,ihout,ii) = 0.
-         hhvaroute(11,ihout,ii) = hsolpst(ii) * hrtwtr(ii)
-         hhvaroute(12,ihout,ii) = hsorpst(ii) * hrtwtr(ii)
-         hhvaroute(13,ihout,ii) = hchla(ii) * hrtwtr(ii) / 1000.
-         hhvaroute(14,ihout,ii) = hnh4(ii) * hrtwtr(ii) / 1000.
-         hhvaroute(15,ihout,ii) = hno2(ii) * hrtwtr(ii) / 1000.
-         hhvaroute(16,ihout,ii) = hbod(ii) *  hrtwtr(ii)/ 1000.
-         hhvaroute(17,ihout,ii) = hdisox(ii) *  hrtwtr(ii)/ 1000.
-         hhvaroute(18,ihout,ii) = hbactp(ii)
-         hhvaroute(19,ihout,ii) = hbactlp(ii)
-         hhvaroute(20,ihout,ii) = hhvaroute(20,inum2,ii) * (1. - rnum1)
-         hhvaroute(21,ihout,ii) = hhvaroute(21,inum2,ii) * (1. - rnum1)
-         hhvaroute(22,ihout,ii) = hhvaroute(22,inum2,ii) * (1. - rnum1)
+!          hhvaroute(2,ihout,ii) = hrtwtr(ii)
+!          hhvaroute(3,ihout,ii) = hsedyld(ii)
+          hhvaroute(4,ihout,ii) = horgn(ii) * hrtwtr(ii) / 1000.
+          hhvaroute(5,ihout,ii) = horgp(ii) *  hrtwtr(ii) / 1000.
+          hhvaroute(6,ihout,ii) = hno3(ii) * hrtwtr(ii) / 1000.
+          hhvaroute(7,ihout,ii) = hsolp(ii) * hrtwtr(ii) / 1000.
+          hhvaroute(8,ihout,ii) = 0.
+          hhvaroute(9,ihout,ii) = 0.
+          hhvaroute(10,ihout,ii) = 0.
+          hhvaroute(11,ihout,ii) = hsolpst(ii) * hrtwtr(ii)
+          hhvaroute(12,ihout,ii) = hsorpst(ii) * hrtwtr(ii)
+          hhvaroute(13,ihout,ii) = hchla(ii) * hrtwtr(ii) / 1000.
+          hhvaroute(14,ihout,ii) = hnh4(ii) * hrtwtr(ii) / 1000.
+          hhvaroute(15,ihout,ii) = hno2(ii) * hrtwtr(ii) / 1000.
+          hhvaroute(16,ihout,ii) = hbod(ii) *  hrtwtr(ii)/ 1000.
+          hhvaroute(17,ihout,ii) = hdisox(ii) *  hrtwtr(ii)/ 1000.
+          hhvaroute(18,ihout,ii) = hbactp(ii)
+          hhvaroute(19,ihout,ii) = hbactlp(ii)
+          hhvaroute(20,ihout,ii) = hhvaroute(20,inum2,ii) * (1. - rnum1)
+          hhvaroute(21,ihout,ii) = hhvaroute(21,inum2,ii) * (1. - rnum1)
+          hhvaroute(22,ihout,ii) = hhvaroute(22,inum2,ii) * (1. - rnum1)
 
           varoute(4,ihout) = varoute(4,ihout) + hhvaroute(4,ihout,ii)
           varoute(5,ihout) = varoute(5,ihout) + hhvaroute(5,ihout,ii)
@@ -349,6 +356,27 @@
           varoute(17,ihout) = varoute(17,ihout) + hhvaroute(17,ihout,ii)
         end do
       end if
+
+!! set subdaily reach output    - by jaehak jeong for urban project, subdaily output in output.rch file
+      if (ievent==3.and.iprint==3) then
+        do ii=1,nstep
+!! determine sediment concentration in outflow
+          sedcon = 0.
+          if (hrtwtr(ii) > 0.01) then
+            sedcon = hsedyld(ii) / hrtwtr(ii) * 1.e6
+          else
+            sedcon = 0.
+          end if
+          rchhr(1,jrch,ii) = hhvaroute(2,inum2,ii) * (1. - rnum1)!!flow in (m^3/s)
+     &      / (idt * 60.)                   
+          rchhr(2,jrch,ii) = hrtwtr(ii) / (idt * 60.)            !!flow out (m^3/s)
+          rchhr(3,jrch,ii) = hrtevp(ii) / (idt * 60.)            !!evap (m^3/s)
+          rchhr(4,jrch,ii) = hrttlc(ii) / (idt * 60.)            !!tloss (m^3/s)
+          rchhr(5,jrch,ii) = hhvaroute(3,inum2,ii) * (1. - rnum1)   !!sed in (tons)
+          rchhr(6,jrch,ii) = hsedyld(ii)                         !!sed out (tons)
+          rchhr(7,jrch,ii) = sedcon                                           !!sed conc (mg/L)
+        end do
+      endif
 
 !! determine sediment concentration in outflow
       sedcon = 0.
@@ -409,18 +437,36 @@
       rchdy(40,jrch) = varoute(20,ihout)                 !!cmetal #1
       rchdy(41,jrch) = varoute(21,ihout)                 !!cmetal #2
       rchdy(42,jrch) = varoute(22,ihout)                 !!cmetal #3
-!!    sediment routing
-       rchdy(43,jrch) = varoute(23,inum2)                 !!sand in   
+!!    sediment routing 
+!!    Assumed all silt for default sediment routine
+!!    For other sediment routing models particle size are tracked
+       if (ch_eqn(jrch) .NE. 0) then
+       rchdy(43,jrch) = varoute(23,inum2) * (1. - rnum1)  !!sand in   
        rchdy(44,jrch) = varoute(23,ihout)                 !!sand out   
-       rchdy(45,jrch) = varoute(24,inum2)                 !!silt in    
+       rchdy(45,jrch) = varoute(24,inum2) * (1. - rnum1)  !!silt in    
        rchdy(46,jrch) = varoute(24,ihout)                 !!silt out   
-       rchdy(47,jrch) = varoute(25,inum2)                 !!clay in    
+       rchdy(47,jrch) = varoute(25,inum2) * (1. - rnum1)  !!clay in    
        rchdy(48,jrch) = varoute(25,ihout)                 !!clay out   
-       rchdy(49,jrch) = varoute(26,inum2)                 !!sm ag in   
+       rchdy(49,jrch) = varoute(26,inum2) * (1. - rnum1)  !!sm ag in   
        rchdy(50,jrch) = varoute(26,ihout)                 !!sm ag out 
-       rchdy(51,jrch) = varoute(27,inum2)                 !!lg ag in  
+       rchdy(51,jrch) = varoute(27,inum2) * (1. - rnum1)  !!lg ag in  
        rchdy(52,jrch) = varoute(27,ihout)                 !!lg ag out  
-      
+       rchdy(53,jrch) = varoute(28,inum2) * (1. - rnum1)  !!gravel in
+       rchdy(54,jrch) = varoute(28,ihout)                 !!gravel out
+       else
+       rchdy(43,jrch) = 0.                 !!sand in   
+       rchdy(44,jrch) = 0.                 !!sand out   
+       rchdy(45,jrch) = varoute(3,inum2) * (1. - rnum1)   !!silt in    
+       rchdy(46,jrch) = varoute(3,ihout)                  !!silt out   
+       rchdy(47,jrch) = 0.                 !!clay in    
+       rchdy(48,jrch) = 0.                 !!clay out   
+       rchdy(49,jrch) = 0.                 !!sm ag in   
+       rchdy(50,jrch) = 0.                 !!sm ag out 
+       rchdy(51,jrch) = 0.                 !!lg ag in  
+       rchdy(52,jrch) = 0.                 !!lg ag out  
+       rchdy(53,jrch) = 0.                 !!gravel in
+       rchdy(54,jrch) = 0.                 !!gravel out
+       end if
 
 !! summarize monthly reach output
       rchmono(1,jrch) = rchmono(1,jrch) + rchdy(1,jrch)
@@ -475,6 +521,13 @@
        rchmono(49,jrch) = rchmono(49,jrch) + rchdy(50,jrch)
        rchmono(50,jrch) = rchmono(50,jrch) + rchdy(51,jrch)
        rchmono(51,jrch) = rchmono(51,jrch) + rchdy(52,jrch)
+       rchmono(52,jrch) = rchmono(52,jrch) + rchdy(53,jrch)
+       rchmono(53,jrch) = rchmono(53,jrch) + rchdy(54,jrch)
+       rchmono(54,jrch) = rchmono(54,jrch) + rchdy(55,jrch)
+       rchmono(55,jrch) = rchmono(55,jrch) + rchdy(56,jrch)
+       rchmono(56,jrch) = rchmono(56,jrch) + rchdy(57,jrch)
+       rchmono(57,jrch) = rchmono(57,jrch) + rchdy(58,jrch)
+         rchmono(58,jrch) = rchmono(58,jrch) + rchdy(59,jrch)
       
 
       return

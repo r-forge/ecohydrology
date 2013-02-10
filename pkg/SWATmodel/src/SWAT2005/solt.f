@@ -150,6 +150,14 @@
         sol_tmp(k,j) = tlag * sol_tmp(k,j) + (1. - tlag) *              &
      &                   (df * (tmp_an(hru_sub(j)) - tmp_srf) + tmp_srf)
         xx = sol_z(k,j)
+
+        ! Temperature correction for Onsite Septic systems
+        if (isep_opt(j)/=0.and.iyr>=isep_iyr(j).and.k>=i_sep(j)) then
+         if (sol_tmp(k,j) < 10.) then
+            sol_tmp(k,j) = 10. - (10. - sol_tmp(k,j)) * 0.1
+         end if     
+        endif
+
       end do
 
       return

@@ -16,7 +16,7 @@
 !!                                 |during growing season
 !!    icr(:)        |none          |sequence number of crop grown within the
 !!                                 |current year
-!!    idplt(:,:,:)  |none          |land cover code from crop.dat
+!!    idplt(:)      |none          |land cover code from crop.dat
 !!    ipdvas(:)     |none          |output variable codes for output.hru file
 !!    isproj        |none          |special project code:
 !!                                 |1 test rewind (run simulation twice)
@@ -159,8 +159,9 @@
       real :: dmt, yldt
       real, dimension (mhruo) :: pdvas, pdvs
       character (len=4) :: cropname
-   
+
       days = 0
+
       select case(mo_chk)
         case (9, 4, 6, 11)
           days = 30
@@ -178,7 +179,6 @@
         do ii = 1, itoth
           if (ipdhru(ii) == j) iflag = 1
         end do
-
 
         if (iflag == 1) then
 
@@ -258,50 +258,85 @@
         pdvas(66) = yldt
         pdvas(67) = hrumono(63,j)
         pdvas(68) = hrumono(64,j)
+        pdvas(69) = wtab(j)  !! based on 30 day antecedent climate(mm) (prec,et)
+        pdvas(70) = wtabelo  !! based on depth from soil surface(mm)
+!!      added current snow content in the hru (not summed)
+        pdvas(71) = sno_hru(j)
+
+!!      added current soil carbon for first layer
+        pdvas(72) = cmup_kgh(j)    !! first soil layer only
+!!      added current soil carbon integrated - aggregating all soil layers
+        pdvas(73) = cmtot_kgh(j)
+        
+!!    adding qtile to output.hru write 3/2/2010 gsm
+        pdvas(74) = hrumono(62,j)
+!!    tileno3 - output.hru
+        pdvas(75) = hrumono(68,j)
+!!    latno3 - output.hru
+        pdvas(76) = hrumono(69,j)
+!!    gwq deep 
+        pdvas(77) = hrumono(70,j)
+!!    lat q continuous
+        pdvas(78) = hrumono(71,j)
+
+      if (itots > 0) then 
+         ix = itots
+      else
+         ix = mhruo
+      endif
+
 
         if (ipdvas(1) > 0) then
-          do ii = 1, itots
+          do ii = 1, ix
             pdvs(ii) = pdvas(ipdvas(ii))
           end do
  
-          idum = idplt(nro(j),icr(j),j)
-          if (idum > 0) then
-            cropname = cpnm(idum)
+          idplant = idplt(j)
+          if (idplant > 0) then
+            cropname = cpnm(idplant)
           else
             cropname = "NOCR"
           endif
 
-          if (iscen == 1 .and. isproj == 0) then
-!         write (3,1000) cpnm(idplt(nro(j),icr(j),j)), j, hrugis(j), sb,&
-          write (3,1000) cropname, j, hrugis(j), sb,                    &
-     &             nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, itots)
-          else if (isproj == 1) then
-!         write (21,1000) cpnm(idplt(nro(j),icr(j),j)), j, hrugis(j),   &
-          write (21,1000) cropname, j, hrugis(j),                       &
-     &         sb, nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, itots)
-          else if (iscen == 1 .and. isproj == 2) then
-          write (3,2000) cropname, j, hrugis(j), sb,                    &
-     &    nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, itots), iyr
+          if (iscen == 1) then                                          &
+            select case (isproj)
+            case (0)
+            write (28,1000) cropname, j, subnum(j), hruno(j), sb,       &
+     &         nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, ix)
+            case (1)
+            write (21,1000) cropname, j, subnum(j), hruno(j),           &
+     &         sb, nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, ix)
+            case (2)
+            write (28,2000) cropname, j, subnum(j), hruno(j), sb,       &
+     &         nmgt(j), mo_chk, hru_km(j),(pdvs(ii), ii = 1, ix), iyr
+            end select
           end if
-        else
-          if (iscen == 1 .and. isproj == 0) then
-!         write (3,1000) cpnm(idplt(nro(j),icr(j),j)), j, hrugis(j), sb,&
-          write (3,1000) cropname, j, hrugis(j), sb,                    &
-     &            nmgt(j), mo_chk, hru_km(j), (pdvas(ii), ii = 1, mhruo)
-          else if (isproj == 1) then
-!         write (21,1000) cpnm(idplt(nro(j),icr(j),j)), j, hrugis(j),   &
-          write (21,1000) cropname, j, hrugis(j),                       &
-     &        sb, nmgt(j), mo_chk, hru_km(j), (pdvas(ii), ii = 1, mhruo)
-          else if (iscen == 1 .and. isproj == 2) then
-          write (3,2000) cropname, j, hrugis(j), sb,                    &
-     &    nmgt(j), mo_chk, hru_km(j), (pdvas(ii), ii = 1, mhruo), iyr
+!     else
+!! write with different format for hrus greater than 9999
+!        select case (isproj)
+!            case (0)
+!            write (28,1001) cropname, j, subnum(j), hruno(j), sb,       &
+!     &         nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, ix)
+!            case (1) 
+!            write (21,1001) cropname, j, subnum(j), hruno(j),           &
+!     &         sb, nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, ix)
+!            case(2) 
+!            write (28,1001) cropname, j, subnum(j), hruno(j), sb,       &
+!     &         nmgt(j), mo_chk, hru_km(j),(pdvs(ii), ii = 1, ix), iyr
+!         end select
           end if
-        end if
+
         end if
       end do
 
       return
- 1000 format (a4,i5,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,2e10.3)
- 2000 format (a4,i5,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,70f10.3,1x,i4)
+ 1000 format (a4,i5,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
+     *e10.5,1x,e10.5,8e10.3,2f10.3)
+ 2000 format (a4,i5,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
+     *e10.5,1x,e10.5,5e10.3,2f10.3,1x,i4)
+ 1001 format (a4,i7,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
+     *e10.5,1x,e10.5,3e10.3,2f10.3,1x,i4)
+!1000 format (a4,i4,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,66f10.3,1x,
+!    *e10.5,1x,e10.5,2e10.3,1x,i4)
+!2000 format (a4,i5,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,70f10.3,1x,i4)
       end

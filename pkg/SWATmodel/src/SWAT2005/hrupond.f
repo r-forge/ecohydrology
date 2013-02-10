@@ -102,7 +102,7 @@
       use parm
 
       integer :: j
-      real :: cnv, pndsa, xx, yy
+      real :: cnv, pndsa, xx, yy, qdayi, latqi
 
       j = 0
       j = ihru
@@ -113,15 +113,34 @@
 
         !! calculate area of HRU covered by pond
         pndsa = 0.
-        pndsa = bp1(j) * pnd_vol(j) ** bp2(j)
+        pndsa = hru_fr(j) * bp1(j) * pnd_vol(j) ** bp2(j)
 
         !! calculate water flowing into pond for day
-        pndflwi = qdr(j) * 10. * hru_ha(j) * pnd_fr(j)
-        qdr(j) = qdr(j) - qdr(j) * pnd_fr(j)
- 
+        pndflwi = qday + latq(j)
+        pndflwi = pndflwi * 10. * hru_ha(j) * pnd_fr(j)
+        qdayi = qday
+        latqi = latq(j)
+        qday = qday * (1. - pnd_fr(j))
+        latq(j) = latq(j) * (1. - pnd_fr(j))
+        pndloss = qdayi - qday
+        lpndloss = latqi - latq(j)
+        qdr(j) = qdr(j) - pndloss - lpndloss
+!       qdr(j) = qdr(j) - qdr(j) * pnd_fr(j)
+
         !! calculate sediment loading to pond for day
-        pndsedin = sedyld(j) *  pnd_fr(j)
-        sedyld(j) = sedyld(j) * (1. - pnd_fr(j))
+        pndsedin = sedyld(j) * (pnd_fr(j) - pndsa / hru_ha(j))
+        pndsanin = sanyld(j) * (pnd_fr(j) - pndsa / hru_ha(j))
+        pndsilin = silyld(j) * (pnd_fr(j) - pndsa / hru_ha(j))
+        pndclain = clayld(j) * (pnd_fr(j) - pndsa / hru_ha(j))
+        pndsagin = sagyld(j) * (pnd_fr(j) - pndsa / hru_ha(j))
+        pndlagin = lagyld(j) * (pnd_fr(j) - pndsa / hru_ha(j))
+
+        sedyld(j) = sedyld(j) - sedyld(j) * pnd_fr(j)
+        sanyld(j) = sanyld(j) - sanyld(j) * pnd_fr(j)
+        silyld(j) = silyld(j) - silyld(j) * pnd_fr(j)
+        clayld(j) = clayld(j) - clayld(j) * pnd_fr(j)
+        sagyld(j) = sagyld(j) - sagyld(j) * pnd_fr(j)
+        lagyld(j) = lagyld(j) - lagyld(j) * pnd_fr(j)
 
         !! compute nitrogen and phosphorus levels in pond at beginning
         !! of day: equation 29.1.1 in SWAT manual
@@ -160,10 +179,16 @@
         call pond(j)
 
         !! compute water leaving pond
+!        qday = qday + pndflwo / cnv
         qdr(j) = qdr(j) + pndflwo / cnv
 
         !! compute sediment leaving pond
         sedyld(j) = sedyld(j) + pndsedo
+        sanyld(j) = sanyld(j) + pndsano
+        silyld(j) = silyld(j) + pndsilo
+        clayld(j) = clayld(j) + pndclao
+        sagyld(j) = sagyld(j) + pndsago
+        lagyld(j) = lagyld(j) + pndlago
 
         !! compute nutrients leaving pond
         if (pndflwo > 1.e-5) then
@@ -192,8 +217,7 @@
 
         
         !! add pond seepage to shallow aquifer convert from m^3 to mm
-        !! This will be done in gwmod.
-!        shallst(j) = shallst(j) + pndsep / cnv
+        shallst(j) = shallst(j) + pndsep / cnv
 
         !! compute seepage depth for HRU water balance
         twlpnd = pndsep / cnv
@@ -201,7 +225,15 @@
       end if
 
       if (qdr(j) < 0.) qdr(j) = 0.
-      if (sedyld(j) < 0.) sedyld(j) = 0.
+
+      if (sedyld(j) < 0.) then
+          sedyld(j) = 0.0
+        sanyld(j) = 0.0
+        silyld(j) = 0.0
+        clayld(j) = 0.0
+        sagyld(j) = 0.0
+        lagyld(j) = 0.0
+        end if
 
       return
       end

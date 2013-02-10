@@ -92,12 +92,12 @@
       if (wtmp <= 0.) wtmp = 0.1
 
 !     skipping hourly bacteria route for now  04/16/07 nubs
-      if (ievent > 20) then                !! hourly mass balance
+      if (ievent > 2) then                !! hourly mass balance
         initlp = 0.
         initp = 0.
         initlp = rch_bactlp(jrch)
         initp = rch_bactp(jrch)
-        do ii = 1, 24
+        do ii = 1, nstep
           !! total bacteria mass in reach
           totbactp = 0.
           totbactlp = 0.

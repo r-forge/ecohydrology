@@ -16,8 +16,8 @@
 !!                               |4 = transfer    13 = 
 !!                               |5 = add         14 = saveconc
 !!                               |6 = rechour     15 = 
-!!                               |7 = recmon      16 = autocal
-!!                               |8 = recyear
+!!                               |7 = recmon    
+!!                               |8 = recyear     
 !!    ihouts(:)   |none          |For ICODES equal to
 !!                               |0: not used
 !!                               |1,2,3,5,7,8,10,11: hydrograph storage
@@ -102,9 +102,9 @@
 
       use parm
 
-      integer :: idum
+      idum = 0
 
-      do idum = 1, mhyd
+      do ii = 1, mhyd_bsn
         icode = 0
         ihout = 0
         inum1 = 0
@@ -112,6 +112,7 @@
         inum3 = 0
         rnum1 = 0.
         inum4 = 0
+        idum = idum + 1
         icode = icodes(idum)
         ihout = ihouts(idum)
         inum1 = inum1s(idum)
@@ -120,82 +121,64 @@
         rnum1 = rnum1s(idum)
         inum4 = inum4s(idum)
         inum5 = inum5s(idum)
+        inum6 = inum6s(idum)
+        inum7 = inum7s(idum)
+        inum8 = inum8s(idum)
 
         select case (icode)
           case (0)
             return
           case (1)
             call subbasin
+            call print_hyd
           case (2) 
             call route
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            if (dtp_onoff(inum1)==1) call det_pond  !route detention pond J.Jeong feb 2010
+            if (wtp_onoff(inum1)==1) call wet_pond  !route wetention pond J.Jeong june 2010
+            call sumhyd
+            call print_hyd
           case (3) 
             call routres
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
           case (4) 
             call transfer
           case (5) 
             call addh
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
+            call print_hyd
           case (6) 
             call rechour
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
+            call print_hyd
           case (7) 
             call recmon
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
           case (8) 
             call recyear
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
           case (9) 
             call save
           case (10) 
             call recday
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
           case (11) 
             call reccnst
-            do ivar = 1, 6
-             shyd(ivar,ihout) = shyd(ivar,ihout) + varoute(ivar+1,ihout)
-            end do
-            shyd(7,ihout) = shyd(7,ihout) + varoute(11,ihout)
-            shyd(8,ihout) = shyd(8,ihout) + varoute(12,ihout)
+            call sumhyd
           case (12)
             call structure
           case (13) 
             call apex_day
           case (14)
             call saveconc
-          case (16)
-            call autocal
+          case (17)
+            call routeunit
+            call sumhyd
+          case (18)
+            iru_sub = inum1   !!routing unit number
+            inum8 = 1
+            call routels(iru_sub)
+            call sumhyd
         end select
-
 
       end do
 

@@ -61,7 +61,6 @@
 !!    ~ ~ ~ OUTGOING VARIABLES ~ ~ ~
 !!    name         |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!    hhprecip(:)  |mm H2O        |precipitation falling during hour in day
 !!    precipday    |mm H2O        |amount of water in effective precipitation
 !!                                |in HRU
 !!    precipdt(:)  |mm H2O        |precipitation for the time step during day
@@ -110,32 +109,31 @@
       smp =0.
       isub = hru_sub(j)
 
-      if (elevb(1,hru_sub(j)) > 0. .and.                                &
-     &                                elevb_fr(1,hru_sub(j)) > 0.) then
+      if (elevb(1,isub) > 0. .and. elevb_fr(1,isub) > 0.) then 
 !! elevation bands
         !! compute snow fall and melt for each elevation band
         do ib = 1, 10
-          if (elevb_fr(ib,hru_sub(j)) < 0.) exit
-          snotmpeb(ib,j) = snotmpeb(ib,j) * (1. - timp) +               &
-     &                                              tavband(ib,j) * timp
+          if (elevb_fr(ib,isub) < 0.) exit
+          snotmpeb(ib,j) = snotmpeb(ib,j) * (1.-sub_timp(ib,isub)) +     &       
+     &                                tavband(ib,j) * sub_timp(ib,isub)
 
-          if (tavband(ib,j) < sub_sftmp(isub)) then
+          if (tavband(ib,j) < sub_sftmp(ib,isub)) then
 
             !! compute snow fall if temperature is below sftmp
             snoeb(ib,j) = snoeb(ib,j) + pcpband(ib,j)
-            snofall = snofall + pcpband(ib,j) * elevb_fr(ib,hru_sub(j))
+            snofall = snofall + pcpband(ib,j) * elevb_fr(ib,isub)
 
           else
 
             !! compute snow melt if temperature is above smtmp
-            if (tmxband(ib,j) > sub_smtmp(isub)) then
+            if (tmxband(ib,j) > sub_smtmp(ib,isub)) then
               smfac = 0.
               smleb = 0.
-              smfac = (sub_smfmx(isub) + sub_smfmn(isub)) / 2. +        &
+              smfac = (sub_smfmx(ib,isub) + sub_smfmn(ib,isub)) / 2. +  &
      &          Sin((iida - 81) / 58.09) *                              &
-     &          (sub_smfmx(isub) - sub_smfmn(isub)) / 2.    !! 365/2pi = 58.09
+     &          (sub_smfmx(ib,isub) - sub_smfmn(ib,isub)) / 2.    !! 365/2pi = 58.09
               smleb = smfac * (((snotmpeb(ib,j) + tmxband(ib,j)) / 2.)  &
-     &                                                - sub_smtmp(isub))
+     &                                             - sub_smtmp(ib,isub))
 
               !! adjust for areal extent of snow cover
               if (snoeb(ib,j) < snocovmx) then
@@ -150,22 +148,21 @@
               if (smleb < 0.) smleb = 0.
               if (smleb > snoeb(ib,j)) smleb = snoeb(ib,j)
               snoeb(ib,j) = snoeb(ib,j) - smleb
-              snomlt = snomlt + smleb * elevb_fr(ib,hru_sub(j))
+              snomlt = snomlt + smleb * elevb_fr(ib,isub)
             endif
           endif
-          sum = sum + snoeb(ib,j) * elevb_fr(ib,hru_sub(j))
-          smp = smp + pcpband(ib,j) * elevb_fr(ib,hru_sub(j))
+          sum = sum + snoeb(ib,j) * elevb_fr(ib,isub)
+          smp = smp + pcpband(ib,j) * elevb_fr(ib,isub)
+          
         end do
+        
+
 
         !! add/sub aggregate snow fall and melt from effective precip 
         !! and snow cover
         precipday = smp + snomlt - snofall
         if (precipday < 0.) precipday = 0.
         if (nstep > 0) then
-          do ii = 1, 24
-            hhprecip(ii) = hhprecip(ii) + (snomlt - snofall) / 24
-            if (hhprecip(ii) < 0.) hhprecip(ii) = 0.
-          end do
           do ii = 1, nstep
             precipdt(ii+1) = precipdt(ii+1) + (snomlt - snofall) / nstep
             if (precipdt(ii+1) < 0.) precipdt(ii+1) = 0.
@@ -175,27 +172,29 @@
 
       else
 !! no elevation bands
+      
+      ib = 1
 
         !! estimate snow pack temperature
-        snotmp(j) = snotmp(j) * (1. - timp) + tmpav(j) * timp
+        snotmp(j)=snotmp(j) * (1. - sub_timp(ib,isub)) + tmpav(j) *     &
+     &            sub_timp(ib,isub)
 
-        if (tmpav(j) <= sub_sftmp(isub)) then
+        if (tmpav(j) <= sub_sftmp(ib,isub)) then
           !! calculate snow fall
           sno_hru(j) = sno_hru(j) + precipday
           snofall = precipday
           precipday = 0.
-          hhprecip = 0.
           precipdt = 0.
         endif
  
-        if (tmx(j) > sub_smtmp(isub) .and. sno_hru(j) > 0.) then
+        if (tmx(j) > sub_smtmp(ib,isub) .and. sno_hru(j) > 0.) then
           !! adjust melt factor for time of year
           smfac = 0.
           snomlt = 0.
-          smfac = (sub_smfmx(isub) + sub_smfmn(isub)) / 2. +            &
+          smfac = (sub_smfmx(ib,isub) + sub_smfmn(ib,isub)) / 2. +      &
      &       Sin((iida - 81) / 58.09) *                                 &
-     &       (sub_smfmx(isub) - sub_smfmn(isub)) / 2.    !! 365/2pi = 58.09
-          snomlt = smfac * (((snotmp(j) + tmx(j)) / 2.) - smtmp)
+     &       (sub_smfmx(ib,isub) - sub_smfmn(ib,isub)) / 2.    !! 365/2pi = 58.09
+          snomlt = smfac * (((snotmp(j)+tmx(j))/2.)-sub_smtmp(ib,isub))
 
           !! adjust for areal extent of snow cover
           if (sno_hru(j) < snocovmx) then
@@ -211,9 +210,6 @@
           sno_hru(j) = sno_hru(j) - snomlt
           precipday = precipday + snomlt
           if (nstep > 0) then
-            do ii = 1, 24
-             hhprecip(ii) = hhprecip(ii) + snomlt / 24
-            end do
             do ii = 1, nstep
              precipdt(ii+1) = precipdt(ii+1) + snomlt / nstep
             end do

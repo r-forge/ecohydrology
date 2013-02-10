@@ -87,12 +87,19 @@
    
       jrch = 0
       jrch = inum1
+      
+!! add transfer amounts
+      do ii = 2, mvaro
+        varoute(ii,inum2) = varoute(ii,inum2) + vartran(ii,jrch)
+        vartran(ii,jrch) = 0.
+      end do
+      
 
 !! zero flow out variables
       do ii = 1, mvaro
         varoute(ii,ihout) = 0.
         if (ievent > 2) then
-          do kk = 1, 24
+          do kk = 1, nstep ! changed from 24 to nstep for urban modeling by J.Jeong 4/16/2008
             hhvaroute(ii,ihout,kk) = 0.
           end do
         end if  
@@ -123,13 +130,13 @@
       hsolpst = 0.
       hsorpst = 0.
       peakr = 0.
-       pet_day = 0.
-       pet_day = sub_pet(jrch)
+      pet_day = 0.
+      pet_day = sub_pet(jrch)
       qdbank = 0.
       rcharea = 0.
       rchdep = 0.
-       rchwtr = 0.
-       rchwtr = rchstor(jrch)
+      rchwtr = 0.
+      rchwtr = rchstor(jrch)
       reactb = 0.
       reactw = 0.
       revapday = 0.
@@ -145,6 +152,26 @@
       sorpesto = 0.
       soxy = 0.
       volatpst = 0.
+
+      vel_chan(jrch) = 0.
+      sedrch = 0.
+      rch_san = 0.
+      rch_sil = 0.
+      rch_cla = 0.
+      rch_sag = 0.
+      rch_lag = 0.
+      rch_gra = 0.
+!!    Bank erosion
+      rchdy(55,jrch) = 0.
+!!    Channel Degredation
+      rchdy(56,jrch) = 0.
+!!    Channel Deposition
+      rchdy(57,jrch) = 0.
+!!    Floodplain Deposition
+      rchdy(58,jrch) = 0.
+!!    Total suspended sediments
+      rchdy(59,jrch) = 0.
+
 
       return
       end

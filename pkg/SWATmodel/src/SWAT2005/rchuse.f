@@ -46,17 +46,35 @@
       if (rtwtr < 0.) rtwtr = 0.
 
       if (ievent > 2) then
-        do ii = 1, 24
-          hrtwtr(ii) = hrtwtr(ii) - wurch(i_mo,jrch) * 10000. / 24.
+        do ii = 1, nstep
+          hrtwtr(ii) = hrtwtr(ii) - wurch(i_mo,jrch) * 10000. 
+     &      / real(nstep)
           if (hrtwtr(ii) < 0.) hrtwtr(ii) = 0.
         end do
       end if
 
       if (wtrin /= rtwtr .and. wtrin > 0.01) then
         sedrch = sedrch * rtwtr / wtrin
-        if (sedrch < 0.) sedrch = 0.
+
+        rch_san = rch_san * rtwtr / wtrin
+        rch_sil = rch_sil * rtwtr / wtrin
+        rch_cla = rch_cla * rtwtr / wtrin
+        rch_sag = rch_sag * rtwtr / wtrin
+        rch_lag = rch_lag * rtwtr / wtrin
+        rch_gra = rch_gra * rtwtr / wtrin
+
+        if (sedrch  < 1.e-6) then
+          sedrch = 0.
+          rch_san = 0.
+          rch_sil = 0.
+          rch_cla = 0.
+          rch_sag = 0.
+          rch_lag = 0.
+          rch_gra = 0.
+        end if
+
         if (ievent > 2) then
-          do ii = 1, 24
+          do ii = 1, nstep
             hsedyld(ii) = hsedyld(ii) * rtwtr / wtrin
             if (hrtwtr(ii) == 0.) hsedyld(ii) = 0.
           end do

@@ -18,7 +18,7 @@
 !!    hru_sub(:) |none           |subbasin in which HRU is located
 !!    icr(:)     |none           |sequence number of crop grown within the
 !!                               |current year
-!!    idplt(:,:,:)|none           |land cover code from crop.dat
+!!    idplt(:)   |none           |land cover code from crop.dat
 !!    igro(:)    |none           |land cover status code
 !!                               |0 no land cover currently growing
 !!                               |1 land cover growing
@@ -225,10 +225,11 @@
         !! potential ET: reference crop alfalfa at 40 cm height
            rv = 0.
            rc = 0.
-           rv = 114. / u10(j)
+           rv = 114. / (u10(j) * (170./1000.)**0.2)
            rc = 49. / (1.4 - 0.4 * co2(hru_sub(j)) / 330.)
            pet_day = (dlt * rn_pet + gma * rho * vpd / rv) /            &
      &                               (xl * (dlt + gma * (1. + rc / rv)))
+
            pet_day = Max(0., pet_day)
  
         !! maximum plant ET
@@ -240,12 +241,11 @@
             uzz = 0.
             zz = 0.
             if (cht(j) <= 1.0) then
-              uzz = u10(j)
               zz = 170.0
             else
               zz = cht(j) * 100. + 100.
-              uzz = u10(j) * (zz / 170.)**0.2
             end if
+            uzz = u10(j) * (zz/1000.)**0.2
 
             !! calculate canopy height in cm
             chz = 0.
@@ -282,12 +282,12 @@
             fvpd = 0.
             xx = vpd - 1.
             if (xx > 0.0) then
-              fvpd = Max(0.1,1.0 - vpd2(idplt(nro(j),icr(j),j)) * xx)
+              fvpd = Max(0.1,1.0 - vpd2(idplt(j)) * xx)
             else
               fvpd = 1.0
             end if
             gsi_adj = 0.
-            gsi_adj = gsi(idplt(nro(j),icr(j),j)) * fvpd
+            gsi_adj = gsi(idplt(j)) * fvpd
             
             !! calculate canopy resistance
             rc = 0.

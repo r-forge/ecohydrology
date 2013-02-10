@@ -121,29 +121,32 @@
           rvol = 1. - Exp(-akv)
 
           !! calculate nitrification (NH3 => NO3)
-          if (rvol + rnit > 1.e-6) then
-            rvol = rnv * rvol / (rvol + rnit)
-            rnit = rnv - rvol
-            if (rnit < 0.) rnit = 0.
-            sol_nh3(k,j) = Max(1.e-6, sol_nh3(k,j) - rnit)
-          endif
-          if (sol_nh3(k,j) < 0.) then
-            rnit = rnit + sol_nh3(k,j)
-            sol_nh3(k,j) = 0.
-          endif
-          sol_no3(k,j) = sol_no3(k,j) + rnit
+          !! apply septic algorithm only to active septic systems
+          if(k/=i_sep(j).or.isep_opt(j)/= 1) then  ! J.Jeong for septic, biozone layer
+             if (rvol + rnit > 1.e-6) then
+               rvol = rnv * rvol / (rvol + rnit)
+               rnit = rnv - rvol
+               if (rnit < 0.) rnit = 0.
+               sol_nh3(k,j) = Max(1.e-6, sol_nh3(k,j) - rnit)
+             endif
+             if (sol_nh3(k,j) < 0.) then
+               rnit = rnit + sol_nh3(k,j)
+               sol_nh3(k,j) = 0.
+             endif
+             sol_no3(k,j) = sol_no3(k,j) + rnit
 
-          !! calculate ammonia volatilization
-          sol_nh3(k,j) = Max(1.e-6, sol_nh3(k,j) - rvol)
-          if (sol_nh3(k,j) < 0.) then
-            rvol = rvol + sol_nh3(k,j)
-            sol_nh3(k,j) = 0.
-          endif
+             !! calculate ammonia volatilization
+             sol_nh3(k,j) = Max(1.e-6, sol_nh3(k,j) - rvol)
+             if (sol_nh3(k,j) < 0.) then
+               rvol = rvol + sol_nh3(k,j)
+               sol_nh3(k,j) = 0.
+             endif
 
-          !! summary calculations
-          if (curyr > nyskip) then
-            wshd_voln = wshd_voln + rvol * hru_dafr(j)
-            wshd_nitn = wshd_nitn + rnit * hru_dafr(j)
+             !! summary calculations
+             if (curyr > nyskip) then
+               wshd_voln = wshd_voln + rvol * hru_dafr(j)
+               wshd_nitn = wshd_nitn + rnit * hru_dafr(j)
+             end if
           end if
         end if
 

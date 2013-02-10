@@ -29,11 +29,12 @@
       integer :: j
 
       do j = 1, subtot
-          write (84,5000) j, subgis(j), iida, rch_dakm(j),              &
-     &       rchyro(3,j), rchyro(4,j),(rchyro(ii,j),ii=42,51)                      
+          rchyro(58,j) = rchyro(58,j)/Real(idlast)
+          write (84,5000) j, subgis(j), iyr, rch_dakm(j),               &
+     &       rchyro(3,j), rchyro(4,j),(rchyro(ii,j),ii=42,58)
       end do
 
       return
- 5000 format ('REACH ',i4,1x,i8,1x,i5,13e12.4)
+ 5000 format ('REACH ',i4,1x,i8,1x,i5,20e12.4)
       end
 

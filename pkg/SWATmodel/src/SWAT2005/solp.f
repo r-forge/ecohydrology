@@ -89,7 +89,25 @@
         sol_solp(2,j) = sol_solp(2,j) + vap
       end if
    
-      !! summary calculation
+      do ii=2,sol_nly(j)-1
+        vap = 0.
+       if (ii/=i_sep(j)) then
+         vap = sol_solp(ii,j) * sol_prk(ii,j) / ((conv_wt(ii,j) 
+     &         / 1000.) * pperco_sub(ii,j))
+         vap = Min(vap, .2 * sol_solp(ii,j))
+         sol_solp(ii,j) = sol_solp(ii,j) - vap
+         sol_solp(ii+1,j) = sol_solp(ii+1,j) + vap
+           if (ii == ldrain(j)) then
+             vap = sol_solp(ii,j) * qtile / (conv_wt(ii,j) / 1000.
+     *           * pperco_sub(ii,j))
+             sol_solp(ii,j) = sol_solp(ii,j) - vap
+             tilep = vap
+           endif
+       endif
+      end do
+      percp(j) = vap
+      
+     !! summary calculation
       if (curyr > nyskip) then
         wshd_plch = wshd_plch + vap * hru_dafr(j)
       end if

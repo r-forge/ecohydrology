@@ -65,9 +65,8 @@
       !! initialize variables for the day
       txmeas = 0.
       tnmeas = 0.
-      
 
-
+     
         !! read temperature data from files
         do k = 1, ntgage
           !! calculate gage id codes for first and last dataset in file
@@ -79,7 +78,7 @@
           else
             kk2 = kk1 + (ntgfil - 1)
           end if
-
+      
           !! read in date from files
           if (ifirstt(k) == 0) then
             read (118+k,5000) (txmeas(l), tnmeas(l), l = kk1, kk2)
@@ -123,9 +122,11 @@
         end do
 
       return
- 5000 format (7x,600f5.1)
- 5100 format (i4,i3,600f5.1)
- 5200 format (7x,600f8.3)
- 5300 format (i4,i3,600f8.3)
+ !!  5000 format (7x,600f5.1)
+ !!  5100 format (i4,i3,600f5.1)
+!5000  format (7x,900f5.1)
+!5100  format (i4,i3,900f5.1)
+5000  format (7x,3600f5.1)
+5100  format (i4,i3,3600f5.1)
       end
 

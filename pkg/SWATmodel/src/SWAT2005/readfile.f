@@ -111,6 +111,7 @@
 !!    tilldb      |NA          |name of tillage database input file(till.dat)
 !!    urbandb     |NA          |name of urban database file (urban.dat)
 !!    xx          |none        |random number between 0.0 and 1.0
+!!    septdb      |none        |name of pesticide database input file(septwq.dat) !! CS
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
@@ -122,6 +123,9 @@
 
       character (len=13) :: figfile, bsnfile, plantdb, tilldb, urbandb, &
      &    pestdb, fertdb, fcstfile
+      
+
+
       character (len=80) :: titldum
       real :: sumv, xx
       integer :: rn, j, ii, eof
@@ -135,6 +139,7 @@
       figfile = ""
       tilldb = ""
       urbandb = ""
+      septdb = ""   !!SEPTIC CHANGES GSM 1/30/09
 
       open (101,file="file.cio")
 
@@ -270,6 +275,7 @@
       open (106,file=pestdb)
       open (107,file=fertdb)
       open (108,file=urbandb)
+      
 
 !!Special Projects input
       read (101,5101) titldum
@@ -281,9 +287,12 @@
       read (101,5101) titldum
       read (101,*) iprint
       read (101,*) nyskip
+!!! check that nyskip input is not greater or equal to nbyr input
+      if (nyskip >= nbyr) nyskip = nbyr - 1
+      
       read (101,*) ilog
       read (101,*) iprp
-      read (101,*) iprs
+      read (101,5101) titldum
 
       !!The user has the option of limiting the number of output
       !!variables printed to the output.rch, output.sub and 
@@ -342,7 +351,10 @@
              !![  40] Conservative metal #1 transported out of reach (kg)
              !![  41] Conservative metal #2 transported out of reach (kg)
              !![  42] Conservative metal #3 transported out of reach (kg)
-
+             !![  43] Total N (org N + no3 + no2 + nh4 outs) to output.rch gsm 10/17/2011
+             !![  44] Total P (org P + sol p outs)to output.rch gsm 10/17/2011
+             !![  45] NO3 concentration output.rch (daily only) gsm 10/30/2011
+             
 
       !!Output variables printed in SUBASIN (output.sub) file
 
@@ -467,27 +479,73 @@
 !!   mauro code for printing hourly output file hard wired (hourq.out)
 !!   IPHR = 0 no print
 !!   IPHR = 1 print file
+      iphr = 0
       read (101,*,iostat=eof) iphr
-!!   code for printing soil storage values by soil layer (soilst.out)
+!!   code for printing soil storage values by soil layer (output.swr)
 !!   ISTO = 0 no print
 !!   ISTO = 1 print file
+      isto = 0
       read (101,*,iostat=eof) isto
 
-!!   code for printing output.sol file (output.sol)
+!!   code for printing output.sol file (formerly 'output.sol' - now output.snu)
 !!   isol = 0 no print
 !!   isol = 1 print file
+      isol = 0
       read (101,*,iostat=eof) isol  
       if (isol == 1) then
-         open (121,file='output.sol')
+         open (121,file='output.snu')
          write (121,12222) 
-12222    format (t19,'SURFACE',t34,'-------  SOIL PROFILE  -------',/,t8,
-     *  'DAY',t12,'HRU',t19,'SOL_RSD',t31,'SOL_P',t42,
-     *  'NO3',t51,'ORG_N',t61,'ORG_P',/,t20,'(t/ha)',t29,'(kg/ha)',t39,
-     *  '(kg/ha)',t49,'(kg/ha)',t59,'(kg/ha)')
+12222   format (t25,'SURFACE',t39,'-------  SOIL PROFILE  -------',/,   & 
+     &  t8,'DAY',t15,'GISnum',t25,'SOL_RSD',t37,'SOL_P',t48,            &
+     &  'NO3',t57,'ORG_N',t67,'ORG_P',t80,'CN'/,t26,                    &
+     &  '(t/ha)',t35,'(kg/ha)',t45,                                     &
+     &  '(kg/ha)',t55,'(kg/ha)',t66,'(kg/ha)')
+      end if  
+!! headwater code (0=do not route; 1=route)
+      i_subhw = 0
+      read (101,*,iostat=eof) i_subhw 
+
+!! SEPTIC CHANGES GSM 01/29/09
+!!   gsm had to take do off when added ia_b ??? 3/25/09 for binary files
+!!      do
+      read (101,5000,iostat=eof) septdb
+!!      if (eof < 0) exit
+      call caps(septdb)
+!!      end do
+
+!!    read from readlup (landuse update file)
+       open (122,file='lup.dat')
+                      
+!!    added for binary files 3/25/09 gsm 
+!!    ia_b  print ascii or binary files
+!!       0 for ascii file 
+!!       1 for binary file   
+      ia_b = 0  
+      read (101, *, iostat=eof) ia_b
+
+!!    read code to turn on output.wqr output file
+!!      ihumus = 0 (do not print file)
+!!      ihumus = 1 (print formerly watqual.out - now output.wql)
+      read(101,*,iostat=eof) ihumus
+
+
+!!   flag for output files named tempvel.out and tempdep.out
+!!   this flag will print both files 
+!!   default is = 0; no print
+      read (101,*,iostat=eof) itemp
+
+
+!!    output by elevation band to (formerly 'snowband.out')
+      read (101,*,iostat=eof) isnow
+      if (isnow == 1) then
+         open (115,file='output.snw')
+         write (115,1010)
       end if
+
 
 !!   read landuse change file
 !     read (101,5000,iostat=eof)  lucfile
+!     call caps (lucfile)
 
 
       !!Set default output variables for REACH, SUBBASIN and HRU files if none
@@ -498,10 +556,11 @@
       end do
 
       if (ipdvar(1) <= 0) then
-        do ii = 1, 42
+ !! change 42 to 45 for output.rch file gsm 10/30/2011     
+        do ii = 1, 45
           ipdvar(ii) = ii
         end do
-        itotr = 42
+        itotr = 45
       end if
 
 
@@ -543,40 +602,64 @@
       end if
 
       !!Open output files
-      open (1,file="input.std")
-      open (2,file="output.std")
-      open (3,file="output.hru",recl=800)
-      open (4,file="output.wtr",recl=800)
-      open (9995,file="output.pst",recl=600)
-      open (9996,file="output.sub",recl=600)
+      open (24,file="input.std")
+      open (26,file="output.std")
+
+      open (28,file="output.hru",recl=1500)
+      if (ia_b == 1) then 
+        open (33333,file="outputb.hru",form='unformatted')
+      end if
+      open (30,file="output.pst",recl=600)
+      open (31,file="output.sub",recl=600)
+      if (ia_b == 1) then
+        open (66666,file = "outputb.sub", form = 'unformatted')
+      end if
       open (7,file="output.rch",recl=800)
       open (8,file="output.rsv",recl=800)
-!! srin output file from watqual.f  
-!     open (82,file='watqual.out')
-!     write (82,6000)
-!6000  format (18x,'WTEMP(C)','ALGAE_INppm','ALGAE_OUTppm',
-!    *' ORGN_INppm','ORGN_OUTppm',' NH4_INppm',' NH4_OUTppm',
-!    *' NO2_INppm',' NO2_OUTppm',' NO3_INppm',' NO3_OUTppm',
-!    *' ORGP_INppm','ORGP_OUTppm',' SOLP_INppm','SOLP_OUTppm',
-!    *' CBOD_INppm','CBOD_OUTppm',' SAT_OXppm','DISOX_INppm',
-!    *'DISOX_OUTppm','H20VOLUMEm3','TRVL_TIMEhr')
+      if (ia_b == 1) then
+        open (77777,file = "outputb.rch", form = 'unformatted')
+      end if
+      
 !!    sediment routing output file
       open (84,file="output.sed",recl=800)
-      write (84,1000)
-1000  format (t7,'RCH',t17,'GIS',t23,'MON',t31,'AREAkm2',               &
+!! write headings to sediment outputfile (output.sed)
+      write (84,1080)
+1080  format (t8,'RCH',t17,'GIS',t23,'MON',t31,'AREAkm2',               &
      &t40,'SED_INtons',t51,'SED_OUTtons',t63,'SAND_INtons',t74,         &
      &'SAND_OUTtons',t87,'SILT_INtons',t98,'SILT_OUTtons',t111,         &
      &'CLAY_INtons',t122,'CLAY_OUTtons',t135,'SMAG_INtons',t146,        &
-     &'SMAG_OUTtons',t160,'LAG_INtons',t171,'LAG_OUTtons')
+     &'SMAG_OUTtons',t160,'LAG_INtons',t171,'LAG_OUTtons',t184,         &
+     &'GRA_INtons',t195,'GRA_OUTtons',t208,'CH_BNKtons',t220,           &
+     &'CH_BEDtons',t232,'CH_DEPtons',t244,'FP_DEPtons',t259,'TSSmg/L')
+     
+      ! Jaehak, sedimentation-filtration output
+      open (77778,file = "bmp-sedfil.out") !jaehak temp urban print out
+      write(77778,'(a46)') 'Sed-Fil Basins Configuration'   
+      write(77778,'(a46)') ''   ! 
+       !retention-irrigation output
+      open (77779,file = "bmp-ri.out") !jaehak temp urban print out
+      write(77779,'(a46)') 'Retention-Irrigation Basins Configuration'   
+      write(77779,'(a46)') ''   ! 
+
+
+!! srin output file from watqual.f  
+      if (ihumus ==1) then
+        open (82,file='output.wql')
+        write (82,6000)
+ 6000   format (18x,'WTEMP(C)',' ALGAE_INppm','  ALGAE_Oppm',
+     *  '  ORGN_INppm',' ORGN_OUTppm','   NH4_INppm','  NH4_OUTppm',
+     *  '   NO2_INppm','  NO2_OUTppm','   NO3_INppm','  NO3_OUTppm',
+     *  '  ORGP_INppm',' ORGP_OUTppm','  SOLP_INppm',' SOLP_OUTppm',
+     *  '  CBOD_INppm',' CBOD_OUTppm','   SAT_OXppm',' DISOX_INppm',
+     *  '  DISOX_Oppm',' H20VOLUMEm3',' TRVL_TIMEhr')
+      end if
 
 !! mauro/jerry whittaker hourly output file
       if (iphr > 0) then
         open (83,file='hourq.out')
         write (83,6001) 
-6001    format (t29,'TOTAL',t39,'SURFACE',/,t27,'WATER YLD',t39,
-     *  'RUNOFF',/,
-     *  t3,'YEAR',t10,'DAY',T15,'HOUR',t22,'SUB',t29,'(m**3)',
-     *  t40,'(m**3)')
+6001    format (t29,'TOTAL',/,t27,'WATER YLD',/,
+     *  t3,'YEAR',t10,'DAY',T15,'HOUR',t22,'HYD',t29,'(m**3)')
       endif
 !! end hourly codes
 
@@ -588,21 +671,74 @@
 !!darrell output files added for interface plotting
       open (11123,file='hyd.out')
       open (16,file='chan.deg')
-      open (17,file='temp')
+!!    open (17,file='wbl.out')
       open (18,file='swat.qst')
-!! output amount of water stored in the soil layer (soilst.out)
+!! output amount of water stored in the soil layer (formerly 'soilst.out')
       if (isto > 0) then
-        open (129,file='soilst.out')
+        open (129,file='output.swr')
         write (129,5001) 
-5001    format (t15,'Soil Storage (mm)',/,t15,'Layer #',/,t3,'Day',t8,
-     *  'HRU',t18,'1',t30,'2',t42,'3',t54,'4',t66,'5',t78,'6',t90,
-     *  '7',t102,'8',t114,'9',t125,'10')
+5001    format (t20,'Soil Storage (mm)',/,t15,'Layer #',/,t3,'Day',t13,
+     *  'HRU',t28,'1',t40,'2',t52,'3',t64,'4',t76,'5',t87,'6',t100,
+     *  '7',t112,'8',t124,'9',t135,'10')
       end if
+
+
 !! Output daily streamflow velocity for each channel (subbasin)
-      open (141,file='tempvel.out')
-      write (141,4999)
-4999  format(t17,'CH_VEL',t26,'AVE WATER',/,t3,'Day',t7,'Year',
-     *t18,'(m/s)',t27,'DEPTH(m)')
+      if (itemp == 1) then
+         open (141,file='output.vel')
+         write (141,4999)
+ 4999     format(t17,'CH_VEL',/,t3,'Day',t7,'Year',t18,'(m/s)')
+         open (142,file='output.dep')
+          write (142,4998)
+ 4998    format(t17,'AVE WATER',/,t3,'Day',t7,'Year',t18,'DEPTH(m)')
+      end if
+
+!! Code for output.mgt file
+!  0=no print 1=print
+      read (101, *,iostat=eof) imgt
+      if (imgt==1) then
+         open (143, file="output.mgt", recl=600)
+         write(143,999)
+999   format(2x,'Sub',4x,'Hru',3x,'Year',3x,'Mon',3x,'Day',3x,
+     *'crop/fert/pest', 4x,
+     *'Operation',4x,'phubase',3x,'phuacc',4x,'sol_sw',4x,'bio_ms',3x,
+     *'sol_rsd',7x,'sol',7x,'sol',5x,'yield',3x,'irr amt',
+     *5x,'amt',5x,'mix eff',
+     *5x,'strsn',
+     *5x,'strsp',3x,'strstmp',5x,'strsw',5x,'strsa',2x,'irrsc',
+     *2x,'irrno',/,114x,
+     *' sumno3',2x,' sumsolp',23x,'frt-kg',17x,' sum',6x,' sum',6x,
+     *' sum',6x,' sum',6x,' sum',/,88x,'mm', 6x,'kg/ha',5x,'kg/ha', 5x,
+     *'kg/ha', 5x,'kg/ha',5x, 'kg/ha',5x, 'mm',4x,'or dwfert',3x,
+     *'frac',6x,'fertno3',7x,'nh3',6x,'orgn',6x,'solp',6x,'orgp',
+     */,'_______________________________________________________________
+     *__________________________________________________________________
+     *__________________________________________________________________
+     *_________________________________________',/)
+      end if     
+      
+!! Code for output.wtr and output.pot files
+! 0 =no print  1 =print
+      read (101,*,iostat=eof) iwtr
+        if (iwtr == 1) then
+          open (29,file="output.wtr",recl=800)
+! write statement added for Aziz (06/25/09)
+          open (125,file='output.pot')
+          write (125, 1000) 
+        end if
+        
+ 1000  format (1x,'HRU',t6,'SUB',t12,'DAY',t17,'YEAR',t26,'VOL-I',t37,  &
+     &'SA-I',t46,'SPILLO', 
+     &t56,'POTSEP',t66,'POTEV',t75,'SOL_SW',t85,'TILE-O',t96,'VOL-F',   &
+     &t106,'SA-F',/,t27,'(mm)',t37,'(ha)',t47,'(mm)',t57,'(mm)',t67,    &
+     &'(mm)',t77,'(mm)',t87,'(mm)',t97,'(mm)',t107,'(ha)')  
+       
+!     code for writing out calendar day or julian day to output.rch, .sub, .hru files
+!     icalen = 0 (print julian day) 1 (print month/day/year) 
+      read (101,*, iostat=eof) icalen
+!!!!! if icalen == 1 (print month/day/year) - force iprint to be daily  <--nubz asked srin 06/11/2012
+      if (icalen == 1) iprint = 1
+      
 !! Atmospheric deposition input file (kannan/santhi)
 !     open (127,file='testatmo.dat')
 !     do iii = 1, 5
@@ -614,6 +750,42 @@
         open (21,file="output2.hru",recl=800)
         open (22,file="output2.rsv",recl=800)
       end if
+
+      !! sj june 07 / nancy Jan 09 output carbon routines 
+!      open (98,file="cswat_daily.txt",recl=280)
+
+!      write (98,*) 'year',';','day',';','lay',';','hru',';',
+!     &'sol_cmass',';','sol_cbn',';','sol_nmass',';','sol_n',';',
+!    &'sol_orgp',';','sol_rsd',';','sol_fon',';','sol_fop',';',
+!     &'sol_solp',';','mancmass',';','mannmass',';','manpmass',';',
+!     &'sol_no3',';','soil_C:N',';','soil_N:P'
+      
+!      open (99,file="cswat_balance.txt")
+!      write (99,*) 'bal_c',';','sum_c_i',';','sum_c_f',';','bal_n',';',
+ !    &'sum_n_i',';','sum_n_f',';','bal_p',';','sum_p_i',';','sum_p_f'      
+
+
+!! sj september 2010 CSWAT final output
+      if (cswat == 1) then
+      open (100,file="cswat_profile.txt",recl=280)
+      write (100,*) 'year',';','day',';','hru',';','cmass',';','sol_rsd',
+     &';','mancmass'
+      end if
+
+      
+
+!! septic result  J.Jeong Feb2009
+      open (173,file='septic.out')  
+      write(173,5102) 'HRU','YEAR','DAY','Precip', 'PERC',        
+     & 'sol_ul','sol_st','sol_fc','nh3init','nh3bgn','nh3end',   
+     & 'no3init','no3bgn','no3end', 'nitrN','denitrN','solpinit',
+     & 'solpbgn','solpend','solpconc'
+      write(173,5102) '#','','','(mm)','(m3)','(mm)',    
+     & '(mm)','(mm)','(kg/ha)','(kg/ha)','(kg/ha)','(kg/ha)',
+     & '(kg/ha)','(kg/ha)','(kg/ha)','(kg/ha)','(kg/ha)',
+     & '(kg/ha)','(kg/ha)','(mg/l)'
+
+
 !!   virgina/mari-vaughn project heading      
 !     write (1112,1112) 
 !1112  format (t6,'NO3',t22,'FON',t36,'AORGN',t54,'NH3',t68,'SOLP',
@@ -630,7 +802,12 @@
 
       close (101)
       return
+
+ 1010 format (32x,'SNOW(mm) at ELEVATION BAND (1-10)',/,                &
+     &1x,'DAY','   YR',t14,'GISnum',t28,'1',t36,'2',t44,'3',t52,'4',    &
+     &t60,'5',t68,'6',t76,'7',t84,'8',t92,'9',t99,'10')
  5000 format (6a)
  5100 format (20a4)
  5101 format (a80)
+ 5102 format (3a5,30a15)
       end

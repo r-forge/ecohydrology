@@ -14,7 +14,7 @@
 !!    hru_dafr(:)   |km**2/km**2   |fraction of watershed area in HRU
 !!    icr(:)        |none          |sequence number of crop grown within the
 !!                                 |current year
-!!    idplt(:,:,:)  |none          |land cover code from crop.dat
+!!    idplt(:)      |none          |land cover code from crop.dat
 !!    ihru          |none          |HRU number
 !!    nactfr        |none          |nitrogen active pool fraction. The fraction
 !!                                 |of organic nitrogen in the active pool.
@@ -189,8 +189,10 @@
         if (sol_tmp(kk,j) > 0.) then
           !! compute soil water factor
           sut = 0.
+      !! change for domain error 1/29/09 gsm check with Jeff !!!
+          if (sol_st(kk,j) < 0.) sol_st(kk,j) = .0000001
           sut = .1 + .9 * Sqrt(sol_st(kk,j) / sol_fc(kk,j))
-          sut = Min(1., sut)
+!          sut = Min(1., sut)
           sut = Max(.05, sut)
 
           !!compute soil temperature factor
@@ -272,8 +274,8 @@
             decr = 0.
             rdc = 0.
             ca = Min(cnrf, cprf, 1.)
-        if (idplt(nro(j),icr(j),j) > 0) then
-            decr = rsdco_pl(idplt(nro(j),icr(j),j)) * ca * csf
+        if (idplt(j) > 0) then
+            decr = rsdco_pl(idplt(j)) * ca * csf
         else
             decr = 0.05
         end if
@@ -295,15 +297,21 @@
             sol_solp(k,j) = sol_solp(k,j) + .8 * rmp
             sol_orgp(k,j) = sol_orgp(k,j) + .2 * rmp
           end if
-
-          !! compute denitrification 
-          wdn = 0.
+!! septic changes 1/28/09 gsm
+!!  compute denitrification
+        wdn = 0.   
+        if (i_sep(j) /= k .or. isep_opt(j) /= 1) then
           if (sut >= sdnco) then
             wdn = sol_no3(k,j) * (1. - Exp(-cdn * cdg * sol_cbn(k,j)))
           else
             wdn = 0.
-          end if
+          endif
           sol_no3(k,j) = sol_no3(k,j) - wdn
+        end if
+! septic changes 1/28/09 gsm
+
+!                  call ndenit(k,j,cdg,wdn,0.05)
+      !!      end if
 
           !! summary calculations
           if (curyr > nyskip) then

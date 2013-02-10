@@ -129,17 +129,32 @@
       integer, intent (in) :: k
       real :: vol, sed, pndsa, xx, targ, tpco, phosk, nitrok, chlaco
       integer :: iseas
+      real :: san, sil, cla, sag, lag, inised, finsed,setsed,remsetsed
 
 
         !! store initial values
         vol = 0.
         sed = 0.
+        san = 0.
+        sil = 0.
+        cla = 0.
+        sag = 0.
+        lag = 0.
+        inised = 0.
+        finsed = 0.
+        setsed = 0.
+        remsetsed = 0.
         vol = pnd_vol(k)
         sed = pnd_sed(k)
+        san = pnd_san(k)
+        sil = pnd_sil(k)
+        cla = pnd_cla(k)
+        sag = pnd_sag(k)
+        lag = pnd_lag(k)
 
         !! calculate water balance for day
         pndsa = 0.
-        pndsa = bp1(k) * pnd_vol(k) ** bp2(k)
+        pndsa = hru_fr(k) * bp1(k) * pnd_vol(k) ** bp2(k)
         pndev = 10. * evpnd(k) * pet_day * pndsa
         pndsep = pnd_k(k) * pndsa * 240.
         pndpcp = subp(k) * pndsa * 10.
@@ -159,6 +174,11 @@
             pndsep = 0.
           end if
           pnd_sed(k) = 0.
+          pnd_san(k) = 0.
+          pnd_sil(k) = 0.
+          pnd_cla(k) = 0.
+          pnd_sag(k) = 0.
+          pnd_lag(k) = 0.
           pnd_solp(k) = 0.
           pnd_psed(k) = 0.
           pnd_orgp(k) = 0.
@@ -171,10 +191,7 @@
           pnd_seci(k) = 0.
 
         else
-
-          !! compute new sediment concentration
-          pnd_sed(k) = (sed * vol + pndsedin) / pnd_vol(k)
-
+        
           !! compute outflow
           if (pnd_evol(k) <= 0.) then
             !! all storage over principle is outflow
@@ -214,6 +231,25 @@
               pndflwo = 0.
             end if
           end if
+          
+          !! compute new sediment concentration
+          if (pndsedin < 1.e-6) pndsedin = 0.
+          if (pndsa == 0.) pndsa = 0.001    !!MJW added line of code 040811
+          velofl = (pndflwo / pndsa) / 10000.
+          if (velofl > 1.e-6) then
+             trappnd = velsetlp(k) / velofl
+             if (trappnd > 1.) trappnd = 1.
+             susp = 1. - trappnd
+          else
+             susp = 0.
+          endif
+               
+          pnd_sed(k) = (sed * vol + susp * pndsedin) / pnd_vol(k)
+          pnd_san(k) = (san * vol + pndsanin) / pnd_vol(k)
+          pnd_sil(k) = (sil * vol + pndsilin) / pnd_vol(k)
+          pnd_cla(k) = (cla * vol + pndclain) / pnd_vol(k)
+          pnd_sag(k) = (sag * vol + pndsagin) / pnd_vol(k)
+          pnd_lag(k) = (lag * vol + pndlagin) / pnd_vol(k)
 
           !! compute final pond volume
           pnd_vol(k) = pnd_vol(k) - pndflwo
@@ -225,12 +261,56 @@
           !! compute change in sediment concentration due to settling
           if (sed_stl(k) < 1.e-6) sed_stl(k) = 0.0
           if (pnd_sed(k) > pnd_nsed(k)) then
+            inised = pnd_sed(k)
             pnd_sed(k) = (pnd_sed(k) - pnd_nsed(k)) * sed_stl(k) +      &
      &                                                       pnd_nsed(k)
+            finsed = pnd_sed(k)
+            setsed = inised - finsed
+
+          if (pnd_lag(k) >= setsed) then
+            pnd_lag(k) = pnd_lag(k) - setsed
+            remsetsed = 0.
+          else
+            remsetsed = setsed - pnd_lag(k)
+            pnd_lag(k) = 0.
+            if (pnd_san(k) >= remsetsed) then
+              pnd_san(k) = pnd_san(k) - remsetsed
+              remsetsed = 0.
+            else
+              remsetsed = remsetsed - pnd_san(k)
+              pnd_san(k) = 0.
+              if (pnd_sag(k) >= remsetsed) then
+                pnd_sag(k) = pnd_sag(k) - remsetsed
+                remsetsed = 0.
+              else
+                remsetsed = remsetsed - pnd_sag(k)
+                pnd_sag(k) = 0.
+                if (pnd_sil(k) >= remsetsed) then
+                    pnd_sil(k) = pnd_sil(k) - remsetsed
+                  remsetsed = 0.
+                else
+                  remsetsed = remsetsed - pnd_sil(k)
+                  pnd_sil(k) = 0.
+                  if (pnd_cla(k) >= remsetsed) then
+                    pnd_cla(k) = pnd_cla(k) - remsetsed
+                    remsetsed = 0.
+                  else
+                    remsetsed = remsetsed - pnd_cla(k)
+                    pnd_cla(k) = 0.
+                  end if
+                end if
+              end if
+            end if
           end if
 
+          end if
           !! compute sediment leaving pond
           pndsedo = pnd_sed(k) * pndflwo
+          pndsano = pnd_san(k) * pndflwo
+          pndsilo = pnd_sil(k) * pndflwo
+          pndclao = pnd_cla(k) * pndflwo
+          pndsago = pnd_sag(k) * pndflwo
+          pndlago = pnd_lag(k) * pndflwo
  
           !! net change in amount of sediment in pond for day
           pndsedc = vol * sed + pndsedin - pndsedo - pnd_sed(k) *       &

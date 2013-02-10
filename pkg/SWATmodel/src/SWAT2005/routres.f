@@ -90,21 +90,21 @@
 !!                               |reactions during month
 !!    resoutm(8,:) |mg pst       |pesticide lost from reservoir through
 !!                               |volatilization during month
-!!    resoutm(9,:) |mg pst       |pesticide moving from water to sediment
+!!    resoutm(9,:) |mg pst       |pesticide moving from water to sediment  <
 !!                               |through settling during month
-!!    resoutm(10,:)|mg pst       |pesticide moving from sediment to water
+!!    resoutm(10,:)|mg pst       |pesticide moving from sediment to water <
 !!                               |through resuspension during month
-!!    resoutm(11,:)|mg pst       |pesticide moving from water to sediment
+!!    resoutm(11,:)|mg pst       |pesticide moving from water to sediment <
 !!                               |through diffusion during month
-!!    resoutm(12,:)|mg pst       |pesticide lost from reservoir sediment layer
+!!    resoutm(12,:)|mg pst       |pesticide lost from reservoir sediment layer <
 !!                               |through reactions during month
-!!    resoutm(13,:)|mg pst       |pesticide lost from reservoir sediment layer
+!!    resoutm(13,:)|mg pst       |pesticide lost from reservoir sediment layer <
 !!                               |through burial during month
-!!    resoutm(14,:)|mg pst       |pesticide transported out of reservoir during
+!!    resoutm(14,:)|mg pst       |pesticide transported out of reservoir during <
 !!                               |month
 !!    resoutm(15,:)|mg pst/m^3   |pesticide concentration in reservoir water
 !!                               |during month
-!!    resoutm(16,:)|mg pst/m^3   |pesticide concentration in reservoir sediment
+!!    resoutm(16,:)|mg pst/m^3   |pesticide concentration in reservoir sediment <
 !!                               |layer during month
 !!    resoutm(17,:)|m^3 H2O      |evaporation from reservoir during month
 !!    resoutm(18,:)|m^3 H2O      |seepage from reservoir during month
@@ -238,7 +238,12 @@
         call irr_res
 
         !! perform reservoir water/sediment balance
-        call res
+        if(ievent<=1) then            !! urban modeling by J.Jeong
+          call res
+        else
+          call reshr
+        endif
+  !!      call res
 
         !! perform reservoir nutrient balance
         call resnut
@@ -282,29 +287,37 @@
         varoute(22,ihout) = varoute(22,inum2)  !!conservative metal #3
 
         if (ievent > 2) then
-          do ii = 1, 24
+          do ii = 1, nstep
             hhvaroute(1,ihout,ii) = 0.           !!undefined
-            hhvaroute(2,ihout,ii) = resflwo / 24.
-            hhvaroute(3,ihout,ii) = ressedo / 24.
-            hhvaroute(4,ihout,ii) = resorgno / 24.
-            hhvaroute(5,ihout,ii) = resorgpo / 24.
-            hhvaroute(6,ihout,ii) = resno3o / 24.
-            hhvaroute(7,ihout,ii) = ressolpo / 24.
+            hhvaroute(2,ihout,ii) = resflwo / real(nstep)
+            hhvaroute(3,ihout,ii) = ressedo / real(nstep)
+            hhvaroute(4,ihout,ii) = resorgno / real(nstep)
+            hhvaroute(5,ihout,ii) = resorgpo / real(nstep)
+            hhvaroute(6,ihout,ii) = resno3o / real(nstep)
+            hhvaroute(7,ihout,ii) = ressolpo / real(nstep)
             hhvaroute(8,ihout,ii) = 0.           !!undefined
             hhvaroute(9,ihout,ii) = 0.           !!undefined
             hhvaroute(10,ihout,ii) = 0.          !!undefined
-            hhvaroute(11,ihout,ii) = solpesto / 24.
-            hhvaroute(12,ihout,ii) = sorpesto / 24.
-            hhvaroute(13,ihout,ii) = reschlao / 24.
-            hhvaroute(14,ihout,ii) = resnh3o / 24.
-            hhvaroute(15,ihout,ii) = resno2o / 24.
+            hhvaroute(11,ihout,ii) = solpesto / real(nstep)
+            hhvaroute(12,ihout,ii) = sorpesto / real(nstep)
+            hhvaroute(13,ihout,ii) = reschlao / real(nstep)
+            hhvaroute(14,ihout,ii) = resnh3o / real(nstep)
+            hhvaroute(15,ihout,ii) = resno2o / real(nstep)
             hhvaroute(16,ihout,ii) = 0.          !!CBOD
             hhvaroute(17,ihout,ii) = 0.          !!dis O2
-            hhvaroute(18,ihout,ii) = varoute(18,inum2) / 24. !!persistent bact
-            hhvaroute(19,ihout,ii) = varoute(19,inum2) / 24. !!less persist bact
-            hhvaroute(20,ihout,ii) = varoute(20,inum2) / 24. !!cons metal #1
-            hhvaroute(21,ihout,ii) = varoute(21,inum2) / 24. !!cons metal #2
-            hhvaroute(22,ihout,ii) = varoute(22,inum2) / 24. !!cons metal #3
+            hhvaroute(18,ihout,ii) = varoute(18,inum2) / real(nstep) !!persistent bact
+            hhvaroute(19,ihout,ii) = varoute(19,inum2) / real(nstep) !!less persist bact
+            hhvaroute(20,ihout,ii) = varoute(20,inum2) / real(nstep) !!cons metal #1
+            hhvaroute(21,ihout,ii) = varoute(21,inum2) / real(nstep) !!cons metal #2
+            hhvaroute(22,ihout,ii) = varoute(22,inum2) / real(nstep) !!cons metal #3
+
+            hhvaroute(23,ihout,ii) = varoute(23,inum2) / real(nstep) !!Sand out
+            hhvaroute(24,ihout,ii) = varoute(24,inum2) / real(nstep) !!Silt out
+            hhvaroute(25,ihout,ii) = varoute(25,inum2) / real(nstep) !!clay out
+            hhvaroute(26,ihout,ii) = varoute(26,inum2) / real(nstep) !!Small agg out
+            hhvaroute(27,ihout,ii) = varoute(27,inum2) / real(nstep) !!Large agg out
+            hhvaroute(28,ihout,ii) = varoute(28,inum2) / real(nstep) !!Gravel out
+
           end do
         end if
 
@@ -370,12 +383,7 @@
           wshddayo(11) = wshddayo(11) + ressedc
           wshddayo(34) = wshddayo(34) + resflwi - resflwo
         end if
-      else
-        !! reservoir has not been constructed yet
-        do ii = 1, mvaro
-          varoute(ii,ihout) = varoute(ii,inum2)
-        end do
-      end if
+      
 
       if (iprint == 1 .and. curyr > nyskip) then
         if (iscen == 1.and. isproj == 0) then
@@ -388,7 +396,7 @@
      &    ressolpo, ressolpc, varoute(13,inum2), reschlao,              &
      &    res_seci(jres), respesti, reactw, volatpst, setlpst, resuspst,&
      &    difus, reactb, bury, solpesto + sorpesto, lkpst_conc(jres),   &
-     &    lkspst_conc(jres)
+     &    lkspst_conc(jres),iyr
         else if (isproj == 1) then
         write (22,5000) jres, iida, res_vol(jres), resflwi / 86400.,    &
      &    (resflwo / 86400.), respcp, resev, ressep, ressedi, ressedo,  &
@@ -399,7 +407,7 @@
      &    ressolpo, ressolpc, varoute(13,inum2), reschlao,              &
      &    res_seci(jres), respesti, reactw, volatpst, setlpst, resuspst,&
      &    difus, reactb, bury, solpesto + sorpesto, lkpst_conc(jres),   &
-     &    lkspst_conc(jres)
+     &    lkspst_conc(jres),iyr
         else if (iscen == 1 .and. isproj == 2) then
         write (8,6000) jres, iida, res_vol(jres), resflwi / 86400.,     &
      &    (resflwo / 86400.), respcp, resev, ressep, ressedi, ressedo,  &
@@ -413,10 +421,15 @@
      &    lkspst_conc(jres), iyr
         endif
       endif
-
+      else
+        !! reservoir has not been constructed yet
+        do ii = 1, mvaro
+          varoute(ii,ihout) = varoute(ii,inum2)
+        end do
+      end if
       endif
 
       return
- 5000 format ('RES   ',i8,1x,i4,41e12.4)
+ 5000 format ('RES   ',i8,1x,i4,41e12.4,1x,i4)
  6000 format ('RES   ',i8,1x,i4,41e12.4,1x,i4)
       end

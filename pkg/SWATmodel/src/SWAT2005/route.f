@@ -8,6 +8,12 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    alpha_bnke(:)|none         |Exp(-alpha_bnk(:))
 !!    bankst(:)   |m^3 H2O       |bank storage
+!!    ch_eqn      |              |sediment routing methods
+!!                               | 0 = original SWAT method
+!!                               | 1 = Bagnold's
+!!                               | 2 = Kodatie
+!!                               | 3 = Molinas Wu
+!!                               | 4 = Yang
 !!    ch_l2(:)    |km            |length of main channel
 !!    ch_revap(:) |none          |revap coeff: this variable controls the amount
 !!                               |of water moving from bank storage to the root
@@ -79,7 +85,8 @@
       call rchinit
 
 !! route overland flow
-      call rtover
+!!      iru_sub = inum4   !!routing unit number
+!!      call routels(iru_sub)
 
       vel_chan(jrch) = 0.
       dep_chan(jrch) = 0.
@@ -89,7 +96,7 @@
         if (irte == 0) call rtday
         if (irte == 1) call rtmusk
       else
-        if (irte == 0) call rthourly
+        if (irte == 0) call rtdt
         if (irte == 1) call rthmusk
       endif
 
@@ -103,13 +110,15 @@
       end if
 
 !! add transmission losses to bank storage/deep aquifer in subbasin
+
       if (rttlc > 0.) then
         bankst(jrch) = bankst(jrch) + rttlc * (1. - trnsrch)
-        subwtr = 0.
-        subwtr = rttlc * trnsrch / (da_ha * sub_fr(jrch) * 10.)
-        do j = hru1(jrch), hru1(jrch) + hrutot(jrch) - 1
-          deepst(j) = deepst(j) + subwtr
-        end do
+        if (da_ha > 1.e-9) then 
+          subwtr = rttlc * trnsrch / (da_ha * sub_fr(jrch) * 10.)
+          do j = hru1(jrch), hru1(jrch) + hrutot(jrch) - 1
+            deepst(j) = deepst(j) + subwtr
+          end do
+        end if
       end if
  
 !! compute revap from bank storage
@@ -122,32 +131,70 @@
       bankst(jrch) = bankst(jrch) - qdbank
       rtwtr = rtwtr + qdbank
       if (ievent > 2) then
-        do ii = 1, 24
-          hrtwtr(ii) = hrtwtr(ii) + qdbank / 24.
+        do ii = 1, nstep
+          hrtwtr(ii) = hrtwtr(ii) + qdbank / real(nstep)
         end do
       end if
 
+
 !! perform in-stream sediment calculations
-        if (inum1 /= inum2) then
-          !! do not perform sediment routing for headwater subbasins
-            if (ievent < 3) then
-              call rtsed
-            else
-              call rthsed
-            end if
-        else
+        sedrch = 0.
+        rch_san = 0.
+        rch_sil = 0.
+        rch_cla = 0.
+        rch_sag = 0.
+        rch_lag = 0.
+        rch_gra = 0.
+        ch_orgn(jrch) = 0.
+        ch_orgp(jrch) = 0.
+!!    Bank erosion
+        rchdy(55,jrch) = 0.
+!!    Channel Degredation
+        rchdy(56,jrch) = 0.
+!!    Channel Deposition
+        rchdy(57,jrch) = 0.
+!!    Floodplain Deposition
+        rchdy(58,jrch) = 0.
+!!    Total suspended sediments
+        rchdy(59,jrch) = 0.
+
+!! do not perform sediment routing for headwater subbasins
+          !! when i_subhw = 0
+        if (i_subhw == 0 .and. inum1 == inum2) then
           if (ievent < 3) then
             if (rtwtr > 0. .and. rchdep > 0.) then
-              sedrch = varoute(3,inum2) * (1. - rnum1)
+              sedrch  = varoute(3,inum2)  * (1. - rnum1)
+              rch_san = varoute(23,inum2) * (1. - rnum1)
+              rch_sil = varoute(24,inum2) * (1. - rnum1)
+              rch_cla = varoute(25,inum2) * (1. - rnum1)
+              rch_sag = varoute(26,inum2) * (1. - rnum1)
+              rch_lag = varoute(27,inum2) * (1. - rnum1)
+              rch_gra = varoute(28,inum2) * (1. - rnum1)
             end if
           else
-            do ii = 1, 24
+            do ii = 1, nstep
               if (hrtwtr(ii) > 0. .and. hdepth(ii) > 0.) then
                 hsedyld(ii) = hhvaroute(3,inum2,ii) * (1. - rnum1)
                 sedrch = sedrch + hsedyld(ii)
+                rch_san = 0.
+                rch_sil = rch_sil + hsedyld(ii)  !!All are assumed to be silt type particles
+                rch_cla = 0.
+                rch_sag = 0.
+                rch_lag = 0.
+                rch_gra = 0.
               end if
             end do
           end if
+        else
+            if (ievent < 3) then
+            if (ch_eqn(jrch) == 0) call rtsed
+            if (ch_eqn(jrch) == 1) call rtsed_bagnold
+            if (ch_eqn(jrch) == 2) call rtsed_kodatie
+            if (ch_eqn(jrch) == 3) call rtsed_Molinas_Wu
+            if (ch_eqn(jrch) == 4) call rtsed_yangsand
+          else
+            call rthsed
+            end if      
         end if
 
 !! perform in-stream nutrient calculations
@@ -160,6 +207,9 @@
         if (iwq == 0) call hhnoqual
       end if
 
+!! perform in-stream pesticide calculations
+!!      call biofilm
+      
 !! perform in-stream pesticide calculations
       if (ievent < 3) then
         call rtpest

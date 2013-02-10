@@ -77,6 +77,8 @@
 !!                                 |fraction of residue which will decompose in
 !!                                 |a day assuming optimal moisture,
 !!                                 |temperature, C:N ratio, and C:P ratio
+!!    rsr1c      |                 |initial root to shoot ratio at the beg of growing season
+!!    rsr2c      |                 |root to shoot ratio at the end of the growing season
 !!    t_base(:)  |deg C            |minimum temperature for plant growth
 !!    t_opt(:)   |deg C            |optimal temperature for plant growth
 !!    vpd2(:)    |(m/s)*(1/kPa)    |rate of decline in stomatal conductance per
@@ -151,7 +153,7 @@
 
       use parm
 
-      integer :: ic, eof, icnum
+      integer :: ic, eof, icnum, yrsmat
       real :: xx, usle_c, frgrw2, laimx2, co2hi, bioehi, vpdfr, blaic
       real :: b1, b2, b3, c1, frgrw1, laimx1, frgmax, bioe, hvstc, dlaic
       real :: chtmxc, rdmxc, topt, tbase, cnyldc, cpyldc, bn1, bn2, bn3
@@ -212,13 +214,15 @@
      &     wavpc, co2hi, bioehi, rsdcopl, alaimin
         if (eof < 0) exit
         read (104,777,iostat=eof) bioleaf, yrsmat, biomxtrees, extcoef, &
-     &     bmdieoff
- 777    format (5f8.3)
+     &     bmdieoff, rsr1c, rsr2c
+!! 777    format (7f8.3)
+ 777    format (f8.3,i5,5f8.3)
+
         if (eof < 0) exit
 
         if (ic <= 0) exit
 
-         if (bmdieoff <= 1.e-6) bmdieoff = 0.10
+        if (bmdieoff <= 1.e-6) bmdieoff = 1.00
 
         cpnm(ic) = cname
         idc(ic) = idtype
@@ -248,6 +252,8 @@
         bmx_trees(ic) = 1000. * biomxtrees
         ext_coef(ic) = extcoef
         bm_dieoff(ic) = bmdieoff
+        rsr1(ic) = rsr1c
+        rsr2(ic) = rsr2c
 
         !! set default value
         if (ext_coef(ic) < 1.e-6) ext_coef(ic) = 0.65
@@ -256,6 +262,8 @@
         if (usle_c >= 1.0) usle_c = 1.0
         if (blai(ic) <= 0.0) blai(ic) = 0.0
         if (blai(ic) >= 10.0) blai(ic) = 10.0
+        if (rsr1(ic) <= 0.0) rsr1(ic) = 0.4
+        if (rsr2(ic) <= 0.0) rsr2(ic) = 0.2
 
 
         if (bio_e(ic) > 0. .and. cpnm(ic) /= 'WATR') then

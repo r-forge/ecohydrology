@@ -48,6 +48,7 @@
 !!    ~ ~ ~ LOCAL DEFINITIONS ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
+!!    det         |hr            |time step (24 hours)
 !!    c           |none          |inverse of channel side slope
 !!    jrch        |none          |reach number
 !!    p           |m             |wetted perimeter
@@ -70,9 +71,9 @@
       use parm
 
       integer :: jrch
-      real :: wtrin, scoef, p, topw, vol, c, rh
-      real :: volrt, maxrt, adddep, addp, addarea
-      real :: tmpstor, rttlc1, rttlc2, rtevp1, rtevp2, rttime1
+      real :: wtrin, scoef, p, tbase, topw, vol, c, rh
+        real :: volrt, maxrt, adddep, addp, addarea, vc, aaa
+        real :: rttlc1, rttlc2, rtevp1, rtevp2, det
 
       jrch = 0
       jrch = inum1
@@ -98,35 +99,31 @@
       rchdep = 0.
       p = 0.
       rh = 0.
+      vc = 0.
 
-      if (volrt >= maxrt) then
+!! If average flowrate is greater than than the channel capacity at bank full
+!! then simulate flood plain flow else simulate the regular channel flow
+      if (volrt > maxrt) then
         rcharea = phi(1,jrch)
         rchdep = ch_d(jrch)
         p = phi(6,jrch) + 2. * ch_d(jrch) * Sqrt(1. + c * c)
         rh = phi(1,jrch) / p
         sdti = maxrt
-        !!  This is the time to empty the volume of water
-        !!  at the bankfull discharge rate
-        rttime1 = vol / (3600. * sdti)
-        if (rttime1 > 24) then
-          !! perform flood plain simulation
-          !! Increase the discharge in flood plain until all the volume can be emptied
-          !! within a day.
-            adddep = 0
-            Do While (rttime1 > 24)
-            !!By iteration at 1cm interval find out how much depth of water in flood plain 
-            !!for the discharge volume within a day
-              adddep = adddep + 0.01
-              addarea=rcharea + ((ch_w(2,jrch) * 5) +c*adddep)*adddep
-              addp = p + (ch_w(2,jrch) * 4) + 2. * adddep * Sqrt(17.)
-              rh = addarea / addp
-              sdti = Qman(addarea, rh, ch_n(2,jrch), ch_s(2,jrch))
-              rttime1 = vol / (3600. * sdti)
-            End Do
-          rcharea = addarea
-          rchdep = rchdep + adddep
-          p = addp
-        End if
+        adddep = 0
+      !! find the crossectional area and depth for volrt
+      !! by iteration method at 1cm interval depth
+      !! find the depth until the discharge rate is equal to volrt
+        Do While (sdti < volrt)
+          adddep = adddep + 0.01
+          addarea = rcharea + ((ch_w(2,jrch) * 5) + 4 * adddep) * adddep
+          addp = p + (ch_w(2,jrch) * 4) + 2. * adddep * Sqrt(1. + 4 * 4)
+          rh = addarea / addp
+          sdti = Qman(addarea, rh, ch_n(2,jrch), ch_s(2,jrch))
+        end do
+        rcharea = addarea
+        rchdep = ch_d(jrch) + adddep
+        p = addp
+        sdti = volrt
       else
       !! find the crossectional area and depth for volrt
       !! by iteration method at 1cm interval depth
@@ -138,25 +135,40 @@
           rh = rcharea / p
           sdti = Qman(rcharea, rh, ch_n(2,jrch), ch_s(2,jrch))
         end do
+        sdti = volrt
       end if
 
-      sdti = volrt
+!! calculate top width of channel at water level
+      topw = 0.
+      if (rchdep <= ch_d(jrch)) then
+        topw = phi(6,jrch) + 2. * rchdep * c
+      else
+        topw = 5 * ch_w(2,jrch) + 2. * (rchdep - ch_d(jrch)) * 4.
+      end if
+
+!!      Time step of simulation (in hour)
+        det = 24.
 
       if (sdti > 0.) then
-        !! calculate travel time
-        vel_chan(jrch) = sdti / rcharea
-        rttime = ch_l2(jrch) * 1000. / (3600. * vel_chan(jrch))
+        !! calculate velocity and travel time
+            vc = sdti / rcharea  
+        vel_chan(jrch) = vc
+        rttime = ch_l2(jrch) * 1000. / (3600. * vc)
+
 
         !! calculate volume of water leaving reach on day
         scoef = 0.
-        scoef = 48. / (2. * rttime + 24.)
-        if (scoef > 1.) scoef = 1.
          rtwtr = 0.
-        rtwtr = scoef * vol
+        scoef = 2. * det / (2. * rttime + det)
+        if (scoef > 1.) scoef = 1.
+
+        rtwtr = scoef * (wtrin + rchstor(jrch))
 
 !! calculate amount of water in channel at end of day
       rchstor(jrch) = rchstor(jrch) + wtrin - rtwtr
- 
+!! Add if statement to keep rchstor from becoming negative
+      if (rchstor(jrch) < 0.0) rchstor(jrch) = 0.0
+
 !! transmission and evaporation losses are proportionally taken from the 
 !! channel storage and from volume flowing out
 
@@ -165,8 +177,9 @@
 
         if (rtwtr > 0.) then
 
-          rttlc = 24 * ch_k(2,jrch) * ch_l2(jrch) * p
+      !!  Total time in hours to clear the water
 
+          rttlc = det * ch_k(2,jrch) * ch_l2(jrch) * p
           rttlc2 = rttlc * rchstor(jrch) / (rtwtr + rchstor(jrch))
 
           if (rchstor(jrch) <= rttlc2) then
@@ -196,15 +209,21 @@
         !! calculate evaporation
         rtevp = 0.
        if (rtwtr > 0.) then
-          !! calculate width of channel at water level
-          topw = 0.
-          if (rchdep <= ch_d(jrch)) then
-            topw = phi(6,jrch) + 2. * rchdep * chside(jrch)
-          else
-            topw = 5 * ch_w(2,jrch) + 2. * (rchdep - ch_d(jrch)) * 4.
-          end if
 
-          rtevp = evrch * pet_day * ch_l2(jrch) * topw
+          aaa = evrch * pet_day / 1000.
+
+          if (rchdep <= ch_d(jrch)) then
+            rtevp = aaa * ch_l2(jrch) * 1000. * topw
+          else
+              if (aaa <=  (rchdep - ch_d(jrch))) then
+              rtevp = aaa * ch_l2(jrch) * 1000. * topw
+            else
+              rtevp = (rchdep - ch_d(jrch)) 
+              rtevp = rtevp + (aaa - (rchdep - ch_d(jrch))) 
+              topw = phi(6,jrch) + 2. * ch_d(jrch) * c           
+              rtevp = rtevp * ch_l2(jrch) * 1000. * topw
+            end if
+          end if
 
           rtevp2 = rtevp * rchstor(jrch) / (rtwtr + rchstor(jrch))
 
@@ -234,20 +253,26 @@
       else
         rtwtr = 0.
         sdti = 0.
+        rchstor(jrch) = 0.
+        vel_chan(jrch) = 0.
+        flwin(jrch) = 0.
+        flwout(jrch) = 0.
       end if
 
 !! precipitation on reach is not calculated because area of HRUs 
 !! in subbasin sums up to entire subbasin area (including channel
 !! area) so precipitation is accounted for in subbasin loop
 
+!!      volinprev(jrch) = wtrin
+!!      qoutprev(jrch) = rtwtr
+
+      if (rtwtr < 0.) rtwtr = 0.
+      if (rchstor(jrch) < 0.) rchstor(jrch) = 0.
 
       if (rchstor(jrch) < 10.) then
         rtwtr = rtwtr + rchstor(jrch)
         rchstor(jrch) = 0.
       end if
-
-      if (rtwtr < 0.) rtwtr = 0.
-      if (rchstor(jrch) < 0.) rchstor(jrch) = 0.
 
       return
       end

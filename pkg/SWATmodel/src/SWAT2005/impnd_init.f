@@ -26,7 +26,7 @@
 !!                               |fill the ponds to the principal spillway
 !!    pnd_sed(:)  |mg/kg         |sediment concentration in pond water
 !!    pnd_vol(:)  |10^4 m^3 H2O  |volume of water in pond at any given time
-!!    silt(:)     |%             |percent silt content in soil material
+!!    sol_silt(:,:)|%             |percent silt content in soil material
 !!    sol_clay(:,:)|%             |percent clay content in soil material
 !!    sub_fr(:)   |none          |fraction of watershed area in subbasin
 !!    wet_fr(:)   |none          |fraction of HRU/subbasin area that drains
@@ -71,7 +71,7 @@
 !!                               |(UNIT CHANGE!)
 !!    sed_stl(:)  |kg/kg         |fraction of sediment remaining suspended in
 !!                               |impoundment after settling for one day 
-!!    silt(:)     |none          |fraction silt content in soil material
+!!    sol_silt(:) |none          |fraction silt content in soil material
 !!                               |(UNIT CHANGE!)
 !!    sol_clay(:,:)|none          |fraction clay content in soil material
 !!                               |(UNIT CHANGE!)
@@ -111,7 +111,7 @@
 !!    pe_vo       |m^3           |local variable to hold value for pnd_evol(:)
 !!    pp_sa       |ha            |local variable to hold value for pnd_psa(:)
 !!    pp_vo       |m^3           |local variable to hold value for pnd_pvol(:)
-!!    sand        |none          |fraction of sand in soil material
+!!    sol_sand(:,:) |none          |fraction of sand in soil material
 !!    si          |none          |variable to hold calculation result
 !!    targ        |10^4 m^3 H2O  |target pond volume
 !!    wetdif      |m^3           |difference between maximum and normal amounts
@@ -135,15 +135,13 @@
         !! calculate the sediment settling rate
         cl = 0.
         si = 0.
-        sand = 0.
+        sa = 0.
         mnpsz = 0.
-        sol_clay(1,j) = sol_clay(1,j) / 100.
-        silt(j) = silt(j) / 100.
-        cl = 0.4100 * sol_clay(1,j)
-        si = 2.7100 * silt(j)
-        sand = 5.7000 * (1. - silt(j) - sol_clay(1,j))
-        mnpsz = Exp(cl + si + sand)
-        sed_stl(j) = Exp(-.184 * mnpsz)
+        cl = 0.4100 * sol_clay(1,j) / 100.
+        si = 2.7100 * sol_silt(1,j) / 100.
+        sa = 5.7000 * sol_sand(1,j) / 100.
+        mnpsz = Exp(cl + si + sa)
+        sed_stl(j) = Exp(-res_stlr_co * mnpsz)
 
 
 !!      set initial pond/wetland parameters
@@ -162,6 +160,13 @@
             
             !! convert to new units
             pnd_sed(j) = pnd_sed(j) * 1.e-6     !! mg/L => tons/m^3
+
+            pnd_san(j) = pnd_sed(j) * 1.e-6 * 0.      !! mg/L => tons/m^3
+            pnd_sil(j) = pnd_sed(j) * 1.e-6 * 1.      !! mg/L => tons/m^3
+            pnd_cla(j) = pnd_sed(j) * 1.e-6 * 0.      !! mg/L => tons/m^3
+            pnd_sag(j) = pnd_sed(j) * 1.e-6 * 0.      !! mg/L => tons/m^3
+            pnd_lag(j) = pnd_sed(j) * 1.e-6 * 0.      !! mg/L => tons/m^3
+
             pnd_nsed(j) = pnd_nsed(j) * 1.e-6   !! mg/L => tons/m^3
             pnd_pvol(j) = 10000. * pnd_pvol(j)  !! 10^4 m^3 => m^3
             pnd_evol(j) = 10000. * pnd_evol(j)  !! 10^4 m^3 => m^3
@@ -191,13 +196,13 @@
               end if
               if (bp2(j) > .9) then
                 bp2(j) = .9
-                bp1(j) = pnd_psa(j) / pnd_pvol(j) ** .9
+                bp1(j) = (pnd_psa(j) / pnd_pvol(j)) ** .9
               else
-                bp1(j) = pnd_esa(j) / pnd_evol(j) ** bp2(j)
+                bp1(j) = (pnd_esa(j) / pnd_evol(j)) ** bp2(j)
               endif
             else
               bp2(j) = .9
-              bp1(j) = pnd_psa(j) / pnd_pvol(j) ** .9
+              bp1(j) = (pnd_psa(j) / pnd_pvol(j)) ** .9
             end if
 
           else
@@ -231,6 +236,13 @@
 
             !! unit conversions
             wet_sed(j) = wet_sed(j) * 1.e-6        !! mg/L => kg/L
+
+            wet_san(j) = wet_sed(j) * 1.e-6 * 0.         !! mg/L => kg/L
+            wet_sil(j) = wet_sed(j) * 1.e-6 * 1.         !! mg/L => kg/L
+            wet_cla(j) = wet_sed(j) * 1.e-6 * 0.         !! mg/L => kg/L
+            wet_sag(j) = wet_sed(j) * 1.e-6 * 0.         !! mg/L => kg/L
+            wet_lag(j) = wet_sed(j) * 1.e-6 * 0.         !! mg/L => kg/L
+
             wet_nsed(j) = wet_nsed(j) * 1.e-6      !! mg/L => kg/L
             wet_nvol(j) = 10000. * wet_nvol(j)     !! 10^4 m^3 => m^3
             wet_mxvol(j) = 10000. * wet_mxvol(j)   !! 10^4 m^3 => m^3
@@ -251,10 +263,10 @@
                bw2(j) = (Log10(wet_mxsa(j)) - Log10(wet_nsa(j))) / 0.001
               end if
               if (bw2(j) > 0.9) bw2(j) = .9
-              bw1(j) = wet_mxsa(j) / wet_mxvol(j) ** bw2(j)
+              bw1(j) = (wet_mxsa(j) / wet_mxvol(j)) ** bw2(j)
             else
               bw2(j) = .9
-              bw1(j) = wet_nsa(j) / wet_nvol(j) ** .9
+              bw1(j) = (wet_nsa(j) / wet_nvol(j)) ** .9
             end if
           else
             wet_fr(j) = 0.

@@ -7,7 +7,7 @@
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!    alpha_bf(:) |days          |alpha factor for groundwater recession curve
+!!    alpha_bf(:) |1/days        |alpha factor for groundwater recession curve
 !!    alpha_bfe(:)|none          |Exp(-alpha_bf(:))
 !!    deepst(:)   |mm H2O        |depth of water in deep aquifer
 !!    ihru        |none          |HRU number
@@ -80,16 +80,17 @@
 
       rchrg1 = 0.
       rchrg_karst = 0.
-      rchrg1 = rchrg(j)
+      rchrg1 = rchrg(j) + rchrg_src(j)
 
 !! add seepage from secondary channels, ponds, and wetlands;
       rchrg_karst = tloss + twlpnd + twlwet
 !! compute shallow aquifer level for current day, assumes karst losses 
 !! infiltrate at the same speed as what goes through the soil profile.
       rchrg(j) = 0.
-      rchrg(j) = (1.-gw_delaye(j)) * (sepbtm(j) + rchrg_karst) +        &
-     &gw_delaye(j) * rchrg1
+      rchrg(j) = (1.-gw_delaye(j)) * (sepbtm(j) + gwq_ru(j) +           &
+     &                             rchrg_karst) + gw_delaye(j) * rchrg1
       if (rchrg(j) < 1.e-6) rchrg(j) = 0.
+      gwq_ru(j) = 0.
 
 !! compute deep aquifer level for day
       gwseep = rchrg(j) * rchrg_dp(j)
@@ -97,7 +98,7 @@
 
       shallst(j) = shallst(j) + (rchrg(j) - gwseep)
       gwht(j) = gwht(j) * alpha_bfe(j) + rchrg(j) * (1. - alpha_bfe(j)) &
-     &    / (800. * gw_spyld(j) + 1.e-6 * alpha_bf(j) + 1.e-6)
+     &    / (800. * gw_spyld(j) * alpha_bf(j) + 1.e-6)
       gwht(j) = Max(1.e-6, gwht(j))
 
 !! compute groundwater contribution to streamflow for day

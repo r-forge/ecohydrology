@@ -64,6 +64,7 @@
       real :: pltpst, solpst, pstenr
 
       eof = 0
+
       
       do
       read (106,5000,iostat=eof) titldum
@@ -80,7 +81,7 @@
       if (eof < 0) exit
       read (106,5100,iostat=eof) (sol_orgp(j,ihru), j = 1, mlyr)
       if (eof < 0) exit
-      read (106,5000,iostat=eof) titldum
+      read (106,5100,iostat=eof) (pperco_sub(j,ihru), j = 1, mlyr)
       if (eof < 0) exit
       read (106,5000,iostat=eof) titldum
       if (eof < 0) exit
@@ -88,6 +89,8 @@
       if (eof < 0) exit
       read (106,5000,iostat=eof) titldum
       if (eof < 0) exit
+!!      end do
+
       do j = 1, mpst
         pstnum = 0
         pltpst = 0.
@@ -119,9 +122,15 @@
       if (eof < 0) exit
       end do
       exit
+   
+        
       end do
 
       close (106)
+      
+      do j = 1, mlyr
+        if (pperco_sub(j,ihru) <= 1.e-6) pperco_sub(j,ihru) = pperco
+      end do
 
       return
  5000 format (a)

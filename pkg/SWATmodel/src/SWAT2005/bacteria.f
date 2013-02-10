@@ -154,10 +154,13 @@
 
       j = 0
       j = ihru
-      
+
+      if (bactlps(j) < 1.e-6) bactlps(j) = 0.0
       if (bactlpq(j) < 1.e-6) bactlpq(j) = 0.0
       if (bactpq(j) < 1.e-6) bactpq(j) = 0.0
-
+      if (bactps(j) < 1.e-6) bactps(j) = 0.0
+      if (bactp_plt(j) < 1.e-6) bactp_plt(j) = 0.0
+      
 !! compute bacteria wash off
       if (precipday >= 2.54) then
         xx = 0.

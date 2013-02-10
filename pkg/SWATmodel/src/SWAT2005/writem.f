@@ -206,9 +206,10 @@
 !! if last day of month or last day in last year
  
       if (i_mo /= mo_chk .or. (curyr == nbyr .and. i == idal)) then
+        mo_atmo = mo_atmo + 1
  
         !! calculate current month (cumulative) of simulation
-        immo = immo + 1
+!       immo = immo + 1
  
         !! calculate number of days in month
         idlast = 0
@@ -235,19 +236,19 @@
 
           !! monthly write--output.std
           if (iscen == 1) then
-          write (2,6200) mo_chk, wshdmono(1), wshdmono(3), wshdmono(4), &
+          write (26,6200) mo_chk, wshdmono(1), wshdmono(3), wshdmono(4),&
      &            wshdmono(104), wshdmono(5), wshdmono(109),            &
      &            wshddayo(35), wshdmono(7), wshdmono(108), wshdmono(6),&
      &            wshdmono(12), wshdmono(42), wshdmono(45),             &
      &            wshdmono(46), wshdmono(44), wshdmono(40),             &
-     &            wshdmono(43), wshdmono(41)
+     &            wshdmono(43), wshdmono(41), wshdmono(111)
           else if (isproj == 1) then
           write (19,6200) mo_chk, wshdmono(1), wshdmono(3), wshdmono(4),&
      &            wshdmono(104), wshdmono(5), wshdmono(109),            &
      &            wshddayo(35), wshdmono(7), wshdmono(108), wshdmono(6),&
      &            wshdmono(12), wshdmono(42), wshdmono(45),             &
      &            wshdmono(46), wshdmono(44), wshdmono(40),             &
-     &            wshdmono(43), wshdmono(41)
+     &            wshdmono(43), wshdmono(41), wshdmono(111)
           endif
 
           if (iprint == 0) then
@@ -259,7 +260,7 @@
                 sum = sum + hrupstm(k,1,j) + hrupstm(k,2,j)
               end do
               if (sum > 0. .and. iprp == 1) then
-                write (9995,5100) j, iyr, mo_chk,                          &
+                write (30,5100) subnum(j), hruno(j), iyr, mo_chk,       &
      &                     (hrupstm(k,1,j), hrupstm(k,2,j), k = 1, npmx) 
               end if
               end if
@@ -346,6 +347,7 @@
 
             !! monthly write--HRU output (output.hru)
             call hrumon
+
             call impndmon
 
             !! monthly write--subbasin output (output.sub)
@@ -396,11 +398,11 @@
       endif
   
       return
- 5100 format (1x,i4,1x,i4,1x,i3,1x,250(e16.4,1x))
+ 5100 format (1x,a5,a4,1x,i4,1x,i3,1x,250(e16.4,1x))
  5200 format (/,1x,i4,a4,1x,10f12.2)
  5300 format (1x,i4,a4,1x,10f12.2,/)
  5800 format ('RES   ',i8,1x,i4,41e12.4)
  6800 format ('RES   ',i8,1x,i4,41e12.4,1x,i4)
- 6200 format (i5,15f7.2,1x,4f8.2)
+ 6200 format (i5,15f8.2,1x,4f8.2)
       end
 

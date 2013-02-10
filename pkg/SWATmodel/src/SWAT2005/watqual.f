@@ -235,12 +235,13 @@
 
       jrch = 0
       jrch = inum1
+      dcoef= 3.
 
        !! initialize water flowing into reach
        wtrin = 0.
        wtrin = varoute(2,inum2) * (1. - rnum1)
 
-       if (rtwtr / 86400. > 0.01 .and. wtrin > 1.e-4) then
+       if (wtrin > 1.e-4) then
 !! concentrations
          !! initialize inflow concentrations
          chlin = 0.
@@ -264,7 +265,7 @@
          orgpin = 1000. * varoute(5,inum2) * (1. - rnum1) / wtrin
          dispin = 1000. * varoute(7,inum2) * (1. - rnum1) / wtrin
          cbodin = 1000. * varoute(16,inum2) * (1. - rnum1) / wtrin
-         disoxin= 1000. * varoute(17,inum2) * (1. - rnum1) / wtrin
+         disoxin = 1000. * varoute(17,inum2) * (1. - rnum1) / wtrin
          end if
 
          !! initialize concentration of nutrient in reach
@@ -291,6 +292,13 @@
          o2con = (disoxin * wtrin + rch_dox(jrch) * rchwtr) / wtrtot
 
          if (orgncon < 1.e-6) orgncon = 0.0
+         if (nh3con < 1.e-6) nh3con = 0.0
+         if (no2con < 1.e-6) no2con = 0.0
+         if (no3con < 1.e-6) no3con = 0.0
+         if (orgpcon < 1.e-6) orgpcon = 0.0
+         if (solpcon < 1.e-6) solpcon = 0.0
+         if (cbodcon < 1.e-6) cbodcon = 0.0
+         if (o2con < 1.e-6) o2con = 0.0
 
          !! calculate temperature in stream
          !! Stefan and Preudhomme. 1993.  Stream temperature estimation 
@@ -337,7 +345,7 @@
          tday = 0.
          tday = rttime / 24.0
          if (tday > 1.0) tday = 1.0
-         tday = 1.0
+    !!     tday = 1.0
 
 !! algal growth
          !! calculate light extinction coefficient 
@@ -402,12 +410,15 @@
      &    Theta(rhoq,thrho,wtmp) * algcon - Theta(rs1(jrch),thrs1,wtmp) &
      &                                         / rchdep * algcon) * tday
          if (algae(jrch) < 1.e-6) algae(jrch) = 0.
+      !! JGA added to set algae limit *****
+         if (algae(jrch) > 5000.) algae(jrch) = 5000.
+         if (algae(jrch) > dcoef * algcon) algae(jrch) = dcoef * algcon
 
          !! calculate chlorophyll-a concentration at end of day
          !! QUAL2E equation III-1
          chlora(jrch) = 0.
          chlora(jrch) = algae(jrch) * ai0 / 1000.
-!! end algal growth 
+         !! end algal growth 
 
 !! oxygen calculations
          !! calculate carbonaceous biological oxygen demand at end
@@ -418,7 +429,18 @@
          zz = Theta(rk3(jrch),thrk3,wtmp) * cbodcon
          rch_cbod(jrch) = 0.
          rch_cbod(jrch) = cbodcon - (yy + zz) * tday
+         
+         !!deoxygenation rate
+         coef = exp(-Theta(rk1(jrch),thrk1,wtmp) * tday)
+         cbodrch = coef * cbodcon
+         !!cbod rate loss due to settling
+         coef = exp(-Theta(rk3(jrch),thrk3,wtmp) * tday)
+         cbodrch = coef * cbodrch
+         
+         rch_cbod(jrch) = cbodrch
          if (rch_cbod(jrch) < 1.e-6) rch_cbod(jrch) = 0.
+         if (rch_cbod(jrch) > dcoef * cbodcon) rch_cbod(jrch) = dcoef * 
+     &         cbodcon
 
          !! calculate dissolved oxygen concentration if reach at 
          !! end of day QUAL2E section 3.6 equation III-28
@@ -428,6 +450,8 @@
          xx = 0.
          yy = 0.
          zz = 0.
+         rhoq = 1.0
+         rk2(jrch) = 1.0
          uu = Theta(rk2(jrch),thrk2,wtmp) * (soxy - o2con)
          vv = (ai3 * Theta(gra,thgra,wtmp) - ai4 *                      &
      &                                  Theta(rhoq,thrho,wtmp)) * algcon
@@ -437,7 +461,38 @@
          zz = ai6 * Theta(bc2mod,thbc2,wtmp) * no2con
          rch_dox(jrch) = 0.
          rch_dox(jrch) = o2con + (uu + vv - ww - xx - yy - zz) * tday
+         
+         !algea O2 production minus respiration
+         if (vv > 0.) then
+           doxrch = soxy
+         else
+           coef = exp(-0.03 * vv)
+           doxrch = coef * soxy
+         end if
+         
+         !cbod deoxygenation
+         coef = exp(-0.1 * ww)
+         doxrch = coef * doxrch
+         
+         !benthic sediment oxidation
+         coef = 1. - (Theta(rk4(jrch),thrk4,wtmp) / 100.)
+         doxrch = coef * doxrch
+         
+         !ammonia oxydation
+         coef = exp(-0.05 * yy)
+         doxrch = coef * doxrch
+         
+         !nitrite oxydation
+         coef = exp(-0.05 * zz)
+         doxrch = coef * doxrch
+         
+         !reaeration
+         uu = Theta(rk2(jrch),thrk2,wtmp) / 100. * (soxy - doxrch)
+         rch_dox(jrch) = doxrch + uu
+         
          if (rch_dox(jrch) < 1.e-6) rch_dox(jrch) = 0.
+         if (rch_dox(jrch) > soxy) rch_dox(jrch) = soxy
+         if (rch_dox(jrch) > dcoef * o2con) rch_dox(jrch)= dcoef * o2con
 !! end oxygen calculations
 
 !! nitrogen calculations
@@ -455,6 +510,8 @@
          organicn(jrch) = 0.
          organicn(jrch) = orgncon + (xx - yy - zz) * tday
          if (organicn(jrch) < 1.e-6) organicn(jrch) = 0.
+            if(organicn(jrch) > dcoef * orgncon) organicn(jrch) = dcoef * 
+     &       orgncon
 
         !! calculate fraction of algal nitrogen uptake from ammonia
         !! pool QUAL2E equation III-18
@@ -475,6 +532,8 @@
         ammonian(jrch) = 0.
         ammonian(jrch) = nh3con + (ww - xx + yy - zz) * tday
         if (ammonian(jrch) < 1.e-6) ammonian(jrch) = 0.
+        if (ammonian(jrch) > dcoef * nh3con .and. nh3con > 0.) 
+     &   ammonian(jrch) = dcoef * nh3con  
 
         !! calculate concentration of nitrite at end of day
         !! QUAL2E section 3.3.3 equation III-19
@@ -485,6 +544,8 @@
         nitriten(jrch) = 0.
         nitriten(jrch) = no2con + (yy - zz) * tday
         if (nitriten(jrch) < 1.e-6) nitriten(jrch) = 0.
+        if (nitriten(jrch) > dcoef * no2con .and. no2con > 0.) 
+     &  nitriten(jrch) = dcoef * no2con
 
         !! calculate nitrate concentration at end of day
         !! QUAL2E section 3.3.4 equation III-20
@@ -494,6 +555,9 @@
         zz = (1. - f1) * ai1 * algcon * Theta(gra,thgra,wtmp)
         nitraten(jrch) = 0.
         nitraten(jrch) = no3con + (yy - zz) * tday
+        if (nitraten(jrch) > dcoef * no3con) nitraten(jrch) = dcoef * 
+     &         no3con
+      
         if (nitraten(jrch) < 1.e-6) nitraten(jrch) = 0.
 !! end nitrogen calculations
 
@@ -509,6 +573,8 @@
         organicp(jrch) = 0.
         organicp(jrch) = orgpcon + (xx - yy - zz) * tday
         if (organicp(jrch) < 1.e-6) organicp(jrch) = 0.
+        if (organicp(jrch) > dcoef * orgpcon) organicp(jrch) = dcoef * 
+     &      orgpcon
 
         !! calculate dissolved phosphorus concentration at end
         !! of day QUAL2E section 3.4.2 equation III-25
@@ -521,6 +587,8 @@
         disolvp(jrch) = 0.
         disolvp(jrch) = solpcon + (xx + yy - zz) * tday
         if (disolvp(jrch) < 1.e-6) disolvp(jrch) = 0.
+        if (disolvp(jrch) > dcoef * solpcon) disolvp(jrch) = dcoef * 
+     &    solpcon   
 !! end phosphorus calculations
 
       else
@@ -549,15 +617,18 @@
       endif
 
 !!!! commented following statements per conversation with 
-!!!!  srini 10/22/08
-!     write for srinivasan 12/07/2004
-!     write (82,5000) jrch, i, tmpav(jrch),
-!    * chlin, chlora(jrch), orgncon, organicn(jrch),
-!    * ammoin, ammonian(jrch), nitritin, nitriten(jrch),
-!    * nitratin, nitraten(jrch), orgpin, organicp(jrch),
-!    * dispin, disolvp(jrch), cbodin, rch_cbod(jrch), soxy, 
-!    * disoxin, rch_dox(jrch), varoute (2,inum2), rttime
-!5000  format ('REACH', i4, i5, 22e12.4)
+!!!! srini 10/22/08
+!    write for srinisan 12/07/2004
+!!    write added back 03/02/2010 - per Srin email
+      if (ihumus == 1) then
+         write (82,5000) jrch, i, tmpav(jrch),
+     *   chlin, chlora(jrch), orgncon, organicn(jrch),
+     *   ammoin, ammonian(jrch), nitritin, nitriten(jrch),
+     *   nitratin, nitraten(jrch), orgpin, organicp(jrch),
+     *   dispin, disolvp(jrch), cbodin, rch_cbod(jrch), soxy, 
+     *   disoxin, rch_dox(jrch), varoute (2,inum2), rttime
+ 5000    format ('REACH', i4, i5, 22e12.4)
+      end if
 
       return
       end

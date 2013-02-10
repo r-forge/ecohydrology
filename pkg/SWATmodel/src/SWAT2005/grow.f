@@ -9,7 +9,7 @@
 !!    name        |units            |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    blai(:)     |none             |maximum (potential) leaf area index
-!!    auto_nstrs(:)|none             |nitrogen stress factor which triggers
+!!    auto_nstrs(:) |none           |nitrogen stress factor which triggers
 !!                                  |auto fertilization
 !!    bio_e(:)    |(kg/ha)/(MJ/m**2)|biomass-energy ratio
 !!                                  |The potential (unstressed) growth rate per
@@ -43,7 +43,7 @@
 !!    idorm(:)    |none             |dormancy status code:
 !!                                  |0 land cover growing (not dormant)
 !!                                  |1 land cover dormant
-!!    idplt(:,:,:)|none             |land cover code from crop.dat
+!!    idplt(:)    |none             |land cover code from crop.dat
 !!    igro(:)     |none             |land cover status code:
 !!                                  |0 no land cover currently growing
 !!                                  |1 land cover growing
@@ -62,7 +62,7 @@
 !!    olai(:)     |
 !!    pet_day     |mm H2O           |potential evapotranspiration on current day
 !!                                  |in HRU
-!!    phu_plt(:,:,:)|heat units       |total number of heat units to bring plant
+!!    phu_plt(:)  |heat units       |total number of heat units to bring plant
 !!                                  |to maturity
 !!    phuacc(:)   |none             |fraction of plant heat units accumulated
 !!    plt_et(:)   |mm H2O           |actual ET simulated during life of plant
@@ -113,6 +113,8 @@
 !!    phuacc(:)   |none          |fraction of plant heat units accumulated
 !!    plt_et(:)   |mm H2O        |actual ET simulated during life of plant
 !!    plt_pet(:)  |mm H2O        |potential ET simulated during life of plant
+!!    rsr1c(:)    |              |initial root to shoot ratio at beg of growing season
+!!    rsr2c(:)    |              |root to shoot ratio at end of growing season
 !!    rwt(:)      |none          |fraction of total plant biomass that is
 !!                               |in roots
 !!    wshd_nstrs  |stress units  |average annual number of nitrogen stress
@@ -163,12 +165,12 @@
 
         !! plant will not undergo stress if dormant
         if (idorm(j) == 1) return
-        idp = idplt(nro(j),icr(j),j)
+        idp = idplt(j)
 
         !! update accumulated heat units for the plant
         delg = 0.
-        if (phu_plt(nro(j),icr(j),j) > 0.1) then
-          delg = (tmpav(j) - t_base(idp)) / phu_plt(nro(j),icr(j),j)
+        if (phu_plt(j) > 0.1) then
+          delg = (tmpav(j) - t_base(idp)) / phu_plt(j)
         end if
         if (delg < 0.) delg = 0.
         phuacc(j) = phuacc(j) + delg  
@@ -226,14 +228,14 @@
           if (reg < 0.) reg = 0.
           if (reg > 1.) reg = 1.
 
-          if (bio_targ(nro(j),icr(j),j) > 1.e-2) then
-            bioday = bioday * (bio_targ(nro(j),icr(j),j) - bio_ms(j)) / &
-     &                                         bio_targ(nro(j),icr(j),j)
+          if (bio_targ(j) > 1.e-2) then
+            bioday = bioday * (bio_targ(j) - bio_ms(j)) / 
+     &                                         bio_targ(j)
             reg = 1.
           end if
  
           bio_ms(j) = bio_ms(j) + bioday * reg
-          if (idc(idp) == 7) then
+          if (idc(idp) == 7 .and. igrotree(j) == 0) then
             if (mat_yrs(idp) > 0) then
               rto = float(curyr_mat(j)) / float(mat_yrs(idp))
               biomxyr = rto * bmx_trees(idp)
@@ -245,7 +247,14 @@
 
           bio_ms(j) = Max(bio_ms(j),0.)
 
-
+          !!add by zhang
+          !!============
+          if (cswat == 2) then
+            NPPC_d(j) = NPPC_d(j) + bioday * reg* 0.42
+          end if
+          !!add by zhang
+          !!============          
+          
           !! calculate fraction of total biomass that is in the roots
           rwt(j) = .4 - .2 * phuacc(j)
 
@@ -272,6 +281,7 @@
             else
               laimax = blai(idp)
             end if
+
             if (laiday(j) > laimax) laiday(j) = laimax
             deltalai = ff * laimax * (1.0 - Exp(5.0 * (laiday(j) -      &
      &                                             laimax))) * Sqrt(reg)
@@ -283,8 +293,10 @@
             laiday(j) = olai(j) * (1. - phuacc(j)) /                    &
      &                               (1. - dlai(idp))
           end if
-          if (laiday(j) < 0.) laiday(j) = 0.
-
+          if (laiday(j) < alai_min(idplt(j))) then   !Sue White dormancy
+            laiday(j) = alai_min(idplt(j))
+          end if
+          
           !! calculate plant ET values
           if (phuacc(j) > 0.5 .and. phuacc(j) < dlai(idp)) then
             plt_et(j) = plt_et(j) + ep_day + es_day
@@ -294,12 +306,20 @@
           hvstiadj(j) = hvsti(idp) * 100. * phuacc(j)                   &
      &                / (100. * phuacc(j) + Exp(11.1 - 10. * phuacc(j)))
 
+!!  added per JGA for Srini by gsm 9/8/2011
+          strsw_sum(j) = strsw_sum(j) + (1. - strsw(j))
+          strstmp_sum(j) = strstmp_sum(j) + (1. - strstmp(j))
+          strsn_sum(j) = strsn_sum(j) + (1. - strsn(j))
+          strsp_sum(j) = strsp_sum(j) + (1. - strsp(j)) 
+          strsa_sum(j) = strsa_sum(j) + (1. - strsa(j))             
+
           !! summary calculations
           if (curyr > nyskip) then
             wshd_wstrs = wshd_wstrs + (1.-strsw(j)) * hru_dafr(j)
             wshd_tstrs = wshd_tstrs + (1.-strstmp(j)) * hru_dafr(j)
             wshd_nstrs = wshd_nstrs + (1.-strsn(j)) * hru_dafr(j)
             wshd_pstrs = wshd_pstrs + (1.-strsp(j)) * hru_dafr(j)
+            wshd_astrs = wshd_astrs + (1.-strsa(j)) * hru_dafr(j)
           end if
         end if
       return

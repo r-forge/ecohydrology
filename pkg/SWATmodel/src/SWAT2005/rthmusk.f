@@ -1,8 +1,8 @@
       subroutine rthmusk
 
 !!    ~ ~ ~ PURPOSE ~ ~ ~
-!!    this subroutine routes an hourly flow through a reach using the
-!!    Muskingum method
+!!    this subroutine routes flow through a reach using the
+!!    Muskingum method at a given time step 
 
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name        |units         |definition
@@ -26,6 +26,7 @@
 !!    flwout(:)   |m^3 H2O       |flow out of reach on previous day
 !!    i           |none          |current day of simulation
 !!    id1         |none          |first day of simulation in year
+!!    idt         |minutes       |operational time step
 !!    inum1       |none          |reach number
 !!    inum2       |none          |inflow hydrograph storage location number
 !!    msk_co1     |none          |calibration coefficient to control impact
@@ -41,7 +42,7 @@
 !!    msk_x       |none          |weighting factor controlling relative
 !!                               |importance of inflow rate and outflow rate
 !!                               |in determining storage on reach
-!!    pet_day     |mm H2O        |potential evapotranspiration
+!!    pet_day     |mm H2O        |potential evapotranspiration for the day
 !!    phi(1,:)    |m^2           |cross-sectional area of flow in channel at
 !!                               |bankfull depth
 !!    phi(5,:)    |m^3/s         |flow rate when reach is at bankfull depth
@@ -62,10 +63,18 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    flwin(:)    |m^3 H2O       |flow into reach on current day
 !!    flwout(:)   |m^3 H2O       |flow out of reach on current day
-!!    hharea(:)   |m^2           |cross-sectional area of flow
-!!    hrchwtr(:)  |m^3 H2O       |water stored in reach at beginning of hour
+!!    hdepth(:)   |m             |depth of flow during time step
+!!    hharea(:)   |m^2           |cross-sectional area of flow for time step
+!!    hhstor(:)   |m^3 H2O       |water stored in reach at end of time step
+!!    hhtime(:)   |hr            |flow travel time for time step
+!!    hrchwtr(:)  |m^3 H2O       |water stored in reach at beginning of time step
+!!    hrtevp(:)   |m^3 H2O       |evaporation from reach during time step
+!!    hrttlc(:)   |m^3 H2O       |transmission losses from reach during time step
+!!    hrtwtr(:)   |m^3 H2O       |water leaving reach during time step
+!!    hsdti(:)    |m^3/s         |average flow rate during time step
 !!    rchdep      |m             |depth of flow on day
 !!    rchstor(:)  |m^3 H2O       |water stored in reach
+!!    rhy(:)      |m H2O         |main channel hydraulic radius
 !!    rtevp       |m^3 H2O       |evaporation from reach on day
 !!    rttime      |hr            |reach travel time
 !!    rttlc       |m^3 H2O       |transmission losses from reach on day
@@ -81,14 +90,15 @@
 !!    c2          |
 !!    c3          |
 !!    c4          |m^3 H2O       |
-!!    det         |hr            |time step (1 hours)
+!!    det         |hr            |time step 
+!!    ii          |none          |counter (Number of operational step during day)
 !!    jrch        |none          |reach number
 !!    p           |m             |wetted perimeter
 !!    rh          |m             |hydraulic radius
 !!    tbase       |none          |flow duration (fraction of 1 hr)
+!!    nstep       |none          |number of steps in a day
 !!    topw        |m             |top width of main channel
-!!    vol         |m^3 H2O       |volume of water in reach at beginning of
-!!                               |day
+!!    vol         |m^3 H2O       |volume of water in reach at beginning of day
 !!    wtrin       |m^3 H2O       |water entering reach on day
 !!    xkm         |hr            |storage time constant for the reach on
 !!                               |current day
@@ -104,21 +114,55 @@
 
 !!    code provided by Dr. Valentina Krysanova, Pottsdam Institute for
 !!    Climate Impact Research, Germany
+!!      Modified by N.Kannan, Blackland Research Center, Temple, USA
   
       use parm
 
       integer :: jrch, ii
-      real :: xkm, det, yy, c1, c2, c3, c4, wtrin, p, vol, c, rh
-      real :: tbase, topw, hrttlc, hrtevp
+      real :: xkm, det, yy, c1, c2, c3, c4, wtrin, p, vol, c
+      real :: tbase, topw
 
       jrch = 0
       jrch = inum1
 
-      do ii = 1, 24
+ !! Compute storage time constant for reach
+      xkm = 0.
+      xkm = phi(10,jrch) * msk_co1 + phi(13,jrch) * msk_co2
+
+      det = idt / 60. 
+
+ !! Compute coefficients
+      yy = 0.
+      c1 = 0.
+      c2 = 0.
+      c3 = 0.
+      c4 = 0.
+      yy = 2. * xkm * (1. - msk_x) + det
+      c1 = (det - 2. * xkm * msk_x) / yy
+      c2 = (det + 2. * xkm * msk_x) / yy
+      c3 = (2. * xkm * (1. - msk_x) - det) / yy
+      c4 = phi(5,jrch) * ch_l2(jrch) * det / yy
+       
+      do ii = 1, nstep   !! begin time step loop
         !! Water entering reach on day
         wtrin = 0.
         wtrin = hhvaroute(2,inum2,ii) * (1. - rnum1)
+ 
+      !! Compute water leaving reach at the end of time step
+        if (curyr == 1 .and. i == id1 .and. ii == 1) then
+         hrtwtr(ii) = c1 * wtrin + c2 * rchstor(jrch) +                 &
+     &                                      c3 * rchstor(jrch) + c4
+        else
+         hrtwtr(ii) = c1 * wtrin + c2 * flwin(jrch) + c3 * flwout(jrch)
+        end if
+        if (hrtwtr(ii) < 1.e-12) hrtwtr(ii) = 0.
 
+
+        !! define flow parameters for current time step
+        flwin(jrch) = 0.
+        flwout(jrch) = 0.
+        flwin(jrch) = wtrin
+        flwout(jrch) = hrtwtr(ii)
         !! calculate volume of water in reach
         vol = 0.
         if (ii == 1) then
@@ -128,7 +172,7 @@
           hrchwtr = hhstor(ii-1)
           vol = wtrin + hhstor(ii-1)
         end if
-        vol = Max(vol,1.e-4)
+        vol = Max(vol,1.e-14) ! changed from e-4 to e-14 for urban modeing by J.Jeong 4/21/2008
 
         !! calculate cross-sectional area of flow
         hharea(ii) = vol / (ch_l2(jrch) * 1000.)
@@ -157,44 +201,17 @@
         end if
 
         !! calculate hydraulic radius
-        rh = 0.
+        rhy(ii) = 0.
         if (p > 0.01) then
-          rh = hharea(ii) / p
+          rhy(ii) = hharea(ii) / p
         else
-          rh = 0.
+          rhy(ii) = 0.
         end if
 
-        !! calculate flow in reach
-        hsdti(ii) = Qman(hharea(ii), rh, ch_n(2,jrch), ch_s(2,jrch))
+        !! calculate flow in reach [m3/s]
+        hsdti(ii) = Qman(hharea(ii), rhy(ii), ch_n(2,jrch),ch_s(2,jrch))
 
-        !! Compute storage time constant for reach
-        xkm = 0.
-        xkm = phi(10,jrch) * msk_co1 + phi(13,jrch) * msk_co2
-
-        det = 1.
-
-        !! Compute coefficients
-        yy = 0.
-        c1 = 0.
-        c2 = 0.
-        c3 = 0.
-        c4 = 0.
-        yy = 2. * xkm * (1. - msk_x) + det
-        c1 = (det - 2. * xkm * msk_x) / yy
-        c2 = (det + 2. * xkm * msk_x) / yy
-        c3 = (2. * xkm * (1. - msk_x) - det) / yy
-        c4 = phi(5,jrch) * ch_l2(jrch) * det / yy
-
-!! Compute water leaving reach on day
-        if (curyr == 1 .and. i == id1 .and. ii == 1) then
-         hrtwtr(ii) = c1 * wtrin + c2 * rchstor(jrch) +                 &
-     &                                           c3 * rchstor(jrch) + c4
-        else
-         hrtwtr(ii) = c1 * wtrin + c2 * flwin(jrch) + c3 * flwout(jrch)
-        end if
-        if (hrtwtr(ii) < 0.) hrtwtr(ii) = 0.
-
-        !! calculate travel time
+        !! calculate travel time[hour]
         if (hsdti(ii) > 1.e-4) then
          hhtime(ii) = ch_l2(jrch) * hharea(ii) / (3.6 * hsdti(ii))
          if (hhtime(ii) < 1.) then
@@ -204,25 +221,18 @@
          end if
         end if
 
-        !! define flow parameters for current day
-        flwin(jrch) = 0.
-        flwout(jrch) = 0.
-        flwin(jrch) = wtrin
-        flwout(jrch) = hrtwtr(ii)
-
         !! calculate transmission losses
         !! transmission losses are ignored if ch_k(2,jrch) is set to zero
         !! in .rte file
         if (hhtime(ii) < 1.) then
-          hrttlc = ch_k(2,jrch) * ch_l2(jrch) * p * hhtime(ii)
+          hrttlc(ii) = ch_k(2,jrch) * ch_l2(jrch) * p * hhtime(ii)
         else
-          hrttlc = ch_k(2,jrch) * ch_l2(jrch) * p
+          hrttlc(ii) = ch_k(2,jrch) * ch_l2(jrch) * p
         end if
-        hrttlc = Min(hrtwtr(ii),hrttlc)
-        hrtwtr(ii) = hrtwtr(ii) - hrttlc
-        rttlc = rttlc + hrttlc
+        hrttlc(ii) = Min(hrtwtr(ii),hrttlc(ii))
+        hrtwtr(ii) = hrtwtr(ii) - hrttlc(ii)
+        rttlc = rttlc + hrttlc(ii)
 
-        hrtevp = 0.
         if (hrtwtr(ii) > 0.) then
           !! calculate flow duration
           tbase = 0.
@@ -239,24 +249,24 @@
 
           !! calculate evaporation
           if (hhtime(ii) < 1.) then
-            hrtevp = evrch * pet_day/24 * ch_l2(jrch) * topw *          &
+            hrtevp(ii) = evrch * pet_day/nstep * ch_l2(jrch) * topw *          &
      &                                                        hhtime(ii)
           else
-            hrtevp = evrch * pet_day/24 * ch_l2(jrch) * topw
+            hrtevp(ii) = evrch * pet_day/nstep * ch_l2(jrch) * topw
           end if
-          if (hrtevp < 0.) hrtevp = 0.
-          hrtevp = Min(hrtwtr(ii),hrtevp)
-          hrtwtr(ii) = hrtwtr(ii) - hrtevp
-          rtevp = rtevp + hrtevp
+          if (hrtevp(ii) < 0.) hrtevp(ii) = 0.
+          hrtevp(ii) = Min(hrtwtr(ii),hrtevp(ii))
+          hrtwtr(ii) = hrtwtr(ii) - hrtevp(ii)
+          rtevp = rtevp + hrtevp(ii)
         end if
 
         !! set volume of water in channel at end of hour
         if (ii == 1) then
-          hhstor(ii) = rchstor(jrch) + wtrin - hrtwtr(ii) - hrtevp -    &
-     &                                                            hrttlc
+          hhstor(ii) = rchstor(jrch) + wtrin - hrtwtr(ii) - hrtevp(ii) -    &
+     &                                                    hrttlc(ii)
         else
-          hhstor(ii) = hhstor(ii-1) + wtrin - hrtwtr(ii) - hrtevp -     &
-     &                                                            hrttlc
+          hhstor(ii) = hhstor(ii-1) + wtrin - hrtwtr(ii) - hrtevp(ii) -     &
+     &                                                    hrttlc(ii)
         end if
         if (hhstor(ii) < 0.) then
           hrtwtr(ii) = hrtwtr(ii) + hhstor(ii)
@@ -264,26 +274,26 @@
           if (hrtwtr(ii) < 0.) hrtwtr(ii) = 0.
         end if
 
-      end do                   !! end hour loop
+      end do                   !! end time step loop
 
 !! calculate amount of water in channel at end of day
-      if (hhstor(24) < 10.) then
-        hrtwtr(24) = hrtwtr(24) + hhstor(24)
-        hhstor(24) = 0.
+      if (hhstor(nstep) < 10.) then
+        hrtwtr(nstep) = hrtwtr(nstep)+hhstor(nstep)
+        hhstor(nstep) = 0.
       end if
-      if (hrtwtr(24) < 0.) hrtwtr(24) = 0.
+      if (hrtwtr(nstep) < 0.) hrtwtr(nstep) = 0.
 
 !! daily average values
       !! set volume of water in reach at end of day
-      rchstor(jrch) = hhstor(24)
+      rchstor(jrch) = hhstor(nstep)
       !! calculate total amount of water leaving reach
       rtwtr = Sum(hrtwtr)
       !! calculate average flow cross-sectional area
-      rcharea = Sum(hharea) / 24.
+      rcharea = Sum(hharea) / nstep
       !! calculate average flow depth
-      rchdep = Sum(hdepth) / 24.
+      rchdep = Sum(hdepth) / nstep
       !! calculate average flow rate
-      sdti = Sum(hsdti) / 24.
+      sdti = Sum(hsdti) / nstep
 
       return
       end

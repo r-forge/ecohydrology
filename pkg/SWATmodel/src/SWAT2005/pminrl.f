@@ -88,7 +88,10 @@
       do l = 1, sol_nly(j)
         rmn1 = 0.
         rmn1 = (sol_solp(l,j) - sol_actp(l,j) * rto)
-        if (rmn1 > 0.) rmn1 = rmn1 * .1
+!!  mike changed/added per isabelle beaudin's email from 01/21/09
+        if (rmn1 > 0.) rmn1 = rmn1 * 0.1
+        if (rmn1 < 0.) rmn1 = rmn1 * 0.6
+!!  mike changed/added per isabelle beaudin's email from 01/21/09
         rmn1 = Min(rmn1, sol_solp(l,j))
 
         roc = 0.

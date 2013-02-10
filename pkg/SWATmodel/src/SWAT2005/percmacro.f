@@ -48,13 +48,14 @@
       use parm
 
       integer :: j, ly
-      real :: sepcrk, crklch = 0.5, xx
+      real :: crklch = 0.5, xx
 
       j = 0
       j = ihru
 
       sepcrk = 0.
       sepcrk = Min(voltot, inflpcp)
+      sepcrktot = sepcrk
       if (sepcrk > 1.e-4) then
         do ly = sol_nly(j), 1, -1
           crk = 0.

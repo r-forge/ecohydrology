@@ -98,29 +98,38 @@
       dstor = 0.
       h2oloss = 0.
 
-      dstor = sno_hru(j) - snoprev + sol_sw(j) - swprev +               &
+      if (ievent<3) then
+          dstor = sno_hru(j) - snoprev + sol_sw(j) - swprev +               &
      &        shallst(j) - shallstp + deepst(j) - deepstp +             &
      &        surf_bs(1,j) - bsprev + bss(1,j) - bssprev
+      else
+         dstor = sno_hru(j) - snoprev + sol_sw(j) - swprev +               &
+     &        shallst(j) - shallstp + deepst(j) - deepstp +             &
+     &        hhsurf_bs(1,j,nstep) - bsprev + bss(1,j) - bssprev
+      endif
 
 !!   subtraction of snoev term in h2oloss variable removed
 !!   this term is already included in the variable:
 !!        etday = ep_day + es_day + canev
 !!   es_day includes the value of the variable snoev (see etact.f routine)
-      h2oloss = subp(j) - qday - latq(j) - etday - gw_q(j) -            &
-     &          revapday + twlpnd + twlwet + aird(j) + rchrg(j) - qtile &
-     &          - sepbtm(j)
+!$$$$$$       h2oloss = subp(j) - qday - latq(j) - etday - gw_q(j) -            &
+!$$$$$$      &          revapday + twlpnd + twlwet + aird(j) + rchrg(j) - qtile &
+!$$$$$$      &          - sepbtm(j)
+      h2oloss = subp(j) - qday - latq(j) - qtile - etday - gw_q(j)      &
+     &          + aird(j) - revapday + rchrg(j) - sepbtm(j) - tloss  
+          
 
-!      write (17,100) iida, sno_hru(j), sol_sw(j), shallst(j), deepst(j),&
-!     &                precipday, snofall, snomlt, snoev, inflpcp, qday, &
-!     &                sepbtm(j), latq(j), es_day, ep_day, rchrg(j),     &
-!     &                gw_q(j), revapday, gwseep, tloss
+!$$$$$$       write (17,100) iida, sno_hru(j), sol_sw(j), shallst(j), deepst(j),&
+!$$$$$$      &                precipday, snofall, snomlt, snoev, inflpcp, qday, &
+!$$$$$$      &                sepbtm(j), latq(j), es_day, ep_day, rchrg(j),     &
+!$$$$$$      &                gw_q(j), revapday, gwseep, tloss
+!$$$$$$ 
+!$$$$$$       write (17,100) iida, dstor, h2oloss
+!     if (Abs(dstor - h2oloss) > 0.001) then
+!       write (17,101) j, iida, curyr, dstor - h2oloss
+!     endif
 
-!      write (17,100) iida, dstor, h2oloss
-!      if (Abs(dstor - h2oloss) > 0.001) then
-!        write (17,101) j, iida, curyr, dstor - h2oloss
-!      endif
-
- 100  format (i4, 20f8.3)
+!$$$$$$  100  format (i4, 20f8.3)
  101  format (' Water Balance Problem - Subbassin', i6,' Day/Year',2i4,
      *  f10.5,' mm')
       return

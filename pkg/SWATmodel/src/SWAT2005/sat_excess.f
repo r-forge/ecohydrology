@@ -58,12 +58,87 @@
 
       use parm
 
-      integer :: j, j1
-      real:: ul_excess
+      integer :: j, j1, ii, isp
+      real:: ul_excess,qlyr,pormm,rtof
 
       j = 0
       j = ihru
+           isp = isep_typ(j)          !! J.Jeong 3/09/09
+      rtof = 0.5
 
+
+       if (isep_opt(j)==2.and.j1==i_sep(j)) then
+        
+        ii = j1 
+        qlyr = sol_st(ii,j)
+        
+        ! distribute excess STE to upper soil layers 
+        do while (qlyr>0.and.ii>1)
+          
+             ! distribute STE to soil layers above biozone layer
+             if (sol_st(ii,j) > sol_ul(ii,j)) then
+            qlyr = sol_st(ii,j) - sol_ul(ii,j)       ! excess water moving to upper layer
+            sol_st(ii,j) = sol_ul(ii,j)  ! layer saturated
+            sol_st(ii-1,j) = sol_st(ii-1,j) + qlyr ! add excess water to upper layer
+         else 
+            qlyr = 0.
+         endif
+        
+          ! Add surface ponding to the 10mm top layer when the top soil layer is saturated
+             !  and surface ponding occurs.
+             if (ii==2) then
+           qlyr = sol_st(1,j) - sol_ul(1,j)
+           ! excess water makes surface runoff
+           if (qlyr>0) then
+               sol_st(1,j) = sol_ul(1,j)
+               surfq(j) = surfq(j) + qlyr 
+                   qvol = qlyr * hru_ha(j) * 10.
+                   ! nutrients in surface runoff
+                   xx = qvol / hru_ha(j) / 1000.
+               surqno3(j) = surqno3(j) + xx 
+     &                      * (sptno3concs(isp) + sptno2concs(isp)) 
+               surqsolp(j) =  surqsolp(j) +  xx * sptminps(isp) 
+               
+               ! Initiate counting the number of days the system fails and makes surface ponding of STE
+               if(sep_tsincefail(j)==0) sep_tsincefail(j) = 1
+           endif
+           qlyr = 0.
+           !nutrients in the first 10mm layer
+               qvol = sol_st(1,j) * hru_ha(j) * 10.
+               xx = qvol / hru_ha(j) / 1000.
+           sol_no3(1,j) = sol_no3(1,j) + xx *(sptno3concs(isp) 
+     &                    + sptno2concs(isp))  
+           sol_nh3(1,j) = sol_nh3(1,j) + xx * sptnh4concs(isp) 
+           sol_orgn(1,j) = sol_orgn(1,j) + xx * sptorgnconcs(isp)
+     &                    * rtof
+           sol_fon(1,j) = sol_fon(1,j) + xx * sptorgnconcs(isp) 
+     &                      * (1.-rtof)
+           sol_orgp(1,j) = sol_orgp(1,j) + xx * sptorgps(isp) * rtof
+           sol_fop(1,j) = sol_fop(1,j) + xx * sptorgps(isp) * (1.-rtof)
+           sol_solp(1,j) = sol_solp(1,j) + xx * sptminps(isp)  
+     
+             endif
+
+         ! volume water in the current layer: m^3
+         qvol = sol_st(ii,j) * hru_ha(j) * 10. 
+         
+             ! add nutrient to soil layer
+             xx = qvol / hru_ha(j) / 1000.
+             sol_no3(ii,j) = sol_no3(ii,j) + xx *  sptno3concs(isp) 
+     &                   + sptno2concs(isp)  
+         sol_nh3(ii,j) = sol_nh3(ii,j) + xx * sptnh4concs(isp) 
+         sol_orgn(ii,j) = sol_orgn(ii,j) + xx * sptorgnconcs(isp) * rtof
+         sol_fon(ii,j) = sol_fon(ii,j) + xx * sptorgnconcs(isp) 
+     &                  * (1.-rtof)
+         sol_orgp(ii,j) = sol_orgp(ii,j) + xx * sptorgps(isp) * rtof
+         sol_fop(ii,j) = sol_fop(ii,j) + xx * sptorgps(isp) * (1.-rtof)
+         sol_solp(ii,j) = sol_solp(ii,j) + xx * sptminps(isp)  
+
+          ii = ii - 1
+        end do
+      endif
+             
+      if (isep_opt(j)==0) then
       if (j1 < sol_nly(j)) then
         if (sol_st(j1,j) - sol_ul(j1,j) > 1.e-4) then
           sepday = sepday + (sol_st(j1,j) - sol_ul(j1,j))
@@ -86,6 +161,7 @@
             end if
             if (j1 == 1 .and. ul_excess > 0.) then
               !! add ul_excess to depressional storage and then to surfq
+              pot_vol(j) = pot_vol(j) + ul_excess
             end if
           end do
           !compute tile flow again after saturation redistribution
@@ -96,6 +172,7 @@
 !           end if
 !         end if
         end if
+      end if
       end if
 
       return

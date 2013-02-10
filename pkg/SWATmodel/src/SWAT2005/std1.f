@@ -42,99 +42,99 @@
       use parm
 
 !!    input summary file
-      write (1,1000) prog,values(2),values(3),values(1),values(5),      &
+      write (24,1000) prog,values(2),values(3),values(1),values(5),      &
      &values(6),values(7)
-      write (1,1010) title
-      write (1,1020) nbyr, da_km
+      write (24,1010) title
+      write (24,1020) nbyr, da_km
       if (igen == 0) then
-        write (1,1030) 
+        write (24,1030) 
       else
-        write (1,1040) igen
+        write (24,1040) igen
       end if
-      write (1,1050) rndseed(idg(1),1)
-      write (1,1051) rndseed(idg(2),1)
-      write (1,1052) rndseed(idg(3),1)
-      write (1,1053) rndseed(idg(4),1)
-      write (1,1054) rndseed(idg(5),1)
-      write (1,1055) rndseed(idg(6),1)
-      write (1,1056) rndseed(idg(7),1)
-      write (1,1057) rndseed(idg(8),1)
-      write (1,1058) rndseed(idg(9),1)
+      write (24,1050) rndseed(idg(1),1)
+      write (24,1051) rndseed(idg(2),1)
+      write (24,1052) rndseed(idg(3),1)
+      write (24,1053) rndseed(idg(4),1)
+      write (24,1054) rndseed(idg(5),1)
+      write (24,1055) rndseed(idg(6),1)
+      write (24,1056) rndseed(idg(7),1)
+      write (24,1057) rndseed(idg(8),1)
+      write (24,1058) rndseed(idg(9),1)
 
-      write (1,1060)
+      write (24,1060)
       select case (pcpsim)
         case (1)
-          write (1,1061)
+          write (24,1061)
           if (ievent > 1) then
-            write (1,1062) idt
+            write (24,1062) idt
           else
-            write (1,1063)
+            write (24,1063)
           end if
         case (2)
-          write (1,1064)
+          write (24,1064)
       end select
-      write (1,1070)
+      write (24,1070)
       select case (tmpsim)
         case (1)
-          write (1,1071)
+          write (24,1071)
         case (2)
-          write (1,1072)
+          write (24,1072)
       end select
 
       select case (ipet)
         case (0)
-          write (1,1080)
+          write (24,1080)
         case (1)
-          write (1,1081)
+          write (24,1081)
         case (2)
-          write (1,1082)
+          write (24,1082)
         case (3)
-          write (1,1083)
+          write (24,1083)
       end select
 
-      write (1,1090)
+      write (24,1090)
       select case (ievent)
         case (0)
-          write (1,1091)
+          write (24,1091)
         case (1)
-          write (1,1092)
+          write (24,1092)
         case (2)
-          write (1,1093)
+          write (24,1093)
         case (3)
-          write (1,1094)
+          write (24,1094)
       end select
       select case (irte)
         case (0)
-          write (1,1095)
+          write (24,1095)
         case (1)
-          write (1,1096)
+          write (24,1096)
       end select
       select case (ideg)
         case (0)
-          write (1,1097)
+          write (24,1097)
         case (1)
-          write (1,1098)
+          write (24,1098)
       end select
       select case (isubwq)
         case (0)
-          write (1,1101)
+          write (24,1101)
         case (1)
-          write (1,1102)
+          write (24,1102)
       end select
       select case (iwq)
         case (0)
-          write (1,1099)
+          write (24,1099)
         case (1)
-          write (1,1100)
+          write (24,1100)
       end select
 
-      if (icrk == 1) write (1,1110)
+      if (icrk == 1) write (24,1110)
 
 !!    standard output file
-      write (2,1000) prog,values(2),values(3),values(1),values(5),      &
+      write (26,1000) prog,values(2),values(3),values(1),values(5),     &
      &values(6),values(7)
-      write (2,1010) title
-      write (2,1020) nbyr, da_km
+      write (26,1010) title
+      write (26,1020) nbyr, da_km
       if (isproj == 1) then
         write (19,1000) prog,values(2),values(3),values(1),values(5),   &
      &  values(6),values(7)

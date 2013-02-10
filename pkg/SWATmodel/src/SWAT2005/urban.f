@@ -18,7 +18,6 @@
 !!    hru_km(:)    |km^2           |area of HRU in square kilometers
 !!    iida         |julian date    |day being simulated (current julian date)
 !!    ihru         |none           |HRU number
-!!    isweep(:,:,:)|julian date    |date of street sweeping operation
 !!    iurban(:)    |none           |urban simulation code:
 !!                                 |0  no urban sections in HRU
 !!                                 |1  urban sections in HRU, simulate using
@@ -127,6 +126,16 @@
   
           sedyld(j) = (.001 * sus_sol) * fimp(urblu(j)) + sedyld(j)     &
      &                                           * (1. - fimp(urblu(j)))
+
+          !! The sediment loading from urban imprevious area is assumed 
+          !! to be all sitly particles
+          silyld(j) = (.001 * sus_sol) * fimp(urblu(j))                 & 
+     &                               + silyld(j) * (1. - fimp(urblu(j)))
+          sanyld(j) = sanyld(j) * (1. - fimp(urblu(j)))
+          clayld(j) = clayld(j) * (1. - fimp(urblu(j)))
+          sagyld(j) = sagyld(j) * (1. - fimp(urblu(j)))
+          lagyld(j) = lagyld(j) * (1. - fimp(urblu(j)))
+
           sedorgn(j) = (.7 * tn / (hru_km(j) * 100.)) * fimp(urblu(j)) +&
      &                                sedorgn(j) * (1. - fimp(urblu(j)))
           surqno3(j) = (.3 * tn / (hru_km(j) * 100.)) * fimp(urblu(j)) +&
@@ -156,6 +165,7 @@
           rp1 = 0.
           durf = 0.
           turo = 0.
+          if(al5==0) al5 = 1e-6    !J.Jeong urban modeling
           rp1 = -2. * Log(1.- al5)
           durf = 4.605 / rp1         
           turo = durf + tconc(j)
@@ -164,7 +174,6 @@
           if (xx > 24.) xx = 24.
           dirt = dirt * Exp (-xx)
           if (dirt < 1.e-6) dirt = 0.0
-          dirt = dirt * Exp(-urbk * turo)
 
           !! set time to correspond to lower amount of dirt
           twash(j) = 0.
@@ -182,6 +191,16 @@
 
           sedyld(j) = (.001 * sus_sol * hru_ha(j)) *                    &
      &                fimp(urblu(j)) + sedyld(j) * (1. - fimp(urblu(j)))
+
+          !! The sediment loading from urban imprevious area is assumed 
+          !! to be all sitly particles
+          silyld(j) = (.001 * sus_sol * hru_ha(j)) *                    &
+     &                fimp(urblu(j)) + silyld(j) * (1. - fimp(urblu(j)))
+          sanyld(j) = sanyld(j) * (1. - fimp(urblu(j)))
+          clayld(j) = clayld(j) * (1. - fimp(urblu(j)))
+          sagyld(j) = sagyld(j) * (1. - fimp(urblu(j)))
+          lagyld(j) = lagyld(j) * (1. - fimp(urblu(j)))
+
           surqno3(j) = tno3 * fimp(urblu(j)) + surqno3(j) *             &
      &                                             (1. - fimp(urblu(j)))
           sedorgn(j) = (tn - tno3) * fimp(urblu(j)) + sedorgn(j) *      &
@@ -194,17 +213,6 @@
           !! dry day
           twash(j) = twash(j) + 1.
 
-          !! perform street sweeping
-          if (isweep(nro(j),nsweep(j),j) > 0 .and.                      &
-     &                          iida >= isweep(nro(j),nsweep(j),j)) then
-            call sweep
-          else if (phusw(nro(j),nsweep(j),j) > 0.0001) then
-            if (igro(j) == 0) then
-              if (phubase(j) > phusw(nro(j),nsweep(j),j)) call sweep
-            else 
-              if (phuacc(j) > phusw(nro(j),nsweep(j),j)) call sweep
-            end if
-          end if
         end if
 
       end select

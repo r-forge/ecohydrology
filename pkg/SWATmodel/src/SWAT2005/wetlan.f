@@ -139,6 +139,11 @@
 
       integer :: j, iseas
       real :: vol, cnv, sed, wetsa, xx, phosk, nitrok, tpco
+      real :: wetsani, wetsili, wetclai, wetsagi, wetlagi
+      real :: san, sil, cla, sag, lag, inised, finsed,setsed,remsetsed
+      real :: wetsano, wetsilo, wetclao, wetsago, wetlago
+      real :: qdayi, latqi
+      
 
       j = 0
       j = ihru
@@ -150,8 +155,23 @@
         !! store initial values
         vol = 0.
         sed = 0.
+        san = 0.
+        sil = 0.
+        cla = 0.
+        sag = 0.
+        lag = 0.
+        inised = 0.
+        finsed = 0.
+        setsed = 0.
+        remsetsed = 0.
+        
         vol = wet_vol(j)
         sed = wet_sed(j)
+        san = wet_san(j)
+        sil = wet_sil(j)
+        cla = wet_cla(j)
+        sag = wet_sag(j)
+        lag = wet_lag(j)
 
         !! calculate water balance for day
         wetsa = 0.
@@ -162,12 +182,33 @@
         wetpcp = subp(j) * wetsa * 10.
 
         !! calculate water flowing into wetland from HRU
-        wetflwi = qdr(j) * 10. * (hru_ha(j) * wet_fr(j) - wetsa)
-        qdr(j) = qdr(j) - qdr(j) * wet_fr(j)
+        wetflwi = qday + latq(j)
+        wetflwi = wetflwi * 10. * (hru_ha(j) * wet_fr(j) - wetsa)
+        qdayi = qday
+        latqi = latq(j)
+        qday = qday * (1. - wet_fr(j))
+        latq(j) = latq(j) * (1. - wet_fr(j))
+        wetloss = qdayi - qday
+        lwetloss = latqi - latq(j)
+
+        qdr(j) = qdr(j) - wetloss - lwetloss
+!       qdr(j) = qdr(j) - qdr(j) * wet_fr(j)
        
         !! sediment loading to wetland from HRU
         wetsedi = sedyld(j) * (wet_fr(j) - (wetsa / hru_ha(j)))
+
+        wetsani = sanyld(j) * (wet_fr(j) - (wetsa / hru_ha(j)))
+        wetsili = silyld(j) * (wet_fr(j) - (wetsa / hru_ha(j)))
+        wetclai = clayld(j) * (wet_fr(j) - (wetsa / hru_ha(j)))
+        wetsagi = sagyld(j) * (wet_fr(j) - (wetsa / hru_ha(j)))
+        wetlagi = lagyld(j) * (wet_fr(j) - (wetsa / hru_ha(j)))
+
         sedyld(j) = sedyld(j) - sedyld(j) * wet_fr(j)
+        sanyld(j) = sanyld(j) - sanyld(j) * wet_fr(j)
+        silyld(j) = silyld(j) - silyld(j) * wet_fr(j)
+        clayld(j) = clayld(j) - clayld(j) * wet_fr(j)
+        sagyld(j) = sagyld(j) - sagyld(j) * wet_fr(j)
+        lagyld(j) = lagyld(j) - lagyld(j) * wet_fr(j)
 
         !! compute nitrogen and phosphorus levels in wetland at beginning
         !! of day
@@ -214,6 +255,13 @@
             wetsep = 0.
           end if
           wet_sed(j) = 0.
+
+          wet_san(j) = 0.
+          wet_sil(j) = 0.
+          wet_cla(j) = 0.
+          wet_sag(j) = 0.
+          wet_lag(j) = 0.
+
           wet_solp(j) = 0.
           wet_psed(j) = 0.
           wet_orgp(j) = 0.
@@ -230,6 +278,12 @@
           !! compute new sediment concentration
           wet_sed(j) = (sed * vol + wetsedi) / wet_vol(j)
 
+          wet_san(j) = (san * vol + wetsani) / wet_vol(j)
+          wet_sil(j) = (sil * vol + wetsili) / wet_vol(j)
+          wet_cla(j) = (cla * vol + wetclai) / wet_vol(j)
+          wet_sag(j) = (sag * vol + wetsagi) / wet_vol(j)
+          wet_lag(j) = (lag * vol + wetlagi) / wet_vol(j)
+
           !! compute outflow if wetland water volume > 0
           if (wet_vol(j) <= wet_nvol(j)) then
             wetflwo = 0.
@@ -242,18 +296,72 @@
               wet_vol(j) = wet_mxvol(j)
             end if
           end if
+          qday= qday + wetflwo / cnv
           qdr(j) = qdr(j) + wetflwo / cnv
 
           !! compute sediment settling
           if (sed_stl(j) < 1.e-6) sed_stl(j) = 0.0
+          inised = wet_sed(j)
           if (wet_sed(j) > wet_nsed(j)) then
             wet_sed(j) = (wet_sed(j) - wet_nsed(j)) * sed_stl(j) +      &
      &                                                       wet_nsed(j)
           end if
+          finsed = wet_sed(j)
+          setsed = inised - finsed
+          setsed = Max(0.,setsed)
+
+          if (wet_lag(j) >= setsed) then
+            wet_lag(j) = wet_lag(j) - setsed
+            remsetsed = 0.
+          else
+            remsetsed = setsed - wet_lag(j)
+            wet_lag(j) = 0.
+            if (wet_san(j) >= remsetsed) then
+              wet_san(j) = wet_san(j) - remsetsed
+              remsetsed = 0.
+            else
+              remsetsed = remsetsed - wet_san(j)
+              wet_san(j) = 0.
+              if (wet_sag(j) >= remsetsed) then
+                wet_sag(j) = wet_sag(j) - remsetsed
+                remsetsed = 0.
+              else
+                remsetsed = remsetsed - wet_sag(j)
+                wet_sag(j) = 0.
+                if (wet_sil(j) >= remsetsed) then
+                    wet_sil(j) = wet_sil(j) - remsetsed
+                  remsetsed = 0.
+                else
+                  remsetsed = remsetsed - wet_sil(j)
+                  wet_sil(j) = 0.
+                  if (wet_cla(j) >= remsetsed) then
+                    wet_cla(j) = wet_cla(j) - remsetsed
+                    remsetsed = 0.
+                  else
+                    remsetsed = remsetsed - wet_cla(j)
+                    wet_cla(j) = 0.
+                  end if
+                end if
+              end if
+            end if
+          end if
 
           !! compute sediment leaving wetland
           wetsedo = wet_sed(j) * wetflwo
+
+          wetsano = wet_san(j) * wetflwo
+          wetsilo = wet_sil(j) * wetflwo
+          wetclao = wet_cla(j) * wetflwo
+          wetsago = wet_sag(j) * wetflwo
+          wetlago = wet_lag(j) * wetflwo
+
           sedyld(j) = sedyld(j) + wetsedo
+
+          sanyld(j) = sanyld(j) + wetsano
+          silyld(j) = silyld(j) + wetsilo
+          clayld(j) = clayld(j) + wetclao
+          sagyld(j) = sagyld(j) + wetsago
+          lagyld(j) = lagyld(j) + wetlago
 
           !! net change in amount of sediment in wetland for day
           wetsedc = vol * sed + wetsedi - wetsedo - wet_sed(j) *        &
@@ -345,7 +453,14 @@
       end if
 
       if (qdr(j) < 0.) qdr(j) = 0.
-      if (sedyld(j) < 0.) sedyld(j) = 0.
+      if (sedyld(j) < 0.) then
+          sedyld(j) = 0.0
+        sanyld(j) = 0.0
+        silyld(j) = 0.0
+        clayld(j) = 0.0
+        sagyld(j) = 0.0
+        lagyld(j) = 0.0
+      end if
 
       return
       end

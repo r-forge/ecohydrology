@@ -21,13 +21,15 @@
  
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
  
-      real :: xx
+      real :: xx, yy
 
-      if (xx < -20.) xx = -20.
-      if (xx > 20.) xx = 20.
+      yy = xx
+
+      if (yy < -20.) yy = -20.
+      if (yy > 20.) yy = 20.
 
       expo = 0.
-      expo = Exp(xx)       
+      expo = Exp(yy)       
 
       return
       end

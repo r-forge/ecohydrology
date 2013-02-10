@@ -23,7 +23,12 @@
 !!    iwave       |none        |flag to differentiate calculation of HRU and
 !!                             |subbasin sediment calculation
 !!                             |iwave = 0 for HRU
-!!                             |iwave = subbasin # for subbasin
+!!                                      MUSLE(sedyld) each hru is calculated
+!!                             |        independently using hru area and 
+!!                             |        adjusted channel length
+!!                             |iwave = 1 subbasin # for subbasin
+!!                                      MUSLE is computed for entire subbasin
+!!                             |        using hru weighted KLSCP
 !!    i_mo        |none        |month being simulated
 !!    nstep       |none        |number of lines of rainfall data for each
 !!                             |day

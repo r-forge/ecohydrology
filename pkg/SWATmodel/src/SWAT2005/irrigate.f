@@ -64,38 +64,9 @@
 !! initialize variable for HRU
 !! (because irrigation can be applied in different command loops
 !! the variable is initialized here)
-      aird(jj) = 0.
 
-
-!! add water to soil layers
-      do k = 1, sol_nly(jj)
-        if (volmm <= 1.e-6) exit
-
-        stx = 0.
-        fcx = 0.
-        stx = sol_st(k,jj)
-        fcx = sol_fc(k,jj)
-
-        if (stx < fcx) then
-          sol_st(k,jj) = 0.
-          if (fcx - stx > volmm) then 
-            sol_st(k,jj) = stx + volmm
-          else
-            sol_st(k,jj) = fcx
-          end if
-
-          yy = 0.
-          yy = sol_st(k,jj) - stx
-          volmm = volmm - yy
-          aird(jj) = aird(jj) + yy
-        end if
-      end do
-
-!! update total soil profile water amount
-      sol_sw(jj) = 0.
-      do k = 1, sol_nly(jj)
-        sol_sw(jj) = sol_sw(jj) + sol_st(k,jj)
-      end do
+      aird(jj) = volmm * (1. - sq_rto)
+      qird(jj) = volmm * sq_rto
 
 !! summary calculations
       if (curyr > nyskip) then 

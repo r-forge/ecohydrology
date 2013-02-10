@@ -8,8 +8,6 @@
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 !!    deepst(:)   |mm H2O        |depth of water in deep aquifer
-!!    hhsubp(:,:) |mm H2O        |precipitation falling during hour in day in
-!!                               |HRU
 !!    ihru        |none          |HRU number
 !!    nstep       |none          |number of lines of rainfall data for each
 !!                               |day
@@ -77,7 +75,6 @@
 !!                               |on the day in HRU
 !!    gwseep      |mm H2O        |amount of water recharging deep aquifer on 
 !!                               |current day
-!!    hhprecip(:) |mm H2O        |precipitation falling during hour in day
 !!    hhqday(:)   |mm H2O        |surface runoff from HRU for every hour in day
 !!    hmntl       |kg N/ha       |amount of nitrogen moving from active
 !!                               |organic to nitrate pool in soil profile
@@ -220,8 +217,8 @@
         cfertn = 0.
         cfertp = 0.
         crk = 0.
-         deepstp = 0.
-         deepstp = deepst(j)
+        deepstp = 0.
+        deepstp = deepst(j)
         enratio = 0.
         ep_day = 0.
         ep_max = 0.
@@ -233,10 +230,6 @@
         grazn = 0.
         grazp = 0.
         gwseep = 0.
-         hhprecip = 0.
-         do ii = 1, 24
-           hhprecip(ii) = hhsubp(j,ii)
-         end do
         hhqday = 0.
         hmntl = 0.
         hmptl = 0.
@@ -254,11 +247,30 @@
         pndsedc = 0.
         pndsedin = 0.
         pndsedo = 0.
+
+        pndsanin = 0.
+        pndsilin = 0.
+        pndclain = 0.
+        pndsagin = 0.
+        pndlagin = 0.
+        pndsano = 0.
+        pndsilo = 0.
+        pndclao = 0.
+        pndsago = 0.
+        pndlago = 0.
+
         pndsep = 0.
         potevmm = 0.
         potflwo = 0.
         potpcpmm = 0.
         potsedo = 0.
+
+        potsano = 0.
+        potsilo = 0.
+        potclao = 0.
+        potsago = 0.
+        potlago = 0.
+
         potsepmm = 0.
          precipday = 0.
          precipday = subp(j)
@@ -279,18 +291,18 @@
         roctl = 0.
         rwntl = 0.
         sepday = 0.
-         shallstp = 0.
-         shallstp = shallst(j)
+        shallstp = 0.
+        shallstp = shallst(j)
         snoev = 0.
         snofall = 0.
         snomlt = 0.
-         snoprev = 0.
-         snoprev = sno_hru(j)
+        snoprev = 0.
+        snoprev = sno_hru(j)
         sol_rd = 0.
         soxy = 0.
         sw_excess = 0.
-         swprev = 0.
-         swprev = sol_sw(j)
+        swprev = 0.
+        swprev = sol_sw(j)
         tloss = 0.
         twlpnd = 0.
         twlwet = 0.
@@ -308,6 +320,13 @@
         wetsedi = 0.
         wetsedo = 0.
         wetsep = 0.
+        
+      !! urban modeling by J.Jeong
+        sedprev = 0.
+        ubnrunoff = 0.
+        irmmdt = 0.
+        hhsedy = 0.
+        ubntss = 0.
 
        return
        end

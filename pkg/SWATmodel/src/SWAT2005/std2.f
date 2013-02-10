@@ -103,11 +103,11 @@
  
       integer :: j
       real :: sumarea, xkm, xch_l1
-      character (len=1) :: kpnd, kbnd, kwet, kubn, kpot, kdrn, kpst
+      character (len=1) :: kpnd, kbnd, kwet, kubn, kpot, kdrn, kpst,ksep
 
 !!    input summary file
         !!write subbasin info
-        write (1,1000)
+        write (24,1000)
         do j = 1, subtot
           kpnd = ""
           kbnd = ""
@@ -127,82 +127,85 @@
           else
             kwet = " "
           end if
-          write (1,1001) j, sub_lat(j), sub_elev(j), hrutot(j), kpnd,   &
-     &                   kbnd, kwet
+          write (24,1001)j, sub_lat(hru_sub(j)), sub_elev(j), hrutot(j), 
+     *         kpnd, kbnd, kwet
 
         end do
 
         !! write HRU info
-        write (1,1020)
+        write (24,1020)
         do j = 1, nhru
           kubn = " "
           kdrn = " "
           kpot = " "
           if (iurban(j) > 0) kubn = "x"
-          if (ipot(j) == j) kpot = "x"
+     !!     if (ipot(j) == j) kpot = "x"
+          if (pot_fr(j) > 0.) kpot = "x"    
           if (ddrain(j) > 0.) kdrn = "x"
-          write (1,1021) hru_sub(j),j,hru_ha(j),hru_slp(j),slsubbsn(j), &
+          write (24,1021)hru_sub(j),j,hru_ha(j),hru_slp(j),slsubbsn(j), &
      &          ov_n(j),cn2(j),tconc(j),esco(j),epco(j)
         end do
         
-        write (1,1028)
+        write (24,1028)
         do j = 1, nhru
-      if (idplt(nro(j),icr(j),j) > 0) then
-         write (1,1029) hru_sub(j), j, hru_ha(j),                       &
-     &                      cpnm(idplt(nro(j),icr(j),j)), snam(j), 
-     &                      cn1(j), cn2(j), cn3(j), sol_sumwp(j),       &
-     &                      sol_sumfc(j), sol_sumul(j)
+      if (idplt(j) > 0) then
+       write (24,1029) hru_sub(j), j, hru_ha(j),cpnm(idplt(j)),snam(j), &
+     &  cn1(j), cn2(j), cn3(j), sol_sumwp(j),sol_sumfc(j), sol_sumul(j)
       else
-        write (1,1030)hru_sub(j), j, hru_ha(j), snam(j), cn1(j), cn2(j),&
+        write (24,1030)hru_sub(j),j,hru_ha(j), snam(j), cn1(j), cn2(j), &
      &   cn3(j), sol_sumwp(j), sol_sumfc(j), sol_sumul(j)
       end if
         end do
 
-        write (1,1022)
+        write (24,1022)
         do j = 1, nhru
-          write (1,1023) hru_sub(j),j,hru_ha(j),snam(j),hydgrp(j),      &
+          write (24,1023) hru_sub(j),j,hru_ha(j),snam(j),hydgrp(j),     &
      &          sol_zmx(j),sol_alb(j),usle_k(j),usle_p(j),usle_ls(j),   &
      &          sol_sumfc(j),sol_sw(j)
         end do
-        write (1,1024)
+        write (24,1024)
         do j = 1, nhru
           kubn = " "
           kdrn = " "
           kpot = " "
           kpst = " "
+          ksep = "   "
           if (iurban(j) > 0) kubn = "x"
-          if (ipot(j) == j) kpot = "x"
+       !!   if (ipot(j) == j) kpot = "x"
+          if (pot_fr(j) > 0.) kpot = "x"
           if (ddrain(j) > 0.) kdrn = "x"
           if (hrupest(j) > 0.) kpst = "x"
-          write (1,1025) hru_sub(j),j,hru_ha(j),kubn,kirr(j),kdrn,kpot, &
-     &          kpst,biomix(j)
+          if (isep_hru(j) == 1) ksep = "x"
+
+          write (24,1025) hru_sub(j),j,hru_ha(j),kubn,kirr(j),kdrn,kpot,&
+     &          kpst,biomix(j),ksep
         end do
-        write (1,1026)
+        write (24,1026)
         do j = 1, nhru
-          write (1,1027) hru_sub(j),j,hru_ha(j),delay(j),alpha_bf(j),   &
+          write (24,1027) hru_sub(j),j,hru_ha(j),delay(j),alpha_bf(j),  &
      &          gwqmn(j),gw_revap(j),revapmn(j),rchrg_dp(j),gwno3(j),   &
      &          gwminp(j)
         end do
 
       !! write reach characteristics
-      write (1,1010)
+      write (24,1010)
       if (irte == 1) then
-        write (1,1013)
+        write (24,1013)
         do j = 1, subtot
           xmk = 0.
           xkm = phi(10,j) * msk_co1 + phi(13,j) * msk_co2
           xch_l1 = 0.
           xch_l1 = ch_l1(hru1(j)) / hru_fr(hru1(j))
-          write (1,1014) j,xch_l1,ch_s(1,j),ch_w(1,j),ch_k(1,j)         &
+          write (24,1014) j,xch_l1,ch_s(1,j),ch_w(1,j),ch_k(1,j)        &
      &          ,ch_n(1,j),ch_l2(j),ch_s(2,j),ch_w(2,j),ch_d(j),        &
      &          ch_k(2,j),ch_n(2,j),xkm
         end do
       else
-        write (1,1011)
+        write (24,1011)
         do j = 1, subtot
           xch_l1 = 0.
           xch_l1 = ch_l1(hru1(j)) / hru_fr(hru1(j))
-          write (1,1012) j,xch_l1,ch_s(1,j),ch_w(1,j),ch_k(1,j)         &
+          write (24,1012) j,xch_l1,ch_s(1,j),ch_w(1,j),ch_k(1,j)        &
      &          ,ch_n(1,j),ch_l2(j),ch_s(2,j),ch_w(2,j),ch_d(j),        &
      &          ch_k(2,j),ch_n(2,j)
         end do
@@ -211,7 +214,7 @@
 !!    standard output file
       sumarea = 0.
       sumarea = Sum(hru_fr)
-      !if (sumarea < .9999) write (2,2000) sumarea
+      !if (sumarea < .9999) write (26,2000) sumarea
  
 !!    chan.deg file
       do j = 1, nrch
@@ -235,35 +238,36 @@
      &       /t10,' Sub  Length(km) Slope Width(m) Cond(mm/hr)     N',  &
      &       1x,'Length(km) Slope Width(m) Depth(m) Cond(mm/hr)     N', &
      &       '  MSK_K')
- 1014 format (t10,i4,2x,f10.2,f6.3,f9.2,f12.4,1x,f5.3,1x,f10.2,f6.3,    &
+ 1014 format (t10,i6,2x,f10.2,f6.3,f9.2,f12.4,1x,f5.3,1x,f10.2,f6.3,    &
      &        2f9.2,f12.4,1x,f5.3,1x,f6.3)
  1020 format (/t10,'HRU Input Summary Table 1:',/t10,                   &
      &       ' Sub   HRU   Area(ha) Slope SlpLgth(m) Ovrlnd_N CondII_CN'&
      &       ,' TimeConc(hr) ESCO EPCO')
- 1021 format (t10,i4,1x,i5,f11.2,f6.3,f11.2,f9.3,f10.2,f13.3,2f5.2)
+ 1021 format (t10,i4,1x,i6,f11.2,f6.3,f11.2,f9.3,f10.2,f13.3,2f5.2)
  1022 format (/t10,'HRU Input Summary Table 2:',/t10,                   &
      &       ' Sub   HRU   Area(ha)         SoilName Hydgrp MaxRtDpth', &
      &       '(mm) Albedo USLE_K USLE_P USLE_LS ProfileAWC(mm) IniSoil',&
      &       'H2O(mm)')
- 1023 format (t10,i4,1x,i5,f11.2,1x,a16,3x,a1,3x,f14.2,3f7.2,f8.2,f11.3,&
+ 1023 format (t10,i4,1x,i6,f11.2,1x,a16,3x,a1,3x,f14.2,3f7.2,f8.2,f11.3,&
      &       f15.3)
  1024 format (/t10,'HRU Input Summary Table 3:',/t10,                   &
      &       ' Sub   HRU   Area(ha) Urban Irrig DrainTiles Pothole',    &
-     &       ' Pstcide Biomix')
- 1025 format (t10,i4,1x,i5,f11.2,3x,a1,5x,a1,8x,a1,8x,a1,6x,a1,5x,f6.2)
+     &       ' Pstcide Biomix Septic')
+ 1025 format (t10,i4,1x,i6,f11.2,3x,a1,5x,a1,8x,a1,8x,a1,6x,a1,5x,f6.2, &
+     & 1x,a1)
  1026 format (/t10,'HRU Input Summary Table 4 (Groundwater):',/t10,     &
      &       ' Sub   HRU   Area(ha) GWdelay(days), GWalpha(days)',      &
      &       ' GWQmin(mm) GWrevap Revapmin(mm) Deepfr NO3(ppm)',        &
      &       ' SolP(ppm)')
- 1027 format (t10,i4,1x,i5,f11.2,2f14.3,f11.3,f8.3,f13.3,f7.3,f9.3,     &
+ 1027 format (t10,i4,1x,i6,f11.2,2f14.3,f11.3,f8.3,f13.3,f7.3,f9.3,     &
      &       f10.3)
  1028 format (/t10,'HRU CN Input Summary Table:',/t10,                  &
      &       ' Sub   HRU   Area(ha)  LULC      Soil    CN1    CN2    ', &
      &       'CN3  Wilting Point (mm H2O)  Field Capacity (mm H2O)',    &
      &       '  Saturation (mm H2O)')
- 1029 format (t10,i4,1x,i5,f11.2,2x,a4,2x,a8,3f7.1,18x,f6.1,19x,f6.1,   &
+ 1029 format (t10,i4,1x,i6,f11.2,2x,a4,2x,a8,3f7.1,18x,f6.1,19x,f6.1,   &
      &       15x,f6.1)
- 1030 format (t10,i4,1x,i5,f11.2,2x,'BARR',2x,a8,3f7.1,18x,f6.1,19x,f6.1   &
+ 1030 format (t10,i4,1x,i6,f11.2,2x,'BARR',2x,a8,3f7.1,18x,f6.1,19x,f6.1   &
      &       ,15x,f6.1)
  2000 format (//,' AREA DOES NOT SUM TO ONE   ', f8.6,//)
  3000 format (i4,3f12.4)

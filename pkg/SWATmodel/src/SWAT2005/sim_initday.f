@@ -16,8 +16,6 @@
 !!    flat(:,:)   |mm H2O        |lateral flow storage array
 !!    frad(:,:)   |none          |fraction of solar radiation occuring during 
 !!                               |hour in day in HRU
-!!    hhsubp(:,:) |mm H2O        |precipitation falling during hour in day in
-!!                               |HRU
 !!    hru_ra(:)   |MJ/m^2        |solar radiation for the day in HRU
 !!    hru_rmx(:)  |MJ/m^2        |maximum possible radiation for the day in HRU
 !!    mo_chk      |none          |check for month being simulated; when mo_chk
@@ -67,6 +65,7 @@
 !!                               |subbasin
 !!    sub_surfq(:)|mm H2O        |surface runoff generated on day in subbasin
 !!    sub_sw(:)   |mm H2O        |amount of water in soil on day in subbasin
+!!    sub_tileno3 |kg N/ha       |NO3 in tile flow on day in subbasin       
 !!    sub_tran(:) |mm H2O        |transmission losses on day in subbasin
 !!    sub_wyld(:) |mm H2O        |water yield on day in subbasin
 !!    sub_yorgn(:)|kg N/ha       |organic N loading on day in subbasin
@@ -95,10 +94,11 @@
       drift = 0.
       flat = 0.
       frad = 0.
-      hhsubp = 0.
+!      gwq_ru = 0.
       hru_ra = 0.
       hru_rmx = 0.
       hrupstd = 0.
+        irr_flag = 0
       latno3 = 0.
       latq = 0.
       minpgw = 0.
@@ -114,12 +114,21 @@
       qdr = 0.
       rainsub = 0.
       rchdy = 0.
+      rchrg_src = 0.    !CB 8/24/09
       rhd = 0.
       sedminpa = 0.
       sedminps = 0.
       sedorgn = 0.
       sedorgp = 0.
+
       sedyld = 0.
+      sanyld = 0.
+      silyld = 0.
+      clayld = 0.
+      sagyld = 0.
+      lagyld = 0.
+      grayld = 0.
+
       sepbtm = 0.
       sol_cnsw = 0.
       sol_prk = 0.
@@ -127,7 +136,7 @@
       strsn = 1.
       strsp = 1.
       strstmp = 1.
-      strsw = 1.
+!!  NUBZ    strsw = 1.
       sub_bactlp = 0.
       sub_bactp = 0.
       sub_bd = 0.
@@ -142,6 +151,7 @@
       sub_hhwtmp = 0.
       sub_latno3 = 0.
       sub_latq = 0.
+      sub_tileq = 0.
       sub_minp = 0.
       sub_minpa = 0.
       sub_minps = 0.
@@ -154,7 +164,15 @@
       sub_qd = 0.
       sub_sedpa = 0.
       sub_sedps = 0.
+
       sub_sedy = 0.
+      sub_dsan = 0.
+      sub_dsil = 0.
+      sub_dcla = 0.
+      sub_dsag = 0.
+      sub_dlag = 0.
+      sub_dgra = 0.
+
       sub_sep = 0.
       sub_snom = 0.
       sub_solp = 0.
@@ -164,6 +182,7 @@
       sub_sumfc = 0.
       sub_surfq = 0.
       sub_sw = 0.
+      sub_tileno3 = 0.
       sub_tran = 0.
       sub_wtmp = 0.
       sub_wyld = 0.
@@ -174,6 +193,7 @@
       surqno3 = 0.
       surqsolp = 0.
       tavband = 0.
+      tileno3 = 0.    !CB 8/24/09
       tmn = 0.
       tmnband = 0.
       tmpav = 0.
@@ -185,7 +205,50 @@
       wshddayo = 0.
 
       mo_chk = i_mo
+!----------------------------------------------------        
+! added by J.Jeong for urban modeling 4/29/2008
+      ubnrunoff = 0.
+      ubntss = 0.
+      sub_ubnrunoff = 0.
+      sub_ubntss = 0.
+      latq = 0.
+        sub_subp_dt = 0.
+        sub_hhsedy = 0.
+      sub_atmp = 0.
+        rchhr = 0.
+!-----------------------------------------------------        
 
+      !!add by zhang
+      !!==========================
+        sedc_d = 0.
+        surfqc_d =0.
+        latc_d = 0.
+        percc_d = 0.
+        foc_d = 0.
+        NPPC_d = 0.
+        rsdc_d = 0. 
+        grainc_d = 0.
+        stoverc_d = 0.
+        emitc_d = 0.
+        soc_d = 0.  
+        rspc_d = 0.   
 
+      sub_sedc_d =0.
+      sub_surfqc_d=0.
+      sub_latc_d=0.
+      sub_percc_d=0.
+      sub_foc_d=0.
+      sub_NEPC_d=0.
+      sub_rsdc_d=0.
+      sub_grainc_d=0.
+      sub_stover_c_d=0.
+      sub_emit_c_d=0.
+      sub_soc_d      =0.
+      sub_rspc_d =0.
+      !!add by zhang
+      !!==========================
+      
+      
+      
       return
       end

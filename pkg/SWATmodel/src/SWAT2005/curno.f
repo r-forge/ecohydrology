@@ -60,7 +60,9 @@
       integer, intent (in) :: h
       real, intent (in) :: cnn
       real :: c2, s3, rto3, rtos
-
+   
+      cn2(h) = cnn
+      if (cn1(h) > 1.e-6) smxold = 254.* (100. / cn1(h) - 1.)
       c2 = 0.
       cn3(h) = 0.
       s3 = 0.
@@ -74,6 +76,7 @@
 
 !! calculate maximum retention parameter value
       smx(h) = 254. * (100. / cn1(h) - 1.)
+
 !! calculate retention parameter value for CN3
       s3 = 254. * (100. / cn3(h) - 1.)
 
@@ -85,7 +88,11 @@
 !! calculate shape parameters
       call ascrv(rto3,rtos,sol_sumfc(h),sol_sumul(h),wrt(1,h),wrt(2,h))
 
-      sci(h) = .9 * smx(h)                          !new cn method (plant ET)
+      if (curyr == 0) then
+        sci(h) = 0.9 * smx(h)
+      else
+        sci(h) = (1. - ((smxold - sci(h)) / smxold)) * smx(h)      !! plant ET
+      end if
 
       return
       end

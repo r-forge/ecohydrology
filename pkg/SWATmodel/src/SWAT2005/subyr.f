@@ -82,20 +82,21 @@
         pdvab(19) = 0.0
         pdvab(20) = 0.0
         pdvab(21) = 0.0
+        pdvab(22) = subyro(18,sb)    !!tile_no3
 
         if (ipdvab(1) > 0) then
           do ii = 1, itotb
             pdvb(ii) = pdvab(ipdvab(ii))
           end do
-          write (9996,1000) sb, subgis(sb), iyr, sub_km(sb),            &
+          write (31,1000) sb, subgis(sb), iyr, sub_km(sb),              &
      &                                         (pdvb(ii), ii = 1, itotb)
         else
-          write (9996,1000) sb, subgis(sb), iyr, sub_km(sb),            &
+          write (31,1000) sb, subgis(sb), iyr, sub_km(sb),              &
      &                                        (pdvab(ii), ii = 1, msubo)
         end if
       end do
 
       return
 !1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,21f10.3)
- 1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,18f10.3,1x,e10.5,2f10.3)
+ 1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,18f10.3,1x,e10.5,3e10.3)
       end 

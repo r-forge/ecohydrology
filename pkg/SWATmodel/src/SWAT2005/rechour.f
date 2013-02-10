@@ -108,12 +108,12 @@
       iyp = 0
       do j = 1, mvaro
         varoute(j,ihout) = 0.
-        do ii = 1, 24
+        do ii = 1, nstep   ! subhourly time step, jaehak jeong
           hhvaroute(j,ihout,ii) = 0.
         end do
       end do
 
-      do ii = 1, 24
+      do ii = 1, nstep   ! subhourly time step, jaehak jeong
         flohr = 0.
         sedhr = 0.
         orgnhr = 0.
@@ -186,6 +186,14 @@
         varoute(20,ihout) = varoute(20,ihout) + cmtl1hr
         varoute(21,ihout) = varoute(21,ihout) + cmtl2hr
         varoute(22,ihout) = varoute(22,ihout) + cmtl3hr
+
+      !! Assumed equal distribution of sediment
+      varoute(23,ihout) = varoute(23,ihout) + sedhr * 0.   ! sand
+      varoute(24,ihout) = varoute(24,ihout) + sedhr * 1.   ! silt
+      varoute(25,ihout) = varoute(25,ihout) + sedhr * 0.   ! cla
+      varoute(26,ihout) = varoute(26,ihout) + sedhr * 0.   ! sag
+      varoute(27,ihout) = varoute(27,ihout) + sedhr * 0.   ! lag
+      varoute(28,ihout) = 0.                    ! gravel
 
       end do
 

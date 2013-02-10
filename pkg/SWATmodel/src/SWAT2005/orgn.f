@@ -67,36 +67,23 @@
       j = ihru
 
       xx = 0.
+      wt1 = 0.    !! conversion factor
+      er = 0.            !! enrichment ratio
       if (iwave <= 0) then
         !! HRU calculations
         xx = sol_orgn(1,j) + sol_aorgn(1,j) + sol_fon(1,j)
-      else
-        !! subbasin calculations
-        xx = sub_orgn(iwave)
-      end if
-
-      !! conversion factor
-      wt1 = 0.
-      if (iwave <= 0) then
-        !! HRU calculations
         wt1 = sol_bd(1,j) * sol_z(1,j) / 100.
-      else
-        !! subbasin calculations
-        wt1 = sub_bd(iwave) * sol_z(1,j) / 100.
-            !! sol_z(1,j) equals 10 mm for all HRUS
-      end if
 
-      !! enrichment ratio
-      er = 0.
-      if (iwave <= 0) then
-        !! HRU calculations
         if (erorgn(j) > .001) then
           er = erorgn(j)
         else
           er = enratio
         end if
+
       else
         !! subbasin calculations
+        xx = sub_orgn(iwave)
+        wt1 = sub_bd(iwave) * sol_z(1,j) / 100.
         er = enratio
       end if
 
@@ -111,7 +98,7 @@
         sedorgn(j) = .001 * conc * sedyld(j) / (da_ha * sub_fr(iwave))
       end if
 
-!! update soil nitrogen pools only for HRU calculations
+      !! update soil nitrogen pools only for HRU calculations
       if (iwave <= 0 .and. xx > 1.e-6) then
        sol_aorgn(1,j) = sol_aorgn(1,j) - sedorgn(j) *                   &
      &                                             (sol_aorgn(1,j) / xx)
@@ -135,4 +122,4 @@
       end if
 
       return
-      end
+      end subroutine

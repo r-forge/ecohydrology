@@ -17,7 +17,7 @@
 !!    ~ ~ ~ OUTGOING VARIABLES ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-!!    chside(:)   |none          |change in horizontal distance per unit
+!!    chsslope(:)   |none          |change in horizontal distance per unit
 !!                               |change in vertical distance on channel side
 !!                               |slopes; always set to 2 (slope=1/2)
 !!    phi(1,:)    |m^2           |cross-sectional area of flow at bankfull
@@ -83,18 +83,25 @@
       aa = 1.
       b = 0.
       d = 0.
-      chside(k) = 2.
+!!    If side slope is not set in .rte file then assume this default
+!!    If it is main reach default side slope to 2:1 if it is a waterway default to 8:1
+      if (chside(k) <= 1.e-6) then
+         chsslope = 2.
+      else
+         chsslope = chside(k)
+      end if
+
       fps = 4.
       d = ch_d(k)
-      b = ch_w(2,k) - 2. * d * chside(k)
+      b = ch_w(2,k) - 2. * d * chsslope
 
 
 !!    check if bottom width (b) is < 0
       if (b <= 0.) then
         b = 0.
-        chside(k) = 0.
+        chsslope = 0.
         b = .5 * ch_w(2,k)
-        chside(k) = (ch_w(2,k) - b) / (2. * d)
+        chsslope = (ch_w(2,k) - b) / (2. * d)
       end if
       phi(6,k) = b
       phi(7,k) = d
@@ -104,8 +111,8 @@
       a = 0.
       rh = 0.
       tt2 = 0.
-      p = b + 2. * d * Sqrt(chside(k) * chside(k) + 1.)
-      a = b * d + chside(k) * d * d
+      p = b + 2. * d * Sqrt(chsslope * chsslope + 1.)
+      a = b * d + chsslope * d * d
       rh = a / p
       phi(1,k) = a
       phi(5,k) = Qman(a, rh, ch_n(2,k), ch_s(2,k))
@@ -134,8 +141,8 @@
       qq1 = 0.
       tt1 = 0.
       d = 0.1 * ch_d(k)
-      p = b + 2. * d * Sqrt(chside(k) * chside(k) + 1.)
-      a = b * d + chside(k) * d * d
+      p = b + 2. * d * Sqrt(chsslope * chsslope + 1.)
+      a = b * d + chsslope * d * d
       rh = a / p
       qq1 = Qman(a, rh, ch_n(2,k), ch_s(2,k))
       tt1 = ch_l2(k) * a / qq1

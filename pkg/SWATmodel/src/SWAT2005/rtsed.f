@@ -7,15 +7,15 @@
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!    ch_cov(:)   |none          |channel cover factor (0.0-1.0)
+!!    ch_cov1(:)  |none          |channel erodibility factor (0.0-1.0)
+!!                               |0 non-erosive channel
+!!                               |1 no resistance to erosion
+!!    ch_cov2(:)  |none          |channel cover factor (0.0-1.0)
 !!                               |0 channel is completely protected from
 !!                               |  erosion by cover
 !!                               |1 no vegetative cover on channel
 !!    ch_d(:)     |m             |average depth of main channel
 !!    ch_di(:)    |m             |initial depth of main channel
-!!    ch_erod(:)  |none          |channel erodibility factor (0.0-1.0)
-!!                               |0 non-erosive channel
-!!                               |1 no resistance to erosion
 !!    ch_li(:)    |km            |initial length of main channel
 !!    ch_n(2,:)   |none          |Manning's "n" value for the main channel
 !!    ch_s(2,:)   |m/m           |average slope of main channel
@@ -80,11 +80,12 @@
       use parm
 
       integer :: jrch
-      real :: qdin, sedin, vc, cyin, cych, depnet, deg, dep
-      real :: depdeg, dot
+      real :: qdin, sedin, vc, cyin, cych, depnet, deg1, deg2, dep
+      real :: depdeg, dot, outfract, deg
 
       jrch = 0
       jrch = inum1
+      sedin = 0.0
 
       if (rtwtr > 0. .and. rchdep > 0.) then
 
@@ -93,13 +94,12 @@
       qdin = rtwtr + rchstor(jrch)
 
 !! do not perform sediment routing if no water in reach
-      if (qdin <= 0.01) return
+      if (qdin > 0.01) then
 
 !! initialize sediment in reach during time step
       sedin = 0.
-      if (varoute(3,inum2) < 1.e-6) varoute(3,inum2) = 0.0
       sedin = varoute(3,inum2) * (1. - rnum1) + sedst(jrch)
-
+      sedinorg = sedin
 !! initialize reach peak runoff rate
       peakr = prf * sdti
 
@@ -112,38 +112,94 @@
       end if
       if (vc > 5.) vc = 5.
 
+      tbase = 0.
+      tbase = ch_l2(jrch) * 1000. / (3600. * 24. * vc)
+
+      if (tbase > 1.) tbase = 1.
+
+
 !! JIMMY'S NEW IMPROVED METHOD for sediment transport
       cyin = 0.
       cych = 0.
       depnet = 0.
-      deg = 0.
+        deg = 0.
+      deg1 = 0.
+        deg2 = 0.
       dep = 0.
-      if (sedin < 1.e-6) sedin = 0.0      !!nbs 02/05/07
       cyin = sedin / qdin
       cych = spcon * vc ** spexp
       depnet = qdin * (cych - cyin)
-      if (depnet > 0.) then
-        if (vc < vcrit) depnet = 0.
-          deg = depnet * ch_erodmo(jrch,i_mo) * ch_cov(jrch)
+      if(abs(depnet) < 1.e-6) depnet = 0.
+      if (vc < vcrit) depnet = 0.
+
+!!  tbase is multiplied so that erosion is proportional to the traveltime, 
+!!  which is directly related to the length of the channel
+!!  Otherwise for the same discharge rate and sediment deficit
+!!  the model will erode more sediment per unit length of channel 
+!!  from a small channel than a larger channel. Modification made by Balaji Narasimhan
+
+      if (depnet > 1.e-6) then
+        deg = depnet * tbase
+        !! First the deposited material will be degraded before channel bed
+        if (deg >= depch(jrch)) then
+          deg1 = depch(jrch)
+          deg2 = (deg - deg1) * ch_erodmo(jrch,i_mo)*ch_cov2(jrch)
+        else
+          deg1 = deg
+          deg2 = 0.
+        endif
         dep = 0.
-         ch_orgn(jrch) = deg * ch_onco(jrch) * 1000.
-         ch_orgp(jrch) = deg * ch_opco(jrch) * 1000.
       else
-        dep = -depnet
+        dep = -depnet * tbase
         deg = 0.
+        deg1 = 0.
+        deg2 = 0.
       endif
 
-      sedst(jrch) = sedin + deg - dep
-      sedrch = sedst(jrch) * rtwtr / qdin
-      if (sedrch < 0.) sedrch = 0.
-      sedst(jrch) = sedst(jrch) - sedrch
-      if (sedst(jrch) < 0.) sedst(jrch) = 0.
+      depch(jrch) = depch(jrch) + dep - deg1
+      if (depch(jrch) < 1.e-6) depch(jrch) = 0.
 
-      rch_san = .1 * sedrch
-      rch_sil = .2 * sedrch
-      rch_cla = .3 * sedrch
-      rch_sag = .15 * sedrch
-      rch_lag = .25 * sedrch
+      sedin = sedin + deg1 + deg2 - dep
+      if (sedin < 1.e-6) sedin = 0.
+
+      outfract = rtwtr / qdin
+      if (outfract > 1.) outfract = 1.
+
+      sedrch = sedin * outfract
+      if (sedrch < 1.e-6) sedrch = 0.
+
+      sedst(jrch) = sedin - sedrch
+      if (sedst(jrch) < 1.e-6) sedst(jrch) = 0.
+
+!!    Mass balance tests
+!!      ambalsed = sedinorg + deg1 + deg2 - dep - sedrch - sedst(jrch)
+!!      if (ambalsed .gt. 1e-3) write (*,*) iida, jrch, ambalsed
+
+!!  In this default sediment routing sediment is not tracked by particle size
+      rch_san = 0.
+      rch_sil = sedrch  !! As particles are not tracked by size, the sediments 
+      rch_cla = 0.      !! in reach is assumed to be silt for mass conservation
+      rch_sag = 0.
+      rch_lag = 0.
+      rch_gra = 0.
+
+!!    Bank erosion
+      rchdy(55,jrch) = 0.
+!!    Channel Degredation
+      rchdy(56,jrch) = deg2
+!!    Channel Deposition
+      rchdy(57,jrch) = dep
+!!    Floodplain Deposition
+      rchdy(58,jrch) = 0.
+!!    Total suspended sediments
+      rchdy(59,jrch) = sedrch / rtwtr * 1.e6
+
+!!    Organic nitrogen and Organic Phosphorus contribution from channel erosion
+!!    ch_orgn(jrch) = deg2 * ch_onco(jrch) * 1000.
+!!    ch_orgp(jrch) = deg2 * ch_opco(jrch) * 1000.
+
+      ch_orgn(jrch) = deg2 * ch_onco(jrch) / 1000.
+      ch_orgp(jrch) = deg2 * ch_opco(jrch) / 1000.
 
 !! compute changes in channel dimensions
       if (ideg == 1) then
@@ -152,7 +208,7 @@
         if (depdeg < ch_si(jrch) * ch_li(jrch) * 1000.) then
           if (qdin > 1400000.) then
             dot = 0.
-            dot = 358.6 * rchdep * ch_s(2,jrch) * ch_erod(jrch) 
+            dot = 358.6 * rchdep * ch_s(2,jrch) * ch_cov1(jrch) 
             dat2 = 1.
             dat2 =  dat2 * dot
             ch_d(jrch) = ch_d(jrch) + dat2
@@ -164,7 +220,29 @@
         endif
       endif
 
-      end if
+      else
+        sedrch = 0.
+        rch_san = 0.
+        rch_sil = 0.
+        rch_cla = 0.
+        rch_sag = 0.
+        rch_lag = 0.
+        rch_gra = 0.
+        sedst(jrch) = sedin
+!!    Bank erosion
+      rchdy(55,jrch) = 0.
+!!    Channel Degredation
+      rchdy(56,jrch) = 0.
+!!    Channel Deposition
+      rchdy(57,jrch) = 0.
+!!    Floodplain Deposition
+      rchdy(58,jrch) = 0.
+!!    Total suspended sediments
+      rchdy(59,jrch) = 0.
+
+      endif !! end of qdin > 0.01 loop
+
+      endif  !! end of rtwtr and rchdep > 0 loop
 
       return
       end

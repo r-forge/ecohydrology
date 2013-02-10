@@ -58,19 +58,24 @@
       call header
 
 !! write headings to HRU output file (output.hru)
-      write (3,1000) prog, values(2), values(3), values(1), values(5),  &
+      write (28,1000) prog, values(2), values(3), values(1), values(5), &
      &               values(6), values(7)
-      write (3,1010) title
+      write (28,1010) title
+      
+
       if (ipdvas(1) > 0) then
-        write (3,1020) (heds(ipdvas(j)), j = 1, itots) !!custom printout
+        if (icalen == 0) write (28,1020) (heds(ipdvas(j)), j = 1, itots) !!custom printout
+        if (icalen == 1) write (28,1021) (heds(ipdvas(j)), j = 1, itots) !!custom printout
       else
-        write (3,1020) (heds(j), j = 1, mhruo)         !!default printout
+        if (icalen == 0) write (28,1020) (heds(j), j = 1, mhruo)         !!default printout
+        if (icalen == 1) write (28,1021) (heds(j), j = 1, mhruo)         !!default printout        
       endif
+
 !! write headings to HRU output file (output2.hru)
       if (isproj == 1) then
-      write (21,1000) prog, values(2), values(3), values(1), values(5), &
+        write (21,1000)prog, values(2), values(3), values(1), values(5), &
      &               values(6), values(7)
-      write (21,1010) title
+        write (21,1010) title
       if (ipdvas(1) > 0) then
         write (21,1020) (heds(ipdvas(j)), j = 1, itots) !!custom printout
       else
@@ -78,69 +83,56 @@
       endif
       endif
 
-!! write headings to VB interface HRU output file (hru.dat)
-      ilen = 10
-      if (ipdvas(1) > 0) then
-        write (12,2000) (heds(ipdvas(j)), icols(ipdvas(j)), ilen,       &
-     &                  j = 1, itots)
-      else
-        write (12,2000) (heds(j), icols(j), ilen, j = 1, mhruo)
-      endif
-      close (12)
-
-
 !! write headings to subbasin output file (output.sub)
-      write (9996,1000) prog,values(2),values(3),values(1), values(5),  &
-     &                values(6), values(7)
-      write (9996,1010) title
-      if (ipdvab(1) > 0) then
-        write (9996,1030) (hedb(ipdvab(j)), j = 1, itotb) !!custom printout
-      else
-        write (9996,1030) (hedb(j), j = 1, msubo)         !!default printout
-      endif
+      write (31,1000) prog, values(2), values(3), values(1), values(5), &
+     &    values(6), values(7)
+      write (31,1010) title
 
-!! write headings to VB interface subbasin output file (sub.dat)
-      ilen = 10
+      
       if (ipdvab(1) > 0) then
-        write (13,2000) (hedb(ipdvab(j)), icolb(ipdvab(j)), ilen,       &
-     &                  j = 1, itotb)
+        if (icalen == 0) write (31,1030) (hedb(ipdvab(j)), j = 1, itotb) !!custom printout
+        if (icalen == 1) write (31,1031) (hedb(ipdvab(j)), j = 1, itotb) !! month/day/yr print
       else
-        write (13,2000) (hedb(j), icolb(j), ilen, j = 1, msubo)
+        if (icalen == 0) write (31,1030) (hedb(j), j = 1, msubo)         !!default printout
+        if (icalen == 1) write (31,1031) (hedb(j), j = 1, msubo)         !!month/day/yr print
+1031  format (//6x,' SUB      GIS  MO DA  YR   AREAkm2',22(a10))
       endif
-      close (13)
-
 
 !! write headings to reach output file (output.rch)
       write (7,1000) prog, values(2), values(3), values(1), values(5),  &
      &               values(6), values(7)
       write (7,1010) title
+
+
       if (ipdvar(1) > 0) then
-        write (7,1040) (hedr(ipdvar(j)), j = 1, itotr)  !! custom printout
-      else
-        write (7,1040) (hedr(j), j = 1, mrcho)          !! default printout
+        if (iprint /= 3) then
+         if (icalen == 0) write (7,1040) (hedr(ipdvar(j)), j = 1, itotr)  !! daily/monthly output - julian day
+         if (icalen == 1) write (7,1042) (hedr(ipdvar(j)), j = 1, itotr)  !! daily output - calendar day
+ 1042 format (//7x,'RCH      GIS  MO DA   YR     AREAkm2',56a12)
+        
+        else
+          write (7,1041) (hedr(ipdvar(j)), j = 1, itotr)  !! subdaily output
+        endif
+      else     !! default printout
+         if (iprint /= 3) then
+           if (icalen == 0) write (7,1040) (hedr(j), j = 1, mrcho)       !! daily/monthly output - julian day
+           if (icalen == 1) write (7,1042) (hedr(j), j = 1, mrcho)       !! daily output - calendar day
+         else
+            write (7,1041) (hedr(j), j = 1, mrcho)          !! subdaily output
+         endif
       endif 
+
 !! write headings to reach output file (output2.rch)
       if (isproj == 1) then
-      write (20,1000) prog, values(2), values(3), values(1), values(5), &
+        write (20,1000)prog, values(2), values(3), values(1), values(5), &
      &               values(6), values(7)
-      write (20,1010) title
+        write (20,1010) title
       if (ipdvar(1) > 0) then
         write (20,1040) (hedr(ipdvar(j)), j = 1, itotr)  !! custom printout
       else
         write (20,1040) (hedr(j), j = 1, mrcho)          !! default printout
       endif 
       endif 
-
-!! write headings to VB interface reach output file (rch.dat)
-      ilen = 12
-      if (ipdvar(1) > 0) then
-        write (11,2000) (hedr(ipdvar(j)), icolr(ipdvar(j)), ilen,       &
-     &                  j = 1, itotr)
-      else
-        write (11,2000) (hedr(j), icolr(j), ilen, j = 1, mrcho)
-      endif
-      close (11)
-
 
 !! write headings to reservoir output file (output.rsv)
       write (8,1000) prog, values(2), values(3), values(1), values(5),  &
@@ -154,41 +146,59 @@
       write (22,1010) title
       write (22,1050) (hedrsv(j), j = 1, 41)
       end if
-
-!!    write headings to VB interface reservoir output file (rsv.dat)
-      ilen = 12
-      write (14,2000) (hedrsv(j), icolrsv(j-1), ilen, j = 2, 19)
-      close (14)
-
  
 !! write headings to HRU impoundment output file (output.wtr)
-      write (4,1000) prog, values(2), values(3), values(1), values(5),  &
+      if (iwtr == 1) then
+        write (29,1000)prog, values(2), values(3), values(1), values(5), &
      &                values(6), values(7)
-      write (4,1010) title
-      write (4,1020) (hedwtr(j), j = 1, 40)
+        write (29,1010) title
+        write (29,1020) (hedwtr(j), j = 1, 40)
+      end if
 
 !! write headings to pesticide output file (output.pst)
       if (iprp /= 0) then
-        write (9995,1000) prog,values(2),values(3),values(1),values(5), &
+        write (30,1000)prog, values(2), values(3), values(1), values(5),&
      &                values(6), values(7)
-        write (9995,1010) title
-        write (9995,3000)
-        write (9995,3001) (npno(j),npno(j), j = 1, npmx)
-        write (9995,3002) (pname(npno(j)),pname(npno(j)), j = 1, npmx)
-        write (9995,3003) (("SOLUBLE mg       SORBED mg"), j = 1, npmx)
+        write (30,1010) title
+        write (30,3000)
+        write (30,3001) (npno(j),npno(j), j = 1, npmx)
+        write (30,3002) (pname(npno(j)),pname(npno(j)), j = 1, npmx)
+        write (30,3003) (("SOLUBLE mg       SORBED mg"), j = 1, npmx)
       end if
+!! Jaehak subdaily bmp output header
+!bmp-sedfil.out
+      write(77778,'(a21)') 'SED-FIL Basins output'                      
+      write(77778,'(a170)') '------------------------------   ----------
+     &------------ Sedimentation Pond --------------------------   -----
+     &----------------------- Sand Filter ------------------------------
+     &' 
+      write(77778,'(5a6,30a12)') 'year', 'day','time','sub','SFnum',
+     & 'inflw(m3)','outflw(m3)','bypass(m3)','sedin(kg)','sedout(kg)',
+     & 'sbypass(kg)','inflw(m3)','outflw(m3)','bypass(m3)','sedin(kg)',
+     & 'sedout(kg)','sbypass(kg)'
+
+!bmp-ri.out
+      write(77779,'(a21)') 'Retention-Irrigation output'                
+      write(77779,'(5a6,30a12)') 'year', 'day','time','sub','RInum',
+     & 'inflw(m3)','qbypass(m3)','pmpflw(m3)','sedin(kg)','sbypass(kg)',
+     & 'pmpsed(kg)'
 
       return
  1000 format ('1',/t5,a80,t105,2(i2,'/'),i4,5x,2(i2,':'),i2)
  1010 format (/(t5,20a4))
- 1020 format (//'LULC HRU      GIS  SUB  MGT  MON','   AREAkm2',70(a10))
- 1030 format (//6x,' SUB      GIS  MON   AREAkm2',21(a10))
- 1040 format (//7x,'RCH      GIS   MON     AREAkm2',54a12)
+ 1020 format (//'LULC  HRU       GIS  SUB  MGT  MON','   AREAkm2',      &
+     & 78(a10))
+ !    * 76(a10),"    GISnum")
+ 1021  format (//'LULC  HRU       GIS  SUB  MGT MO DA   YR',            &
+     &'   AREAkm2', 78(a10))         
+ 1030 format (//6x,' SUB      GIS  MON   AREAkm2',22(a10))
+ 1040 format (//7x,'RCH      GIS   MON     AREAkm2',56a12)
+ 1041 format (//7x,'RCH      GIS   DAY   DET     AREAkm2',45a12)    
  1050 format (//6x,'     RES  MON',41a12)
  1060 format (//6x,'RCH GIS  MON',26a12)
  2000 format (a12,12x,i4,4x,i4)
  3000 format ("Pesticide loadings to main channel by HRU",/)
- 3001 format ("Pesticide #",250(13x,i3,1x))
+ 3001 format ("Pesticide #",250(18x,i3,1x))
  3002 format ("Pesticide name:      ",250(a16,1x))
- 3003 format (2x,'HRU YEAR MON',7x,125(a26,8x))
+ 3003 format (4x,'GISnum YEAR MON',7x,125(a26,8x))
       end

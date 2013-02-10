@@ -10,7 +10,6 @@
 !!    blai(:)     |none          |maximum (potential) leaf area index
 !!    canmx(:)    |mm H2O        |maximum canopy storage
 !!    canstor(:)  |mm H2O        |amount of water held in canopy storage
-!!    hhprecip(:) |mm H2O        |precipitation for hour in HRU
 !!    icr(:)      |none          |sequence number of crop grown within a year
 !!    idplt(:,:,:)|none          |land cover code from crop.dat
 !!    ievent      |none          |rainfall/runoff code
@@ -31,7 +30,6 @@
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    canstor(:)  |mm H2O        |amount of water held in canopy storage
-!!    hhprecip(:) |mm H2O        |precipitation reaching soil surface in hour
 !!    precipday   |mm H2O        |precipitation reaching soil surface
 !!    precipdt(:) |mm H2O        |precipitation reaching soil surface in
 !!                               |time step
@@ -59,7 +57,7 @@
       j = 0
       j = ihru
 
-      if (blai(idplt(nro(j),icr(j),j)) < 0.001) return
+      if (blai(idplt(j)) < 0.001) return
 
       select case (ievent)
         case (2,3)
@@ -67,7 +65,7 @@
           canstori = 0.
           canmxl = 0.
           canstori = canstor(j)
-          canmxl = canmx(j) * laiday(j) / blai(idplt(nro(j),icr(j),j))
+          canmxl = canmx(j) * laiday(j) / blai(idplt(j))
           do ii = 2, nstep+1
             xx = 0.
             xx = precipdt(ii)
@@ -81,14 +79,14 @@
             endif
           end do
           if (canstor(j) > canstori) then
-            do ii = 1, 24
+            do ii = 1, nstep
               xx = 0.
-              xx = hhprecip(ii)
-              hhprecip(ii) = hhprecip(ii) - (canstor(j) - canstori)
+              xx = precipdt(ii)
+              precipdt(ii) = precipdt(ii) - (canstor(j) - canstori)
 
-              if (hhprecip(ii) < 0.) then
+              if (precipdt(ii) < 0.) then
                 canstori = canstori + xx
-                hhprecip(ii) = 0.
+                precipdt(ii) = 0.
               else
                 canstori = canstor(j)
               endif
@@ -99,7 +97,7 @@
           xx = 0.
           canmxl = 0.
           xx = precipday
-          canmxl = canmx(j) * laiday(j) / blai(idplt(nro(j),icr(j),j))
+          canmxl = canmx(j) * laiday(j) / blai(idplt(j))
           precipday = precipday - (canmxl - canstor(j))
           if (precipday < 0.) then
             canstor(j) = canstor(j) + xx

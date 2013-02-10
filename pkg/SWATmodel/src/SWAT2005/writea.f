@@ -198,17 +198,17 @@
 
           !! annual write-output.std
           if (iscen == 1) then
-          write (2,6300) iyr, wshdyro(1), wshdyro(3), wshdyro(4),       &
+          write (26,6300) iyr, wshdyro(1), wshdyro(3), wshdyro(4),      &
      &            wshdyro(104), wshdyro(5), wshdyro(109), wshddayo(35), &
      &            wshdyro(7), wshdyro(108), wshdyro(6), wshdyro(12),    &
      &            wshdyro(42), wshdyro(45), wshdyro(46), wshdyro(44),   &
-     &            wshdyro(40), wshdyro(43), wshdyro(41)
+     &            wshdyro(40), wshdyro(43), wshdyro(41), wshdyro(111)
           else if (isproj == 1) then
           write (19,6300) iyr, wshdyro(1), wshdyro(3), wshdyro(4),      &
      &            wshdyro(104), wshdyro(5), wshdyro(109), wshddayo(35), &
      &            wshdyro(7), wshdyro(108), wshdyro(6), wshdyro(12),    &
      &            wshdyro(42), wshdyro(45), wshdyro(46), wshdyro(44),   &
-     &            wshdyro(40), wshdyro(43), wshdyro(41)
+     &            wshdyro(40), wshdyro(43), wshdyro(41), wshdyro(111)
           endif
 
           !!write channel degradation data (chan.deg)
@@ -228,7 +228,7 @@
               sum = sum + hrupsty(k,1,j) + hrupsty(k,2,j)
             end do
             if (sum > 0. .and. iprp == 1) then
-                write (5,5100) j, iyr,                                  &
+                write (30,5100) subnum(j), hruno(j), iyr,               &
      &                     (hrupsty(k,1,j), hrupsty(k,2,j), k = 1, npmx)
             end if
             end if
@@ -244,7 +244,7 @@
           !! annual write--reach output (.rch)
           call rchyr
 
-          !! annual write--sediment routing (.sed)
+!         !! annual write--sediment routing (.sed)
           call rsedyr
 
           idlast = 0
@@ -314,6 +314,7 @@
             yldaa(j) = yldaa(j) + yldanu(j)
           end do
 
+      
           wshdaao = wshdaao + wshdyro
           wpstaao = wpstaao + wpstyro
           hruaao = hruaao + hruyro
@@ -340,11 +341,11 @@
  779  format (i4,3f12.4)
  780  format (/,' Year End',i5,' Channel Dimensions ',/,' Reach',       &
      &         '    Depth (m)','  Width (m)','  Slope (m/m)')
- 5100 format (1x,i4,1x,i4,4x,1x,250(e16.4,1x))
+ 5100 format (1x,a5,a4,1x,i4,4x,1x,250(e16.4,1x))
  5200 format (/,1x,i4,a4,1x,10f12.2)
  5300 format (1x,i4,a4,1x,10f12.2,/)
  5800 format ('RES   ',i8,1x,i4,41e12.4)
  6800 format ('RES   ',i8,1x,i4,41e12.4,1x,i4)
- 6300 format (/i5,15f7.2,1x,4f8.2//)
+ 6300 format (/i5,15f8.2,1x,5f8.2//)
       end
 

@@ -1,11 +1,12 @@
       program main
-!!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this is the main program that reads input, calls the main simulation
-!!    model, and writes output
+!!    model, and writes output.
+!!    comment changes to test merging with trunk and c:\branch_test code
+!!    two lines added to c:\branch_test code
 
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name        |units         |definition
-!!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+!!         ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 !!    date        |NA            |date simulation is performed where leftmost
 !!                               |eight characters are set to a value of
 !!                               |yyyymmdd, where yyyy is the year, mm is the 
@@ -53,29 +54,30 @@
 
       use parm
       implicit none
-      prog = "SWAT  Sept '05 VERSION2005"
+      prog = "SWAT Jan 28 2013    VER 2012/Rev 585"
 
       write (*,1000)
- 1000 format(1x,"               SWAT2005               ",/,             &
+ 1000 format(1x,"               SWAT2012               ",/,             &
+     &          "               Rev. 585               ",/,             &
      &          "      Soil & Water Assessment Tool    ",/,             &
-!     &          "              UNIX Version            ",/,             &
      &          "               PC Version             ",/,             &
      &          " Program reading from file.cio . . . executing",/)
 
 !! process input
-		
-
+            
       call getallo
       call allocate_parms
       call readfile
       call readbsn
       call readwwq
       if (fcstyr > 0 .and. fcstday > 0) call readfcst
-      call readplant              !! read in the landuse/landcover database
+      call readplant             !! read in the landuse/landcover database
       call readtill              !! read in the tillage database
       call readpest              !! read in the pesticide database
       call readfert              !! read in the fertilizer/nutrient database
       call readurban             !! read in the urban land types database
+      call readseptwq            !! read in the septic types database     
+      call readlup
       call readfig
       call readatmodep
       call readinpt
@@ -83,6 +85,18 @@
       call std2
       call openwth
       call headout
+
+      !! convert integer to string for output.mgt file
+      subnum = ""
+      hruno = ""
+      do i = 1, mhru
+        write (subnum(i),fmt=' (i5.5)') hru_sub(i)
+        write (hruno(i),fmt=' (i4.4)') hru_seq(i)  
+      end do
+
+      if (isproj == 2) then 
+        hi_targ = 0.0
+      end if
 
 !! save initial values
       if (isproj == 1) then
@@ -110,14 +124,14 @@
         if (scenario > iscen) call rewind_init
       end do
          end if
-      do i = 1, 9
+      do i = 101, 109       !Claire 12/2/09: change 1, 9  to 101, 109.
         close (i)
       end do
+      close(124)
       write (*,1001)
  1001 format (/," Execution successfully completed ")
-	
+      
 
         iscen=1
-        if (iclb > 0) call automet
-	stop
+      stop
       end

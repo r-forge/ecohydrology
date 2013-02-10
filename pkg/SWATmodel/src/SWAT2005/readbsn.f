@@ -34,9 +34,10 @@
 !!    cmn         |none          |rate factor for humus mineralization on
 !!                               |active organic N
 !!    cncoef      |none          |plant ET curve number coefficient 
-!!    cnfroz      |              |
+!!    cnfroz      |              |Drainge coefficient (mm day -1) 
 !!    depimp_bsn  |mm            |depth to impervious layer. Used to model
 !!                               |perched water tables in all HRUs in watershed
+!!    drain_co_bsn |mm-day-1     |Drainage coeffcient (range 10.0 - 51.0)
 !!    ddrain_bsn  |mm            |depth to the sub-surface drain
 !!    dorm_hr     |hours         |time threshold used to define dormant
 !!    epco(:)     |none          |plant water uptake compensation factor (0-1)
@@ -97,10 +98,24 @@
 !!    isubwq      |none          |subbasin water quality code
 !!                               |0 do not calculate algae/CBOD
 !!                               |1 calculate algae/CBOD
+!! drainmod tile equations   01/2006
+!!    itdrn       |none          |tile drainage equations flag/code
+!!                               |1 simulate tile flow using subroutine drains(wt_shall)
+!!                               |0 simulate tile flow using subroutine origtile(wt_shall,d) 
+!!    iwtdn       |none          |water table depth algorithms flag/code
+!!                               |1 simulate wt_shall using subroutine new water table depth routine
+!!                               |0 simulate wt_shall using subroutine original water table depth routine
+!!    ismax       |none          |maximum depressional storage selection flag/code
+!!                               |1 dynamic stmaxd computed as a function of random roughness and rain intensity 
+!!                               |by depstor.f
+!!                               |0 static stmaxd read from .bsn for the global value or .sdr for specific hrus   
+!! drainmod tile equations   01/2006
 !!    iwq         |none          |stream water quality code
 !!                               |0 do not model stream water quality
 !!                               |1 model stream water quality
 !!                               |   (QUAL2E & pesticide transformations)
+!!    latksatf_bsn |             |Multiplication factor to determine lateral ksat from SWAT ksat input value for HRU
+!!                                  (range 0.01 - 4.0)
 !!    msk_co1     |none          |calibration coefficient to control impact
 !!                               |of the storage time constant for the
 !!                               |reach at bankfull depth (phi(10,:) upon
@@ -135,6 +150,7 @@
 !!                               |  is zero
 !!                               |1:percolate has same concentration of nitrate
 !!                               |  as surface runoff
+!!    pc_bsn      |mm h-1        |Pump capacity (def val = 1.042 mm h-1 or 25 mm day-1)
 !!    p_updis     |none          |phosphorus uptake distribution parameter
 !!                               |This parameter controls the amount of
 !!                               |phosphorus removed from the different soil
@@ -167,7 +183,9 @@
 !!    psp         |none          |Phosphorus availibility index. The fraction
 !!                               |of fertilizer P remaining in labile pool
 !!                               |after initial rapid phase of P sorption.
-!!    rcn         |mg/kg         |Concentration of nitrogen in the rainfall
+!!    rcn_sub_bsn |mg/kg         |Concentration of nitrogen in the rainfall
+!!    re_bsn      |mm            |Effective radius of drains (range 3.0 - 40.0)  
+!!    res_stlr_co |none          |reservoir sediment settling coefficient
 !!    rsd_covco   |              |residue cover factor for computing frac of cover
 !!    rsdco       |none          |residue decomposition coefficient
 !!                               |The fraction of residue which will decompose
@@ -179,6 +197,8 @@
 !!                               |Mean air temperature at which precipitation
 !!                               |is equally likely to be rain as snow/freezing
 !!                               |rain.
+!!    sdrain_bsn  |mm            |Distance bewtween two drain or tile tubes (range 7600.0 - 30000.0)
+!!    sstmaxd(:)  |mm            |static maximum depressional storage; read from .sdr 
 !!    smfmn       |mm/deg C/day  |Minimum melt rate for snow during year (Dec.
 !!                               |21) where deg C refers to the air temperature.
 !!    smfmx       |mm/deg C/day  |Maximum melt rate for snow during year (June
@@ -322,8 +342,9 @@
       use parm
 
       character (len=80) :: titldum
+      character (len=130) :: tlu
       character (len=13) :: wwqfile
-      integer :: eof
+      integer :: eof, numlu
       real :: escobsn, epcobsn
 
 !!    initialize variables
@@ -331,6 +352,7 @@
       escobsn = 0.
       epcobsn = 0.
       wwqfile = ""
+      numlu=1
 
 !! read basin parameters
       do
@@ -359,7 +381,7 @@
       read (103,*) spcon
       read (103,*) spexp
       read (103,1000) titldum
-      read (103,*) rcn
+      read (103,*) rcn_sub_bsn
       read (103,*) cmn
       read (103,*) n_updis
       read (103,*) p_updis
@@ -448,7 +470,7 @@
       if (eof < 0) exit
       read (103,*,iostat=eof) hlife_ngw_bsn
       if (eof < 0) exit
-      read (103,*,iostat=eof) rcn_sub_bsn
+      read (103,1000,iostat=eof) titldum    
       if (eof < 0) exit
       read (103,*,iostat=eof) bc1_bsn
       if (eof < 0) exit
@@ -465,16 +487,94 @@
       read (103,*,iostat=eof) rsd_covco
       if (eof < 0) exit
       read (103,*,iostat=eof) vcrit
+      if (eof < 0) exit
+      read (103,*,iostat=eof) cswat
+      if (eof < 0) exit
+      read (103,*,iostat=eof) res_stlr_co
+      if (eof < 0) exit
+!     following reads moved to end of .bsn file
+!     read (103,*,iostat=eof) sol_p_model  !! if = 1 use new soil P model
+!     if (eof < 0) exit
+      read (103,*,iostat=eof) bf_flg
+       if (eof < 0) exit
+      read (103,*,iostat=eof) iuh 
+      if (eof < 0) exit
+      read (103,*,iostat=eof) uhalpha 
+      if (eof < 0) exit
+      read (103,*,iostat=eof) titldum
+       read (103,'(a130)') tlu
+       do ii=3,len_trim(tlu)
+          if ((tlu(ii:ii).eq.','.and.tlu(ii-1:ii-1).ne.',').or.          
+     &       (tlu(ii:ii).eq.' '.and.tlu(ii-1:ii-1).ne.' ')) then
+             numlu = numlu + 1
+          end if         
+       end do 
+       if (len_trim(tlu).le.3) numlu = 0
+       backspace(103)
+       read (103,*) (lu_nodrain(kk), kk=1,numlu)
+       
+
+ !!   subdaily erosion modeling by Jaehak Jeong
+      read (103,*,iostat=eof) titldum
+       if (eof < 0) exit
+      read (103,*,iostat=eof) eros_spl
+      if (eof < 0) exit
+      read (103,*,iostat=eof) rill_mult
+      if (eof < 0) exit
+      read (103,*,iostat=eof) eros_expo
+      if (eof < 0) exit
+      read (103,*,iostat=eof) sed_ch
+      if (eof < 0) exit
+      read (103,*,iostat=eof) c_factor
+      if (eof < 0) exit
+      read (103,*,iostat=eof) ch_d50
+      if (eof < 0) exit
+      read (103,*,iostat=eof) sig_g 
+      if (eof < 0) exit
+!!    Drainmod input variables - 01/2006
+      read (103,*,iostat=eof) re_bsn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) sdrain_bsn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) drain_co_bsn
+      if (eof < 0) exit
+!!    Drainmod input variables - 01/2006
+      read (103,*,iostat=eof) pc_bsn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) latksatf_bsn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) itdrn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) iwtdn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) sol_p_model  !! if = 1 use new soil P model
+      if (eof < 0) exit
+       read (103,*,iostat=eof) iabstr
+       if (eof < 0) exit
+!     iatmodep = 0 - average annual = 1 - monthly
+      read (103,*,iostat=eof) iatmodep
+      if (eof < 0) exit
+      read (103,*,iostat=eof) r2adj
+      if (eof < 0) exit
+      read (103,*,iostat=eof) sstmaxd_bsn
+      if (eof < 0) exit
+      read (103,*,iostat=eof) ismax
+      if (eof < 0) exit
       exit
+!!    Drainmod input variables - 01/2006
       end do
 
 !!    copy global values to local HRUs
       esco = escobsn
       epco = epcobsn
-
+      
 !!    set default values for undefined parameters
-      if (depimp_bsn <= 1.e-6) depimp_bsn = 6000.
-      if (bact_swf <= 1.e-6) bact_swf = 0.15
+!     if (ievent == 1) nstep = 24
+      if (r2adj < 1.e-6) r2adj = 1.
+      if (drain_co_bsn < 1.e-6) drain_co_bsn = 10. 
+      if (res_stlr_co < 1.e-6) res_stlr_co = .184
+      if (depimp_bsn < 1.e-6) depimp_bsn = 6000.
+      if (bact_swf < 1.e-6) bact_swf = 0.15
       if (adj_pkr <= 0.) adj_pkr = 1.
       if (spcon <= 0.) spcon = .0001
       if (spexp <= 0.) spexp = 1.0
@@ -493,16 +593,20 @@
       if (timp <= 0.) timp = 1.0
       if (snocovmx <= 0.) snocovmx = 1.0
       if (sno50cov <= 0.) sno50cov = .5
-      if (rcn <= 0.) rcn = 1.
       if (surlag <= 0.) surlag = 4.
       if (evrch <= 0.) evrch = 0.6
       if (bactkdq <= 0.) bactkdq = 75.
       if (thbact <= 0.) thbact = 1.07
       if (msk_x <= 0.) msk_x = 0.2
+      if (msk_co1 <= 0. .and. msk_co2 <= 0.) then
+          msk_co1 = 0.75
+          msk_co2 = 0.25
+        end if
+
       if (evlai <= 0.) evlai = 3.0
       if (cncoef <= 0.) cncoef = 1.0
       if (cdn <= 0.) cdn = 1.4
-      if (sdnco <= 0.) sdnco = 1.10
+      if (sdnco <= 0.) sdnco = 1.30
       if (bactmx <= 0.) bactmx = 10.
       if (bactminlp <= 0.) bactminlp = .0
       if (bactminp <= 0.) bactminp = 0.
@@ -516,7 +620,7 @@
       if (ch_onco_bsn <= 1.e-6) ch_onco_bsn = 0.0
       if (ch_opco_bsn <= 1.e-6) ch_opco_bsn = 0.0
       if (hlife_ngw_bsn <= 1.e-6) hlife_ngw_bsn = 5.0
-      if (rcn_sub_bsn <= 1.e-6) rcn_sub_bsn = 0.2
+      if (rcn_sub_bsn <= 1.e-6) rcn_sub_bsn = 1.0
       if (bc1_bsn <= 1.e-6) bc1_bsn = 0.1
       if (bc2_bsn <= 1.e-6) bc2_bsn = 0.1
       if (bc3_bsn <= 1.e-6) bc3_bsn = 0.02
@@ -524,6 +628,20 @@
       if (decr_min <= 1.e-6) decr_min = 0.01
 !!    mike van liew additions for basins.bsn
 
+      ! check parameter values for urban project jaehak 9/15/09 
+       if(iuh/=1.and.iuh/=2) then
+            iuh = 1
+       endif
+       if(bf_flg>1.or.bf_flg<0) then
+         write(*,*) 'The range of BFLO_DIST in bsn file should be 0-1'
+      !  stop
+       endif
+       if(sed_ch>2) then
+         write(*,*) 'Error in choosing channel erosion model:
+     &      0-Bagnold, 1-Brownlie, 2-Yang'
+         write(*,*) 'Check *.bsn file to correct the error'
+      !  stop
+       endif
       if (icfac <= 0) icfac = 0
       if (rsd_covco <= 1.e-6) rsd_covco = 0.3
 
@@ -559,10 +677,44 @@
 !!    initialize variables (may make these .bsn inputs for user adjustment
 !!    at some future time)
       nactfr = 0.02
+      abstinit = iabstr
 
       
       close (103)
+       !!add by zhang
+      !!=====================
+      if (cswat == 2) then
+      open (98,file="cswat_profile.txt",recl=356)
+       write (98,5102) 'year','day','lay','hru',
+     &'sol_mass','sol_cmass','sol_nmass','sol_LS',
+     &'sol_LM','sol_LSC','sol_LMC','sol_HSC',
+     &'sol_HPC','sol_BMC','sol_LSN','sol_LMN',
+     &'sol_HPN','sol_HSN','sol_BMN','sol_no3',
+     &'sol_fop','sol_orgp','sol_actp','sol_stap',
+     &'sol_solp' 
+
+      open (100,file="cswat_daily.txt",recl=786)
+      write (100,5104) 'year','day','hru','rsdc','sedc',
+     &'percc','latc','emitc','grainc','surfq_c',
+     &'stoverc','NPPC','foc','rspc','tot_mass','tot_cmass','tot_nmass',
+     &'tot_LSC','tot_LMC','tot_HSC','tot_HPC','tot_BMC','Biom_C','rwtf',
+     &'tot_no3_nh3','wdntl', 
+     &'ET','Tillfactor','SW1','SW2','SW3','SW4','SW5','SW6','SW7','SW8',
+     &'SW9','SW10','SW11',
+     &'WFSC1','WFSC2','WFSC3','WFSC4','WFSC5','WFSC6','WFSC7','WFSC8',
+     &'WFSC9','WFSC10','WFSC11'
+      endif       
+      !!add by zhang
+      !!=====================
+
+!      open (111, file="final_n_balance.txt")
+!      open (112, file="final_yields.txt")
+      !! carbon output ends 
+     
+      
       return
  1000 format (a)
  1001 format (i4)
+ 5102 format (3a5,30a15)
+ 5104 format (a4,a4,a8,48a16)
       end

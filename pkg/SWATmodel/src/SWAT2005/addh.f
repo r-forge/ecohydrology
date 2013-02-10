@@ -1,7 +1,4 @@
       subroutine addh
-
-
-      
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine adds loadings from two sources for routing
 
@@ -74,7 +71,8 @@
 
 !! add hydrograph points (hourly time step)
       if (ievent > 2) then
-        do kk = 1, 24
+   !     do kk = 1, 24
+        do kk = 1, nstep  ! modified for urban modeling by J.Jeong 4/15/2008
           if (hhvaroute(2,inum1,kk) + hhvaroute(2,inum2,kk) > 0.1) then
             hhvaroute(1,ihout,kk) = (hhvaroute(1,inum1,kk) *            &
      &                  hhvaroute(2,inum1,kk) + hhvaroute(1,inum2,kk) * &
@@ -83,13 +81,18 @@
           end if
         end do
         do ii = 2, mvaro
-          do kk = 1, 24
+   !       do kk = 1, 24
+          do kk = 1, nstep  ! modified for urban modeling by J.Jeong 4/15/2008
             hhvaroute(ii,ihout,kk) = hhvaroute(ii,inum1,kk) +           &
      &                                            hhvaroute(ii,inum2,kk)
           end do
         end do
       endif
-
+      
+      do ii = 29, mvaro
+        varoute(ii,inum1) = 0.
+        varoute(ii,inum2) = 0.
+      end do
 
       return
       end

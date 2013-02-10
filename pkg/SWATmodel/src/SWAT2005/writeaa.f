@@ -30,7 +30,7 @@
 !!                                |4 = transfer    13 = 
 !!                                |5 = add         14 = saveconc
 !!                                |6 = rechour     15 = 
-!!                                |7 = recmon      16 = autocal
+!!                                |7 = recmon 
 !!                                |8 = recyear
 !!    idaf         |julian date   |beginning day of simulation
 !!    idal         |julian date   |ending day of simulation
@@ -311,7 +311,7 @@
       use parm
 
       real :: yrs, xx, xmm, sumno3, sumorgn, summinp, sumorgp
-      integer :: j, nnro, nicr, k, ly, idum, ic, ii
+      integer :: j, nnro, nicr, k, ly, ic, ii
 
 !! calculate number of years simulated
       yrs = 0.
@@ -330,6 +330,15 @@
       end do
       if (yrs <= 0) return
 
+      if (da_ha < 1.e-9) then
+         rchaao = rchaao / yrs
+           if (iprint /=1) then
+             call rchaa(yrs)
+             call rsedaa(yrs)
+           end if
+           return
+      end if
+
 !! calculate average annual values for HRU data
       hruaao = hruaao / yrs
       wtraa = wtraa / yrs
@@ -339,13 +348,14 @@
       irn = irn / yrs
       aairr = aairr / yrs
       do j = 1, nhru
-        do nnro = 1, nrot(j)
-          do nicr = 1, mcr
-            yldn(nnro,nicr,j) = yldkg(nnro,nicr,j) /                    &
-     &                               (Real(ncrops(nnro,nicr,j)) + 1.e-6)
-            bio_aahv(nnro,nicr,j) = bio_hv(nnro,nicr,j) /               &
-     &                               (Real(ncrops(nnro,nicr,j)) + 1.e-6)
-          end do
+        do nicr = 1, mcrhru(j)
+          if (ncrops(nicr,j) > 0) then
+            yldn(nicr,j) = yldkg(nicr,j) /  ncrops(nicr,j)
+            bio_aahv(nicr,j) = bio_hv(nicr,j) / ncrops(nicr,j)  
+          else
+            yldn(nicr,j) = 0.
+            bio_aahv(nicr,j) = 0.
+          end if
         end do
       end do
       hrupsta = hrupsta / yrs
@@ -405,8 +415,10 @@
       wshd_tstrs = wshd_tstrs / yrs
       wshd_nstrs = wshd_nstrs / yrs
       wshd_pstrs = wshd_pstrs / yrs
+      wshd_astrs = wshd_astrs / yrs
       !! calculate watershed pothole averages
       spadyo = spadyo / yrs
+      spadyosp = spadyosp / yrs
       spadyev = spadyev / yrs
       spadysp = spadysp / yrs
       spadyrfv = spadyrfv / yrs
@@ -418,12 +430,16 @@
       wshd_ftotn = wshd_ftotn / yrs
       wshd_ftotp = wshd_ftotp / yrs
       wshd_dnit = wshd_dnit / yrs
-      wshd_fixn = wshd_fixn / yrs
-      wshd_hmn = wshd_hmn / yrs
-      wshd_rwn = wshd_rwn / yrs
-      wshd_hmp = wshd_hmp / yrs
-      wshd_rmn = wshd_rmn / yrs
-      wshd_rmp = wshd_rmp / yrs
+      wshd_fixn = wshd_fixn / yrs  !! fix
+
+      if (cswat == 0) then
+            wshd_hmn = wshd_hmn / yrs  !! humus n for active
+            wshd_rwn = wshd_rwn / yrs  !! active to stable
+            wshd_hmp = wshd_hmp / yrs  !! humus min on active org         
+      end if
+
+        wshd_rmn = wshd_rmn / yrs  !! min from fresh orgn
+      wshd_rmp = wshd_rmp / yrs  !! min from fresh orgp 
       wshd_raino3 = wshd_raino3 / yrs
       wshd_fno3 = wshd_fno3 / yrs
       wshd_fnh3 = wshd_fnh3 / yrs
@@ -443,11 +459,29 @@
         sumorgp = 0.
         do ly = 1, sol_nly(j)
           sumno3 = sumno3 + sol_no3(ly,j)
-          sumorgn = sumorgn + sol_aorgn(ly,j) + sol_orgn(ly,j) +        &
-     *        sol_fon(ly,j)
-          summinp = summinp + sol_solp(ly,j) + sol_actp(ly,j) +         &
+          if (cswat == 0) then
+            sumorgn = sumorgn + sol_aorgn(ly,j) + sol_orgn(ly,j) +
+     &        sol_fon(ly,j)
+            sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j)
+          end if
+          if (cswat == 1) then
+                sumorgn = sumorgn + sol_orgn(ly,j) + sol_fon(ly,j) +
+     &        sol_mn(ly,j)
+                sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j) +
+     &        sol_mp(ly,j)
+          end if
+          !!add by zhang
+          !!=======================
+          if (cswat == 2) then
+            sumorgn = sumorgn + sol_LMN(ly,j) + sol_LSN(ly,j) +
+     &        sol_HPN(ly,j) + sol_BMN(ly,j) + sol_HSN(ly,j)
+            sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j)            
+          end if
+          !!add by zhang
+          !!=======================          
+          
+          summinp = summinp + sol_solp(ly,j) + sol_actp(ly,j) +
      &              sol_stap(ly,j)
-          sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j)
         end do
         basno3f = basno3f + sumno3 * hru_dafr(j)
         basorgnf = basorgnf + sumorgn * hru_dafr(j)
@@ -474,9 +508,9 @@
         call impndaa(yrs)
 
         !! write average annual output--reach (.rch)
-        call rchaa(yrs)
+        if (iprint /= 3) call rchaa(yrs)
 
-        !! write average annual output--sediment routing (.sed)
+!       !! write average annual output--sediment routing (.sed)
         call rsedaa(yrs)
 
         !! write average annual output--subbasin (output.sub)
@@ -485,25 +519,37 @@
 
 !! write average annual pesticide data (output.pst)
       if (iprp == 1) then
-        write (9995,5500)
+        write (30,5500)
         do j = 1, nhru
           if (hrupest(j) == 1) then
-                write (9995,5600) j, yrs,                               &
+                write (30,5600) subnum(j), hruno(j), yrs,               &
      &                     (hrupsta(k,1,j), hrupsta(k,2,j), k = 1, npmx)
           end if
         end do
       end if
 
 !! write to hydrograph output file
-      idum = 1
-      do while (icodes(idum) > 0)
-        ic = 0
-        ic = ihouts(idum)
-        write(11123,9400) icodes(idum), ic, inum1s(idum), inum2s(idum), &
-     &               inum3s(idum),subed(ic),recmonps(ic),reccnstps(ic), &
+      do idmm = 1, mhyd
+        ic = ihouts(idmm)
+        if (ic > 0) then
+        write(11123,9400) icodes(idmm), ic, inum1s(idmm), inum2s(idmm), &
+     &               inum3s(idmm),subed(ic),recmonps(ic),reccnstps(ic), &
      &               (shyd(ii,ic), ii = 1, 8)
-        idum = idum + 1
+        end if
       end do
+
+!! average septic outputs for output.std
+      wshd_sepno3 = wshd_sepno3 / yrs
+      wshd_sepnh3 = wshd_sepnh3 / yrs
+      wshd_seporgn = wshd_seporgn / yrs
+      wshd_sepfon = wshd_sepfon / yrs
+      wshd_seporgp = wshd_seporgp / yrs
+      wshd_sepfop = wshd_sepfop / yrs
+      wshd_sepsolp = wshd_sepsolp / yrs
+      wshd_sepbod = wshd_sepbod / yrs
+      wshd_sepmm = wshd_sepmm / yrs
+!! average septic outputs for output.std
+
 
 !! write average annual summary tables in standard output file (.std)
       call stdaa
@@ -513,8 +559,20 @@
         write (18,*) iscen, (fcstaao(j), j = 1, 16)
       end if
 
+!! write life span of septic HRUs (time to first failure, years)
+      write(173,'(a50)') 'Year the first failure occured'
+      write(173,'(1/,a5,a7)') 'HRU','Failyr'
+      do j=1,nhru
+        if (isep_opt(j)/=0) then
+          if(failyr(j)==0) write(173,'(i5,a7)') j,'No Fail'
+          if(failyr(j)/=0) write(173,'(i5,f7.3)') j,failyr(j)
+        end if
+      end do
+
       return
  5500 format ("Average Annual Loadings")
- 5600 format (1x,i4,1x,f4.0,4x,1x,250(e16.4,1x))
- 9400 format (6i8,2(5x,a),8e12.4)
+ 5600 format (1x,a5,a4,1x,f4.0,4x,1x,250(e16.4,1x))
+!!! changed the format for hyd.out for Bill Komar
+!9400 format (6i8,2(5x,a),8e12.4)
+ 9400 format (6(i8,1x),2(a10,1x),8e12.4)
       end

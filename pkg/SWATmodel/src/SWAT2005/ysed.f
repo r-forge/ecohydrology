@@ -72,27 +72,8 @@
         !! subbasin sediment calculations
         cklsp(j) = wcklsp(iwave)
       else
-        !! HRU sediment calculations
-      if (icfac == 0) then
-        if (idplt(nro(j),icr(j),j) > 0) then
-          c = Exp((-.2231 - cvm(idplt(nro(j),icr(j),j))) *                &
-     &          Exp(-.00115 * sol_cov(j)) + cvm(idplt(nro(j),icr(j),j)))
-        else
-          if (sol_cov(j) > 1.e-4) then
-          c = Exp(-.2231 * Exp(-.00115 * sol_cov(j)))                         
-        else
-          c = .8
-        end if
-      end if
-      else
-        rsd_frcov = Exp(-rsd_covco * sol_cov(j))
-        grcov_fr = laiday(j) / (laiday(j) + 
-     *          Exp(1.748 - 1.748*laiday(j)))
-        bio_frcov = 1. - grcov_fr * Exp(-.01*cht(j))
-        c = amax1(1.e-10,rsd_frcov*bio_frcov)
-      end if
-!      endif
-        cklsp(j) = c * usle_mult(j)
+      !! HRU sediment calculations
+        cklsp(j) = usle_cfac(j) * usle_mult(j)
       end if
 
       !! compute sediment yield with musle
@@ -120,6 +101,13 @@
       else
         sedyld(j) = sedyld(j) / Exp(sno_hru(j) * 3. / 25.4)
       end if
+
+      !!Particle size distribution of sediment yield
+        sanyld(j) = sedyld(j) * det_san(j)    !! Sand yield
+        silyld(j) = sedyld(j) * det_sil(j)    !! Silt yield
+        clayld(j) = sedyld(j) * det_cla(j)    !! Clay yield
+        sagyld(j) = sedyld(j) * det_sag(j)    !! Small Aggregate yield
+        lagyld(j) = sedyld(j) * det_lag(j)    !! Large Aggregate yield
 
       !! compute erosion with usle (written to output for comparison)
       usle = 1.292 * usle_ei * cklsp(j) / 11.8

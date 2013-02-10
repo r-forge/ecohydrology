@@ -6,6 +6,8 @@
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    curyr       |none          |current year of simulation
+!!    drydep_no3  |kg/ha/yr      |atmospheric dry deposition of nitrates
+!!    drydep_nh4  |kg/ha/yr      |atmospheric dry deposition of ammonia
 !!    hru_dafr(:) |none          |fraction of watershed in HRU
 !!    ihru        |none          |HRU number
 !!    nyskip      |none          |number of years to skip output summarization
@@ -43,12 +45,19 @@
 
       j = 0
       j = ihru
-
+      
+       if (iatmodep == 1) then
+            nh3pcp = .01 * rammo_mo(mo_atmo,hru_sub(j)) * precipday
+            no3pcp = .01 * rcn_mo(mo_atmo,hru_sub(j)) * precipday
+            sol_nh3(1,j) = nh3pcp + drydep_nh4_mo(mo_atmo,hru_sub(j))
+            sol_no3(1,j) = no3pcp + drydep_no3_mo(mo_atmo,hru_sub(j))
+       else      
 !! calculate nitrate in precipitation
-      no3pcp = .01 * rcn_sub(hru_sub(j)) * precipday
-      nh3pcp = .01 * rammo_sub(hru_sub(j)) * precipday
-      sol_no3(1,j) = sol_no3(1,j) + no3pcp
-      sol_nh3(1,j) = sol_nh3(1,j) + nh3pcp
+            nh3pcp = .01 * rammo_sub(hru_sub(j)) * precipday
+            no3pcp = .01 * rcn_sub(hru_sub(j)) * precipday
+            sol_nh3(1,j)=sol_nh3(1,j)+nh3pcp+drydep_nh4(hru_sub(j))/365.
+            sol_no3(1,j)=sol_no3(1,j)+no3pcp+drydep_no3(hru_sub(j))/365.
+       endif
 
 !! summary calculations
       if (curyr > nyskip) then

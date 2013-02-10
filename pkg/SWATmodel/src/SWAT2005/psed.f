@@ -98,22 +98,23 @@
       xxs = 0.
       if (iwave <= 0) then
         !! HRU sediment calculations
-        xx = sol_orgp(1,j) + sol_fop(1,j) + sol_actp(1,j) +             &
-     &                                                     sol_stap(1,j)
+        xx = sol_orgp(1,j) + sol_fop(1,j) + sol_mp(1,j) +   
+     &                                    sol_actp(1,j) + sol_stap(1,j)
         if (xx > 1.e-3) then
-           xxo = (sol_orgp(1,j) + sol_fop(1,j)) / xx
+           xxo = (sol_orgp(1,j) + sol_fop(1,j)+ sol_mp(1,j)) / xx
            xxa = sol_actp(1,j) / xx
            xxs = sol_stap(1,j) / xx
         end if
         !! sum for subbasin sediment calculations
-        sub_orgp(sb) = sub_orgp(sb) + (sol_orgp(1,j) + sol_fop(1,j))    &
-     &                                                     * hru_dafr(j)
-        sub_minpa(sb) = sub_minpa(sb) + sol_actp(1,j) * hru_dafr(j)
-        sub_minps(sb) = sub_minps(sb) + sol_stap(1,j) * hru_dafr(j)
+        sub_orgp(sb) = sub_orgp(sb) + (sol_orgp(1,j) + sol_fop(1,j)
+     &      + sol_mp(1,j)) * hru_dafr(j)
+        sub_minpa(sb) = sub_minpa(sb) + sol_actp(1,j) * hru_fr(j)
+        sub_minps(sb) = sub_minps(sb) + sol_stap(1,j) * hru_fr(j)
       else
         !! subbasin sediment calculations
         xx = sub_orgp(iwave) + sub_minpa(iwave) + sub_minps(iwave)
         if (xx > 1.e-3) then
+          ! notice no soil_fop or soil_mp calculations here Armen March 2009
           xxo = sub_orgp(iwave) / xx
           xxa = sub_minpa(iwave) / xx
           xxs = sub_minps(iwave) / xx
@@ -167,14 +168,18 @@
         psedd = sol_actp(1,j) + sol_stap(1,j)
         porgg = sol_orgp(1,j) + sol_fop(1,j)
         if (porgg > 1.e-3) then
-        sol_orgp(1,j) = sol_orgp(1,j) - sedorgp(j) * (sol_orgp(1,j) /   &
+        sol_orgp(1,j) = sol_orgp(1,j) - sedorgp(j) * (sol_orgp(1,j) /
      &                                                            porgg)
-        sol_fop(1,j) = sol_fop(1,j) - sedorgp(j) * (sol_fop(1,j) /      &
+        sol_fop(1,j) = sol_fop(1,j) - sedorgp(j) * (sol_fop(1,j) /
+     &                                                            porgg)
+        sol_mp(1,j) = sol_mp(1,j) - sedorgp(j) * (sol_mp(1,j) /
      &                                                            porgg)
         end if
         sol_actp(1,j) = sol_actp(1,j) - sedminpa(j)
         sol_stap(1,j) = sol_stap(1,j) - sedminps(j)
 
+        !! Not sure how can this happen but I reapeated 
+        !! the check for sol_mp(1,j) - Armen March 2009
         if (sol_orgp(1,j) < 0.) then
           sedorgp(j) = sedorgp(j) + sol_orgp(1,j)
           sol_orgp(1,j) = 0.
@@ -183,6 +188,11 @@
         if (sol_fop(1,j) < 0.) then
           sedorgp(j) = sedorgp(j) + sol_fop(1,j)
           sol_fop(1,j) = 0.
+        end if
+
+        if (sol_mp(1,j) < 0.) then
+          sedorgp(j) = sedorgp(j) + sol_mp(1,j)
+          sol_mp(1,j) = 0.
         end if
 
         if (sol_actp(1,j) < 0.) then

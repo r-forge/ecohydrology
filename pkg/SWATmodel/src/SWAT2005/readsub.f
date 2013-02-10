@@ -104,7 +104,10 @@
 !!    eof         |none          |end of file flag (=-1 if eof, else =0)
 !!    gwfile      |NA            |HRU groundwater data
 !!    hrufile     |NA            |name of HRU general data file
+!!    ltcfile     |NA            |name of land transport capacity input file
 !!    opsfile     |NA            |name of operation schedule file for Phil G.
+!!    gsm 7/24/08 for tile drainage
+!!    sdrfile     |NA            |name of subbasin drainage file
 !!    if          |none          |number of HRU in subbasin that is floodplain
 !!    ip          |none          |number of HRU in subbasin that is pothole
 !!    ir          |none          |number of HRU in subbasin that is riparian zone
@@ -113,6 +116,7 @@
 !!    mgtfile     |NA            |HRU management data
 !!    mon         |none          |monthly counter
 !!    pndfile     |NA            |subbasin impoundment file (.pnd)
+!!    septfile    |NA            |septic input data file (.sep)
 !!    solfile     |NA            |HRU soil data
 !!    sumebfr     |none          |total area of subbasin modeled in
 !!                               |elevation bands
@@ -129,10 +133,11 @@
 
       use parm
 
-      character (len=80) :: titldum
+      character (len=80) :: titldum, snofile
       character (len=13) :: hrufile, chmfile, mgtfile, solfile, gwfile
-      character (len=13) :: opsfile, wgnfile, pndfile, wusfile
-      integer :: eof, mon, j, jj, ip, if, ir, myJ
+      character (len=13) :: opsfile, wgnfile, pndfile, wusfile, septfile
+        character (len=13) :: sdrfile, ltcfile
+      integer :: eof, mon, j, jj, ip, if, ir
       real :: ssnoeb(10), sno_sub, ch_ls, sumebfr
 
       wgnfile = ""
@@ -146,13 +151,19 @@
       ip = 0
       if = 0
       ir = 0
-      
-      do
+
       read (101,5100) titldum
       read (101,*) sub_km(i)
       if (isproj == 2) then
-       read (101,5101) harg_petco(i), cncoef_sub(i), sub_smfmx(i),
-     &   sub_smfmn(i), sub_sftmp(i), sub_smtmp(i), sub_timp(i)
+       read (101,5101) harg_petco(i), cncoef_sub(i), sub_smfmx(1,i),
+     &  sub_smfmn(1,i), sub_sftmp(1,i), sub_smtmp(1,i), sub_timp(1,i)
+        do ib = 2, 10
+          sub_smfmx(ib,i) = sub_smfmx(1,i)
+          sub_smfmn(ib,i) = sub_smfmn(1,i)
+          sub_sftmp(ib,i) = sub_sftmp(1,i)
+          sub_smtmp(ib,i) = sub_smtmp(1,i) 
+          sub_timp(ib,i) = sub_timp(1,i)
+        end do
       else
         read (101,5100) titldum                                      
       end if
@@ -166,7 +177,7 @@
       read (101,*) iwgage(i)
       read (101,5300) wgnfile
         call caps(wgnfile)
-        open (103,file=wgnfile)
+        open (114,file=wgnfile)
       read (101,*) fcst_reg(i)
       read (101,5100) titldum
       read (101,5100) titldum
@@ -192,7 +203,16 @@
       read (101,5300) wusfile
         call caps(wusfile)
         open (105,file=wusfile)
-      read (101,5100) titldum
+      read (101,5100) snofile
+      if(snofile /='             ' .or. snofile /= 'Climate Change')then
+        if (snofile /='             ') then
+          if (snofile /= 'Climate Change') then
+            open (113,file=snofile)
+            call caps (snofile)
+            call readsno
+          endif
+        endif
+      endif
       read (101,*) co2(i) 
       read (101,5100) titldum
       read (101,5200) (rfinc(i,mon),mon = 1,6)
@@ -214,120 +234,12 @@
 !! read HRU input data
       read (101,*) hrutot(i)
       read (101,5100) titldum
-      !!Depressional Storage Area HRU
       read (101,5100) titldum
-      chmfile = ""
-      hrufile = ""
-      mgtfile = ""
-      solfile = ""
-      gwfile = ""
-      opsfile = ""
-      read (101,5300) hrufile, mgtfile, solfile, chmfile, gwfile,
-     & opsfile
-        if (hrufile /= '             ') then
-          ihru = 0
-          ihru = nhru + jj
-          if (jj == 1) hru1(i) = ihru
-          ipot(ihru) = ihru
-          ip = ihru
-          call caps(hrufile)
-          call caps(mgtfile)
-          call caps(solfile)
-          call caps(chmfile)
-          call caps(gwfile)
-        if (opsfile /= '             ') then
-          call caps(opsfile)
-          open (111,file=opsfile)
-          call readops
-        end if
-          open (106,file=chmfile)
-          open (107,file=solfile)
-          open (108,file=hrufile)
-          open (109,file=mgtfile)
-          open (110,file=gwfile)
-          call readhru
-          call readchm
-          call readmgt
-          call readsol
-          call readgw
-          jj = jj + 1
-        end if
-      !!Floodplain HRU
       read (101,5100) titldum
-      chmfile = ""
-      hrufile = ""
-      mgtfile = ""
-      solfile = ""
-      gwfile = ""
-      opsfile = ""
-      read (101,5300) hrufile, mgtfile, solfile, chmfile, gwfile,
-     & opsfile
-        if (hrufile /= '             ') then
-          ihru = 0
-          ihru = nhru + jj
-          if (jj == 1) hru1(i) = ihru
-          ifld(ihru) = ihru
-          if = ihru
-          call caps(hrufile)
-          call caps(mgtfile)
-          call caps(solfile)
-          call caps(chmfile)
-          call caps(gwfile)
-        if (opsfile /= '             ') then
-          call caps(opsfile)
-          open (111,file=opsfile)
-          call readops
-        end if
-          open (106,file=chmfile)
-          open (107,file=solfile)
-          open (108,file=hrufile)
-          open (109,file=mgtfile)
-          open (110,file=gwfile)
-          call readhru
-          call readchm
-          call readmgt
-          call readsol
-          call readgw
-          jj = jj + 1
-        end if
-      !!Riparian HRU
       read (101,5100) titldum
-      chmfile = ""
-      hrufile = ""
-      mgtfile = ""
-      solfile = ""
-      gwfile = ""
-      opsfile = ""
-      read (101,5300) hrufile, mgtfile, solfile, chmfile, gwfile,
-     & opsfile
-        if (hrufile /= '             ') then
-          ihru = 0
-          ihru = nhru + jj
-          if (jj == 1) hru1(i) = ihru
-          irip(ihru) = ihru
-          ir = ihru
-          call caps(hrufile)
-          call caps(mgtfile)
-          call caps(solfile)
-          call caps(chmfile)
-          call caps(gwfile)
-        if (opsfile /= '             ') then
-          call caps(opsfile)
-          open (111,file=opsfile)
-          call readops
-        end if
-          open (106,file=chmfile)
-          open (107,file=solfile)
-          open (108,file=hrufile)
-          open (109,file=mgtfile)
-          open (110,file=gwfile)
-          call readhru
-          call readchm
-          call readmgt
-          call readsol
-          call readgw
-          jj = jj + 1
-        end if
+      read (101,5100) titldum
+      read (101,5100) titldum
+      read (101,5100) titldum
       !!General HRUs
       read (101,5100) titldum
         do j = jj, hrutot(i)
@@ -343,27 +255,27 @@
           solfile = ""
           gwfile = ""
           opsfile = ""
-!!          read (101,5300) hrufile, mgtfile, solfile, chmfile, gwfile,
-!!     & opsfile, ipot(j)
+          septfile = ""
+          sdrfile = ""
          read (101,5300) hrufile, mgtfile, solfile, chmfile, gwfile,
-     & opsfile, myj
-!!       if (ipot(j) == 1) then
-       if (myj == 1) then
-         do k = jj, hrutot(i)
-           ihrup = nhru + k
-           ipot(ihrup) = ihru
-         end do
-       end if
+     & opsfile, septfile, sdrfile, ils2(ihru)
           call caps(hrufile)
           call caps(mgtfile)
           call caps(solfile)
           call caps(chmfile)
           call caps(gwfile)
-        if (opsfile /= '             ') then
-          call caps(opsfile)
-          open (111,file=opsfile)
-          call readops
-        end if
+          if (septfile /='             ') then
+            call caps (septfile)
+            open (172,file=septfile, status='old')
+            isep_hru(ihru) = 1
+            call readsepticbz
+          end if
+          if (sdrfile /= '             ') then
+            call caps(sdrfile)
+            open (112,file=sdrfile)
+            call readsdr
+          end if
+          
           open (106,file=chmfile)
           open (107,file=solfile)
           open (108,file=hrufile)
@@ -374,9 +286,108 @@
           call readmgt
           call readsol
           call readgw
+          if (opsfile /= '             ') then
+            call caps(opsfile)
+            open (111,file=opsfile)
+            call readops
+          end if
+          
+          ! set up variables for landscape routing
+!          if (ils_nofig == 1) then
+            if (ils2(ihru) == 0) then
+              ils = 1
+            else
+              ils = 2
+              ils2flag(i) = 1
+            end if
+            daru_km(i,ils) = daru_km(i,ils) + hru_fr(j) * sub_km(i)
+!         end if
+          
+          ! estimate drainage area for urban distributed bmps in hectares - jaehak
+          if (urblu(ihru)>0) then
+            kk=1
+            bmpdrain(ihru) = 1
+            do while(lu_nodrain(kk).ne."    ")
+              if (urbname(urblu(ihru)).eq.lu_nodrain(kk)) then
+                bmpdrain(ihru) = 0
+                exit
+              end if
+              kk = kk + 1
+              if (kk>30) exit
+            end do
+            if(bmpdrain(ihru)==1) then
+              sub_ha_imp(i) = sub_ha_imp(i) + hru_ha(ihru)              & 
+     &            * fimp(urblu(ihru))               !!!!   nubz
+              sub_ha_urb(i) = sub_ha_urb(i) + hru_ha(ihru) 
+           end if
+          end if
+          
+          ! HRU selection criteria for Irrigation by retention-irrigation basins
+          if (num_ri(i)>0) then
+            if(sol_z(sol_nly(ihru),ihru)>300 !!    - soil thickness > 12 inches  
+     &        .AND.sol_k(1,ihru)>0.76       !    - permeability > 0.03 inches/hr (=0.76mm/hr)
+     &        .AND.hru_slp(ihru)<0.1        !!    - hru slope < 10%
+     &        .AND.urblu(ihru)>0) then !urban LU
+ 
+               ri_luflg(ihru) = 1 !irrigate HRU
+            end if
+            
+            do kk=1,num_noirr(i)
+               if (urbname(urblu(ihru)).eq.ri_nirr(i,kk)) then
+                  ri_luflg(ihru) = 0 !exclude these land uses from irrigation
+               end if
+            end do
+            
+            if (ri_luflg(ihru) == 1) then
+               ri_subkm(i) = ri_subkm(i) + hru_km(ihru)* 
+     &                       (1.-fimp(urblu(ihru))) !km2
+            end if
+          end if
+
+          ! estimate impervious cover in the upstream drainage area for on-line bmps
+          if (iurban(ihru) > 0) then
+             subdr_ickm(i) = subdr_ickm(i) + hru_km(ihru) 
+     &                       *  fimp(urblu(ihru))
+          end if
+          ! estimate average Curve Number for the subbasin
+          sub_cn2(i) = sub_cn2(i) + cn2(ihru) * hru_fr(ihru)
+        end do      ! hru loop
+        
+        !! set up routing unit fractions for landscape routing
+        do j = jj, hrutot(i)
+          ihru = nhru + j
+          if (ils2(ihru) == 0) then
+            ils = 1
+          else
+            ils = 2
+          end if
+          
         end do
-      exit
-      end do
+        if (ils == 2) then
+          do j = jj, hrutot(i)
+          hru_rufr(ils,ihru) = hru_fr(ihru) * sub_km(i) / daru_km(i,ils)
+          end do
+        end if
+      
+!!  routing changes gsm per jga 5/3/2010
+!!      irunits = 0
+!!      read (101,*,iostat=eof) titldum
+!!      read (101,*,iostat=eof) irunits
+!!     if (irunits = = 1) then
+!!        call readfig_sub
+!!      endif
+      
+!!    set default values
+!!    set default values
+      if (re(ihru) <= 0.) re(ihru) = re_bsn
+      if (sdrain(ihru) <= 0.) sdrain(ihru) = sdrain_bsn
+      if (drain_co(ihru) <= 0.) drain_co(ihru) = drain_co_bsn
+      if (pc(ihru) <= 0.) pc(ihru) = pc_bsn
+      if (latksatf(ihru) <= 0.) latksatf(ihru) = latksatf_bsn      
+      if (sstmaxd(ihru) <= 0.) sstmaxd(ihru) = sstmaxd_bsn      
+      !     estimate drainage area for urban on-line bmps in square km
+      !subdr_km(i) = subdr_km(i) + sub_km(i)
+
 
 !!    set default values
       if (sub_km(i) <= 0.) sub_km(i) = 1.
@@ -388,16 +399,19 @@
            cncoef_sub(i) = 1.
         endif
       endif
+
       if (fcst_reg(i) <= 0.) fcst_reg(i) = 1
       if (co2(i) <= 0.) co2(i) = 330.
       if (ch_s(1,i) <= 0.) ch_s(1,i) = .0001
       if (ch_n(1,i) <= 0.005) ch_n(1,i) = 0.005
       if (ch_n(1,i) >= 0.70) ch_n(1,i) = 0.70
-      if (sub_smfmx(i) < 1.e-6) sub_smfmx(i) = smfmx
-      if (sub_smfmn(i) < 1.e-6) sub_smfmn(i) = smfmn
-      if (sub_sftmp(i) < 1.e-6) sub_sftmp(i) = sftmp
-      if (sub_smtmp(i) < 1.e-6) sub_smtmp(i) = smtmp
-      if (sub_timp(i) < 1.e-6) sub_timp(i) = timp
+      do ib = 1, 10
+        if (sub_smtmp(ib,i) < 1.e-6) sub_smtmp(ib,i) = smtmp      
+        if (sub_sftmp(ib,i) < 1.e-6) sub_sftmp(ib,i) = sftmp        
+        if (sub_smfmx(ib,i) < 1.e-6) sub_smfmx(ib,i) = smfmx
+        if (sub_smfmn(ib,i) < 1.e-6) sub_smfmn(ib,i) = smfmn
+        if (sub_timp(ib,i) < 1.e-6) sub_timp(ib,i) = timp
+      end do
 
 !!    check elevation band fractions
       sumebfr = 0.
@@ -405,7 +419,7 @@
         sumebfr = sumebfr + elevb_fr(j,i)
       end do
       if (sumebfr > 1.e-5) then
-        if (sumebfr < .99) write (1,1000) i
+        if (sumebfr < .99) write (24,1000) i
       end if
 
 !!    This equation given to us by EPA, in the process of getting reference
@@ -440,14 +454,18 @@
 !!read in subbasin water use parameter values
       call readwus
 
+!! sediment delivery ration for the subbasin..... urban modeling by J.Jeong
+      dratio(i) = 0.42 * sub_km(i) ** -0.125
+      if(dratio(i)>0.9) dratio(i) = 0.9
+
       close (101)
       return
  1000 format ('ERROR: Elevation Band Fractions in Subbasin ',i4,        &
      &        ' do not add up to 100% of subbasin area!')
  5100 format (a)
  5101 format (f8.4,f4.2,5f8.3)
- 5200 format (10f8.3)
- 5300 format (6a13,i4)
+ 5200 format (10f8.1)
+ 5300 format (8a13,i6)
  5400 format (i4,6f8.3)
  5500 format (2i4)
       end

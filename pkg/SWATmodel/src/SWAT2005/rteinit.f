@@ -17,7 +17,7 @@
 !!                               |4 = transfer    13 = 
 !!                               |5 = add         14 = saveconc
 !!                               |6 = rechour     15 = 
-!!                               |7 = recmon      16 = autocal
+!!                               |7 = recmon     
 !!                               |8 = recyear
 !!    ihouts(:)   |none          |For ICODES equal to
 !!                               |0: not used
@@ -106,7 +106,7 @@
 
       use parm
 
-      integer :: idum, icd, inm1, inm2, inm3, inm4, iht
+      integer :: icd, inm1, inm2, inm3, inm4, iht
       real :: rnm1
 
 !!    calculate watershed area in hectares
@@ -119,9 +119,9 @@
       do idum = 1, nhru
         hru_dafr(idum) = hru_km(idum) / da_km
         isb = hru_sub(idum)
-        if (idplt(1,1,idum) > 0) then 
-         if (bio_e(idplt(1,1,idum)) > 1.e-6) then
-          subfr_nowtr(isb) = subfr_nowtr(isb) + hru_dafr(idum)
+        if (idplt(idum) > 0) then 
+         if (bio_e(idplt(idum)) > 1.e-6) then
+          subfr_nowtr(isb) = subfr_nowtr(isb) + hru_fr(idum)
          end if
         end if
       end do

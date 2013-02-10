@@ -96,6 +96,8 @@
 
       integer :: jres
       real :: vol, sed, vvr, targ, xx, flw
+      real :: san,sil,cla,sag,lag,gra,ndespill
+      real :: inised, finsed, setsed, remsetsed
  
       jres = 0
       jres = inum1
@@ -103,8 +105,21 @@
 !! store initial values
       vol = 0.
       sed = 0.
+      inised = 0.
+      finsed = 0.
+      setsed = 0.
+      remsetsed = 0.
+
       vol = res_vol(jres)
       sed = res_sed(jres)
+
+!!    Storage by particle sizes
+      san = res_san(jres)
+      sil = res_sil(jres)
+      cla = res_cla(jres)
+      sag = res_sag(jres)
+      lag = res_lag(jres)
+      gra = res_gra(jres)
 
 !! calculate surface area for day
       ressa = br1(jres) * res_vol(jres) ** br2(jres)
@@ -138,6 +153,13 @@
 
           case (1)                   !! use measured monthly outflow
             resflwo = res_out(jres,i_mo,curyr)
+          !! This will override the measured outflow! This is just a check 
+          !! should really calibrate inflow or check res volumes
+            ndespill = ndtargr(nres)
+            if (ndespill <= 0.) ndespill = 10.
+            if (res_vol(jres) > res_evol(jres)) then
+              resflwo = resflwo+(res_vol(jres)-res_evol(jres))/ndespill
+            endif
 
           case (2)                   !! controlled outflow-target release
             targ = 0.
@@ -205,11 +227,6 @@
 
       else
 
-        !! compute new sediment concentration in reservoir
-      if (ressedi < 1.e-6) ressedi = 0.0      !!nbs 02/05/07
-        res_sed(jres) = (ressedi + sed * vol) / res_vol(jres)
-        res_sed(jres) = Max(0.,res_sed(jres))
-
         !! check calculated outflow against specified max and min values
         if (resflwo < oflowmn(i_mo,jres)) resflwo = oflowmn(i_mo,jres)
         if (resflwo > oflowmx(i_mo,jres) .and. oflowmx(i_mo,jres) > 0.) &
@@ -235,21 +252,115 @@
         !! add spillage from consumptive water use to reservoir outflow
         resflwo = resflwo + xx * wurtnf(jres)
 
+        !! compute new sediment concentration in reservoir
+        if (ressedi < 1.e-6) ressedi = 0.0      !!nbs 02/05/07
+        if (ressa == 0.) ressa = 1.e-6     !! MJW added 040711
+        velofl = (resflwo / ressa) / 10000.  !!m3/d / ha * 10000. = m/d
+!!        velsetl = 1.35      !! for clay particle m/d
+        if (velofl > 1.e-6) then
+          trapres = velsetlr(jres) / velofl
+          if (trapres > 1.) trapres = 1.  !! set to nres
+          susp = 1. - trapres
+        else
+          susp = 0.
+        end if
+
+      if (res_vol(jres) > 0.) then                         !!MJW added 040811
+        res_sed(jres) = (ressedi * susp + sed * vol) / res_vol(jres)
+        res_san(jres) = (ressani + san * vol) / res_vol(jres)
+        res_sil(jres) = (ressili + sil * vol) / res_vol(jres)
+        res_cla(jres) = (resclai + cla * vol) / res_vol(jres)
+        res_sag(jres) = (ressagi + sag * vol) / res_vol(jres)
+        res_lag(jres) = (reslagi + lag * vol) / res_vol(jres)
+        res_gra(jres) = (resgrai + gra * vol) / res_vol(jres)
+
+        res_sed(jres) = Max(1.e-6,res_sed(jres))
+        res_san(jres) = Max(1.e-6,res_san(jres))
+        res_sil(jres) = Max(1.e-6,res_sil(jres))
+        res_cla(jres) = Max(1.e-6,res_cla(jres))
+        res_sag(jres) = Max(1.e-6,res_sag(jres))
+        res_lag(jres) = Max(1.e-6,res_lag(jres))
+        res_gra(jres) = Max(1.e-6,res_gra(jres))
+      else
+        res_sed(jres) = 1.e-6             !!MJW added 040711
+        res_san(jres) = 1.e-6
+        res_sil(jres) = 1.e-6
+        res_cla(jres) = 1.e-6
+        res_sag(jres) = 1.e-6
+        res_lag(jres) = 1.e-6
+        res_gra(jres) = 1.e-6
+      endif
+        
         !! compute change in sediment concentration due to settling
         if (res_sed(jres) < 1.e-6) res_sed(jres) = 0.0    !!nbs 02/05/07
         if (res_sed(jres) > res_nsed(jres)) then
+          inised = res_sed(jres)
           res_sed(jres) = (res_sed(jres) - res_nsed(jres)) *            &
      &                                   sed_stlr(jres) + res_nsed(jres)
+          finsed = res_sed(jres)
+          setsed = inised - finsed
+
+        if (res_gra(jres) >= setsed) then
+          res_gra(jres) = res_gra(jres) - setsed
+          remsetsed = 0.
+        else
+          remsetsed = setsed - res_gra(jres)
+          res_gra(jres) = 0.
+            if (res_lag(jres) >= remsetsed) then
+            res_lag(jres) = res_lag(jres) - remsetsed
+            remsetsed = 0.
+          else
+            remsetsed = remsetsed - res_lag(jres)
+            res_lag(jres) = 0.
+            if (res_san(jres) >= remsetsed) then
+              res_san(jres) = res_san(jres) - remsetsed
+              remsetsed = 0.
+            else
+              remsetsed = remsetsed - res_san(jres)
+              res_san(jres) = 0.
+              if (res_sag(jres) >= remsetsed) then
+                res_sag(jres) = res_sag(jres) - remsetsed
+                remsetsed = 0.
+              else
+                remsetsed = remsetsed - res_sag(jres)
+                res_sag(jres) = 0.
+                if (res_sil(jres) >= remsetsed) then
+                    res_sil(jres) = res_sil(jres) - remsetsed
+                  remsetsed = 0.
+                else
+                  remsetsed = remsetsed - res_sil(jres)
+                  res_sil(jres) = 0.
+                  if (res_cla(jres) >= remsetsed) then
+                    res_cla(jres) = res_cla(jres) - remsetsed
+                    remsetsed = 0.
+                  else
+                    remsetsed = remsetsed - res_cla(jres)
+                    res_cla(jres) = 0.
+                  end if
+                end if
+              end if
+            end if
+          end if
+        endif
+
         end if
 
         !! compute sediment leaving reservoir
         ressedo = res_sed(jres) * resflwo
+        ressano = res_san(jres) * resflwo
+        ressilo = res_sil(jres) * resflwo
+        resclao = res_cla(jres) * resflwo
+        ressago = res_sag(jres) * resflwo
+        reslago = res_lag(jres) * resflwo
+          resgrao = res_gra(jres) * resflwo
 
         !! net change in amount of sediment in reservoir for day
         ressedc = vol * sed + ressedi - ressedo - res_sed(jres) *       &
      &                                                     res_vol(jres)
-
-
+!      write (130,5999) i, jres, res_sed(jres), sed_stlr(jres),          &
+!     & res_nsed(jres), ressedi, ressedo, resflwi, resflwo
+!5999  format (2i4,7e12.4)
+      
       end if
 
 !!    update surface area for day

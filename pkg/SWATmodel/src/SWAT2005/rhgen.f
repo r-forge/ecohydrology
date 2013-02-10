@@ -11,6 +11,10 @@
 !!    idg(:)      |none          |array location of random number seed used
 !!                               |for a given process
 !!    j           |none          |HRU number
+!!    irelh       |none          |irelh = 0 (dewpoint)
+!!                               |      = 1 (relative humidity)
+!!                               |note:  inputs > 1.0 (dewpoint)
+!!                                       inputs < 1.0 (relative humidity)
 !!    i_mo        |none          |month being simulated
 !!    pr_w(3,:,:) |none          |proportion of wet days in a month
 !!    rndseed(:,:)|none          |random number seeds
@@ -65,7 +69,14 @@
         blm = 0.
         tmpmean = 0.
         tmpmean = (tmpmx(i_mo,hru_sub(j)) + tmpmn(i_mo,hru_sub(j))) / 2.
-        rhmo = Ee(dewpt(i_mo,hru_sub(j))) / Ee(tmpmean)
+
+!!   dewpoint or relative humidity --
+        if (irelh(hru_sub(j)) == 1) then 
+           rhmo = dewpt(i_mo,hru_sub(j))
+        else
+           rhmo = Ee(dewpt(i_mo,hru_sub(j))) / Ee(tmpmean)
+        endif
+
         yy = 0.9 * pr_w(3,i_mo,hru_sub(j))
         rhm = (rhmo - yy) / (1.0 - yy)
         if (rhm < 0.05) rhm = 0.5 * rhmo

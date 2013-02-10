@@ -148,7 +148,7 @@
       if (chpstmass + sedpstmass < 1.e-6) return
 
 !!in-stream processes
-      if (rtwtr / 86400. > 0.01) then
+      if (rtwtr / 86400. > 0.002) then
         !! calculated sediment concentration
         sedcon = 0.
         sedcon = sedrch / rtwtr * 1.e6
@@ -158,11 +158,10 @@
         frsrb = 0.
         if (solpstin + sorpstin > 1.e-6) then
           if (chpst_koc(jrch) > 0.) then
-            frsol = 1. / (1. + chpst_koc(jrch))
+            frsol = 1. / (1. + chpst_koc(jrch)* sedcon)
           else
             frsol = solpstin / (solpstin + sorpstin)
           end if
-!         frsol = 1. / (1. + chpst_koc(jrch) * sedcon)
           frsrb = 1. - frsol
         else
           !!drifting pesticide is only pesticide entering
@@ -182,14 +181,17 @@
 
         !! calculate amount of pesticide that undergoes chemical or
         !! biological degradation on day in reach
-        reactw = chpst_rea(jrch) * chpstmass * tday
+        !! MFW, 3/12/12: modify decay to be 1st order
+        !! reactw = chpst_rea(jrch) * chpstmass * tday
+        reactw = chpstmass - (chpstmass * EXP(-1. * chpst_rea(jrch)     &
+     &           * tday))
         chpstmass = chpstmass - reactw
 
         !! calculate amount of pesticide that volatilizes from reach
         volatpst = chpst_vol(jrch) * frsol * chpstmass * tday / depth
-        if (volatpst > chpstmass) then
-          volatpst = chpstmass
-          chpstmass = 0.
+        if (volatpst > frsol * chpstmass) then
+          volatpst = frsol * chpstmass 
+          chpstmass = chpstmass - volatpst
         else
           chpstmass = chpstmass - volatpst
         end if
@@ -197,9 +199,9 @@
         !! calculate amount of pesticide removed from reach by
         !! settling
         setlpst = chpst_stl(jrch) * frsrb * chpstmass * tday / depth
-        if (setlpst > chpstmass) then
-          setlpst = chpstmass
-          chpstmass = 0.
+        if (setlpst >  frsrb * chpstmass) then
+          setlpst = frsrb * chpstmass
+          chpstmass = chpstmass - setlpst
         else
           chpstmass = chpstmass - setlpst
         end if
@@ -281,7 +283,7 @@
       sedpst_conc(jrch) = sedpstmass / bedvol
 
 !! calculate amount of pesticide transported out of reach
-      if (rtwtr > 0.001) then
+      if (rtwtr / 86400. > 0.002) then             !Claire, corrected to match line 151
         solpesto = chpst_conc(jrch) * frsol
         sorpesto = chpst_conc(jrch) * frsrb
       else
