@@ -41,7 +41,7 @@ Average daily temperature (degrees C) (if not known, will be taken as the averag
 (-) average slope
 }
   \item{forest}{
-(-) Forest cover.  Always set to zero for landscape-wide processes.  Only change if calculating PET under a canopy
+(-) Forest or shade cover (0-1).  This modifies the amount of solar radiation reaching the location of interest.  It should always set to zero for landscape-wide processes regardless of the amount of forest present.  Only change this if calculating PET under a canopy.
 }
 }
 \value{
@@ -52,6 +52,8 @@ PET (potential evapotranspiration) in m
 %% ...
 }
 \references{
+Archibald JA, Walter MT.  (in review)  Towards a physically-based potential evapotranspiration estimate based on temperature.  JAWRA
+
 Priestley and Taylor (1972).  On the assessment of surface heat flux and evaporation using large-scale parameters. 
 Mon. Weath. Rev. 100: 81-92
 }
