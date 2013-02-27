@@ -9,7 +9,7 @@ Calculates potential Evapotranspiration (in meters) based on the Priestley-Taylo
 net radiation based on temperature data.
 }
 \usage{
-PET_fromTemp(Jday, Tmax_C, Tmin_C, lat_radians, AvgT = (Tmax_C + Tmin_C)/2, albedo = 0.18, TerrestEmiss = 0.97, aspect = 0, slope = 0, forest = 0)
+PET_fromTemp(Jday, Tmax_C, Tmin_C, lat_radians, AvgT = (Tmax_C + Tmin_C)/2, albedo = 0.18, TerrestEmiss = 0.97, aspect = 0, slope = 0, forest = 0, PTconstant=1.26)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,13 +35,16 @@ Average daily temperature (degrees C) (if not known, will be taken as the averag
 (-) Surface Emissivity - defaults to 0.97
 }
   \item{aspect}{
-(-) Surface aspect
+(radians) Surface aspect
 }
   \item{slope}{
-(-) average slope
+(radians) average slope
 }
   \item{forest}{
 (-) Forest or shade cover (0-1).  This modifies the amount of solar radiation reaching the location of interest.  It should always set to zero for landscape-wide processes regardless of the amount of forest present.  Only change this if calculating PET under a canopy.
+}
+  \item{PTconstant}{
+(-) Priestley-Taylor Constant, often 1.26
 }
 }
 \value{

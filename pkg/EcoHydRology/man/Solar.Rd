@@ -36,4 +36,10 @@ Solar(lat, Jday, Tx, Tn, albedo, forest, slope, aspect)
   \item{aspect}{
  ground aspect [rad from north]
 }
+  \item{units}{
+Units of the result.  Defaults to kJ/m2/d, changing this will make output in W/m2
+}
+  \item{latUnits}{
+Latitude units can be explicitly stated here, options are 'radians', 'degrees' or default is 'unknown', which will assume radians unless value of lat is in polar regions or beyond  (> 1.62 or < -1.62)
+}
 }
