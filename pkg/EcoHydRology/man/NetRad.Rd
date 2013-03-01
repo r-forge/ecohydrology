@@ -2,7 +2,6 @@
 \alias{NetRad}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Title to be replaced
 Daily Net Radiation
 }
 \description{
