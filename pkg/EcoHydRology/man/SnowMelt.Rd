@@ -13,7 +13,7 @@ SnowMelt(Date, precip_mm, Tmax_C, Tmin_C, lat_deg, slope = 0, aspect = 0, tempHt
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{Date}{
-Vector of dates (class Date or character) in this format: "/%Y-/%m-/%d"
+Vector of dates (class Date or character) in this format: Y-m-d
 }
   \item{precip_mm}{
 Precipitation in mm
@@ -59,7 +59,7 @@ The density of snow on the ground on the first day (kg/m3)
 }
 }
 \value{
-This will return a 10 column data frame with nrow = length of input streamflow data.  Column names are :
+This will return a 10 column data frame with nrow = length of input weather data.  Column names are :
 Date, MaxT_C, MinT_C, Precip_mm, Rain_mm, SnowfallWatEq_mm, SnowMelt_mm, NewSnow_m, SnowDepth_m, SnowWaterEq_mm 
 }
 \references{
