@@ -35,7 +35,7 @@ Time of solar noon.  Can be calculated from sunrise and sunset times. [hr]
 Units of the result.  Defaults to W/m2
 }
   \item{latUnits}{
-Latitude units can be explicitly stated here, options are 'radians', 'degrees' or default is 'unknown', which will assume radians unless value of lat is in polar regions or beyond  (> 1.62)
+Latitude units can be explicitly stated here, options are 'radians', 'degrees' or default is 'unknown', which will assume radians unless the absolute value of lat is greater than pi/2
 }
 }
 

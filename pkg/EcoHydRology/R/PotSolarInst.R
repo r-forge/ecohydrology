@@ -5,7 +5,7 @@ function(Jday, hour = 12, lat = 42.44*pi/180, sunrise = NULL, sunset = NULL, Sol
 #hour[hour of day, 0-24]
 #Either sunrise and sunset times, or SolarNoon is needed   [in hours, 0-24]
 
-if ((abs(lat) > 1.162 & latUnits == "unknown") | latUnits == "degrees" ){
+if ((abs(lat) > pi/2 & latUnits == "unknown") | latUnits == "degrees" ){
 print("Latitude in degrees")
 lat <- lat*pi/180
 } else if (latUnits == "unknown"){

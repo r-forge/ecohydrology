@@ -2,7 +2,7 @@
 \alias{PET_fromTemp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Potential Evapotranspiration
+Priestley-Taylor Potential Evapotranspiration from temperature
 }
 \description{
 Calculates potential Evapotranspiration (in meters) based on the Priestley-Taylor equation (1972).  We use an estimation of
@@ -81,5 +81,4 @@ detach(OwascoInlet)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

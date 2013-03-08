@@ -13,7 +13,7 @@ NetRad(lat, Jday, Tx, Tn, albedo = 0.18, forest = 0, slope = 0, aspect = 0, airt
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{lat}{
-latitude.  Default is radians, but will automatically convert from degrees if value is larger than 1.62 or less than -1.62
+latitude.  Default is radians, but will automatically convert from degrees if value is larger than pi/2 or less than -pi/2
 }
   \item{Jday}{
 Day of the year [-]
@@ -50,7 +50,7 @@ Surface emissivity [-]
 Surface temperature [C]
 }
   \item{units}{
-Units of the result.  Defaults to kJ/m2/d, changing this will make output in W/m2
+Units of the result.  Defaults to "kJm2d" which returns result in kJ/m2/d, the other option is "Wm2", which will make output in W/m2
 }
 
 }

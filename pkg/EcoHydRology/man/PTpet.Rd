@@ -35,6 +35,4 @@ Josephine Archibald
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ Evaporation}
-\keyword{ PET }
-\keyword{ Priestley-Taylor }
+
