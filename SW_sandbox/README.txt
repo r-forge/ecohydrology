@@ -42,9 +42,9 @@ Once you have downloaded and installed an SVN provider, you can grab the data fr
 - Create a new folder in an easy-to-find place. 
 - Open the folder and right click.  Chose SVN Checkout
 - You will need to change the path in the first box.  
--  " svn checkout svn+ssh://PUT_YOUR_ID_here@scm.r-forge.r-project.org/svnroot/ecohydrology/SW_sandbox "
+-  " svn+ssh://PUT_YOUR_ID_here@scm.r-forge.r-project.org/svnroot/ecohydrology/SW_sandbox "
 -  (You will have to enter your developer password a few times..)
-- OR TO CHECK IT OUT ANONYMOUSLY : " svn checkout svn://scm.r-forge.r-project.org/svnroot/ecohydrology/SW_sandbox "
+- OR TO CHECK IT OUT ANONYMOUSLY : " svn://scm.r-forge.r-project.org/svnroot/ecohydrology/SW_sandbox "
 - Notice that now your new folder will have a bunch of new files in it with little green check icons over the folders.  
 - This means that you have the newest version of these files
 
