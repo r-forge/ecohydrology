@@ -29,7 +29,7 @@ function(
 	  # Calculated from Time to peak, which is related to time of concentration
 ){
 	# Parameters
-	latitude<-latitudeDegrees*pi/180## latitude in radians
+	latitude<-latitudeDegrees*pi/180 ## latitude in radians
 
 	## Effective soil water storage coefficients, eswsc = Se*(2..... see Schneiderman et al 2007)
 	eswsc <- vector(mode="numeric", length=no_wet_class)
@@ -54,7 +54,7 @@ function(
 	month<-strptime(dateSeries,"%Y-%m-%d")$mon+1
 
 	## Potential Evapotranspiration 
-	PET<-PET_fromTemp(Jday=day,Tmax_C=Tmax,Tmin_C=Tmin,AvgT=Tav,albedo=albedo,lat=latitude)*1000## mm (Priestley-Taylor)
+	PET<-PET_fromTemp(Jday=day,Tmax_C=Tmax,Tmin_C=Tmin,AvgT=Tav,albedo=albedo,lat_radians=latitude)*1000## mm (Priestley-Taylor)
 	PET[which(PET>PETcap)]<-PETcap#Sets a cap on PET estimates (usually ~ 5mm)
 
 	ETo<- PET * 0.7  #In growing season, ET = ~0.7 PET
