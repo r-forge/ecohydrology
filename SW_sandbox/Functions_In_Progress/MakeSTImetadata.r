@@ -116,7 +116,7 @@ STI_F <- rasterFromXYZ(xyz_F, res=c(NA,NA), crs="+proj=utm +zone=18 +datum=NAD27
 raster(STI_F)
 Quants_F <- as.vector(quantile(xyz_F$z, na.rm=TRUE, probs = seq(0,1, by=0.1)))
 Lims_F <- as.matrix(data.frame(From=Quants_F[1:10], To=Quants_F[2:11], Becomes = seq(10,1,by=-1)))
-wet_class_F <- reclass(STI_F, Lims_F)  ## use to be reclass(), function changed??
+wet_class_F <- reclassify(STI_F, Lims_F)  ## use to be reclass(), function changed??
 
 
 LocData["STI"] <- extract(STIgrid,xy, method='simple')
