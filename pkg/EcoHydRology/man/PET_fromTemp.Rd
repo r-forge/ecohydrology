@@ -9,7 +9,10 @@ Calculates potential Evapotranspiration (in meters) based on the Priestley-Taylo
 net radiation based on temperature data.
 }
 \usage{
-PET_fromTemp(Jday, Tmax_C, Tmin_C, lat_radians, AvgT = (Tmax_C + Tmin_C)/2, albedo = 0.18, TerrestEmiss = 0.97, aspect = 0, slope = 0, forest = 0, PTconstant=1.26, AEparams=list(vp=NULL, opt="linear"))
+PET_fromTemp(Jday, Tmax_C, Tmin_C, lat_radians, 
+AvgT = (Tmax_C + Tmin_C)/2, albedo = 0.18, TerrestEmiss = 0.97, 
+aspect = 0, slope = 0, forest = 0, PTconstant=1.26,
+AEparams=list(vp=NULL, opt="linear"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -77,7 +80,8 @@ We are assuming that the Ground heat flux on a daily time-step is zero
 data(OwascoInlet)
 head(OwascoInlet)
 attach(OwascoInlet)
-PETapprox<-PET_fromTemp(Jday=(1+as.POSIXlt(date)$yday), Tmax_C=Tmax_C, Tmin_C=Tmin_C, lat_radians=42.45*pi/180)
+PETapprox <- PET_fromTemp(Jday=(1+as.POSIXlt(date)$yday), Tmax_C=Tmax_C,
+ Tmin_C=Tmin_C, lat_radians=42.45*pi/180)
 plot(PETapprox*1000~date, type="l")
 detach(OwascoInlet)
 

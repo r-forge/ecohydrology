@@ -8,7 +8,10 @@ Daily Net Radiation
 Daily net radiation [kJ m-2 d-1]
 }
 \usage{
-NetRad(lat, Jday, Tx, Tn, albedo = 0.18, forest = 0, slope = 0, aspect = 0, airtemp = (Tn+Tx)/2, cloudiness = "Estimate", surfemissivity = 0.97, surftemp = (Tn+Tx)/2, units = "kJm2d", AEparams=list(vp=NULL, opt="linear"))
+NetRad(lat, Jday, Tx, Tn, albedo = 0.18, forest = 0, slope = 0, 
+aspect = 0, airtemp = (Tn+Tx)/2, cloudiness = "Estimate", 
+surfemissivity = 0.97, surftemp = (Tn+Tx)/2, units = "kJm2d", 
+AEparams=list(vp=NULL, opt="linear"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
