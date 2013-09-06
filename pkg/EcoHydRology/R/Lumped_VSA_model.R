@@ -192,11 +192,12 @@ function(
 	}
 	} else MaxWetClass[i] <- 0 # If no runoff, then no saturated areas.
 	}
-
+	MaxWetPer <- MaxWetClass/no_wet_class
+	
 	modeled_flow<-(OverlandFlow+ShallowInterflow)*(1-0.01*percentImpervious)+impervRunoff*(0.01*percentImpervious)+baseflow#totQ+baseflow
 	quickflow_combined<-(OverlandFlow+ShallowInterflow)*(1-0.01*percentImpervious)+impervRunoff*(0.01*percentImpervious)
 	rain_snowmelt<-P
-	Streamflow<-data.frame(Date=as.Date(as.character(dateSeries)), rain_snowmelt, modeled_flow, baseflow, OverlandFlow, ShallowInterflow, totQ, deltaP, Pe, Se, Ia, SoilWater, quickflow_combined, impervRunoff, excess, Tmax, Tmin, ET,MaxWetClass)[OutStart:length(P),] 
+	Streamflow<-data.frame(Date=as.Date(as.character(dateSeries)), rain_snowmelt, modeled_flow, baseflow, OverlandFlow, ShallowInterflow, totQ, deltaP, Pe, Se, Ia, SoilWater, quickflow_combined, impervRunoff, excess, Tmax, Tmin, ET,MaxWetClass,MaxWetPer)[OutStart:length(P),] 
 
 	return(Streamflow)
 }
