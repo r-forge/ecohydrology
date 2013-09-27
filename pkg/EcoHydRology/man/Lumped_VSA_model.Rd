@@ -11,8 +11,8 @@ This model calculates streamflow and approximate saturated area percentage contr
 Lumped_VSA_model(dateSeries, P, Tmax, Tmin, Depth = NULL, SATper = NULL, AWCper = NULL, 
 percentImpervious = 0, no_wet_class = 10, Tp = 5, latitudeDegrees = 42.38, albedo = 0.23, 
 StartCond = "avg", PETin = NULL, AWC = Depth * AWCper, SAT = Depth * SATper, SW1 = NULL, 
-BF1 = 1, PETcap = 5, rec_coef = 0.1, Se_min = 78, C1 = 3.1, Ia_coef = 0.05, PreviousOutput = NULL, 
-runoff_breakdown = RunoffBreakdown(Tp, HrPrcDelay = (Tp/2 - 4)))
+BF1 = 1, PETcap = 5, rec_coef = 0.1, Se_min = 78, C1 = 3.1, Ia_coef = 0.05, 
+PreviousOutput = NULL, runoff_breakdown = RunoffBreakdown(Tp, HrPrcDelay = (Tp/2 - 4)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
