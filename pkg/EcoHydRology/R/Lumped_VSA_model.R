@@ -56,7 +56,8 @@ function(
 	## Potential Evapotranspiration 
 	PET<-PET_fromTemp(Jday=day,Tmax_C=Tmax,Tmin_C=Tmin,AvgT=Tav,albedo=albedo,lat_radians=latitude)*1000## mm (Priestley-Taylor)
 	PET[which(PET>PETcap)]<-PETcap#Sets a cap on PET estimates (usually ~ 5mm)
-
+	
+	ETo <- PET
 	ETo[which(day<=166)]<-(0.1+0.02*(day[which(day<=166)]-121))*PET[which(day<=166)]## linear increase from May 1- June 15
 	ETo[which(month<5)]<-0.1*PET[which(month<5)]									## until May 1, ET is only 10% of PET
 	ETo[which(day>=274)]<-(1-0.02*(day[which(day>=274)]-274))*PET[which(day>=274)]  # 
