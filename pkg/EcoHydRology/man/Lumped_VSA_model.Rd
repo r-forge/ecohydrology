@@ -8,7 +8,11 @@ Lumped Variable Source Area (VSA) Watershed Model
 This model calculates streamflow and approximate saturated area percentage contributing to overland flow.  It was developed in saturation-excess dominated watersheds, and is based on the Thornthwaite-Mather water budget and SCS Curve Number approach for overland runoff. 
 }
 \usage{
-Lumped_VSA_model(dateSeries, P, Tmax, Tmin, Depth = NULL, SATper = NULL, AWCper = NULL, percentImpervious = 0, no_wet_class = 10, Tp = 5, latitudeDegrees = 42.38, albedo = 0.23, StartCond = "avg", PETin = NULL, AWC = Depth * AWCper, SAT = Depth * SATper, SW1 = NULL, BF1 = 1, PETcap = 5, rec_coef = 0.1, Se_min = 78, C1 = 3.1, Ia_coef = 0.05, PreviousOutput = NULL, runoff_breakdown = RunoffBreakdown(Tp, HrPrcDelay = (Tp/2 - 4)))
+Lumped_VSA_model(dateSeries, P, Tmax, Tmin, Depth = NULL, SATper = NULL, AWCper = NULL, 
+percentImpervious = 0, no_wet_class = 10, Tp = 5, latitudeDegrees = 42.38, albedo = 0.23, 
+StartCond = "avg", PETin = NULL, AWC = Depth * AWCper, SAT = Depth * SATper, SW1 = NULL, 
+BF1 = 1, PETcap = 5, rec_coef = 0.1, Se_min = 78, C1 = 3.1, Ia_coef = 0.05, PreviousOutput = NULL, 
+runoff_breakdown = RunoffBreakdown(Tp, HrPrcDelay = (Tp/2 - 4)))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -124,9 +128,13 @@ PET_fromTemp
 \examples{
 data(OwascoInlet)
 # First get rain and snow-melt input: 
-rsm <- SnowMelt(Date=OwascoInlet$date, precip_mm=OwascoInlet$P_mm, Tmax_C=OwascoInlet$Tmax_C, Tmin_C=OwascoInlet$Tmin_C, lat_deg=42.66)
+rsm <- SnowMelt(Date=OwascoInlet$date, precip_mm=OwascoInlet$P_mm, Tmax_C=OwascoInlet$Tmax_C, 
+Tmin_C=OwascoInlet$Tmin_C, lat_deg=42.66)
 # Calculate streamflow based on watershed characteristics:
-Results <- Lumped_VSA_model(dateSeries = OwascoInlet$date, 	P = rsm$Rain_mm+rsm$SnowMelt_mm, Tmax=OwascoInlet$Tmax_C, Tmin = OwascoInlet$Tmin_C, latitudeDegrees=42.66, Tp = 5.8, Depth = 2010, SATper = 0.27, AWCper = 0.13, StartCond = "wet")
+Results <- Lumped_VSA_model(dateSeries = OwascoInlet$date, 	P = rsm$Rain_mm+rsm$SnowMelt_mm, 
+Tmax=OwascoInlet$Tmax_C, Tmin = OwascoInlet$Tmin_C, latitudeDegrees=42.66, Tp = 5.8, Depth = 2010, 
+SATper = 0.27, AWCper = 0.13, StartCond = "wet")
 #  View results:
-hydrograph(streamflow=ConvertFlowUnits(cms=OwascoInlet$Streamflow_m3s, WA=106, AREAunits="mi2") , timeSeries =OwascoInlet$date   ,  streamflow2 =  Results$modeled_flow , precip = rsm$Rain_mm+rsm$SnowMelt_mm )
+hydrograph(streamflow=ConvertFlowUnits(cms=OwascoInlet$Streamflow_m3s, WA=106, AREAunits="mi2"), 
+timeSeries=OwascoInlet$date, streamflow2=Results$modeled_flow, precip=rsm$Rain_mm+rsm$SnowMelt_mm)
 }

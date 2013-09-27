@@ -53,6 +53,7 @@ OwascoInlet_mmd <- ConvertFlowUnits(cmd=OI$flowdata$flow, WA=OI$area)
 FallCreek_mmd <- ConvertFlowUnits(cmd=FC$flowdata$flow, WA=FC$area)
 
 ##  Compare the watershed area normalized flow depth for two watersheds near Ithaca NY :
-hydrograph(streamflow=OwascoInlet_mmd, streamflow2=FallCreek_mmd, timeSeries=FC$flowdata$mdate, stream.label="flow depth (mm/d)")
+hydrograph(streamflow=OwascoInlet_mmd, streamflow2=FallCreek_mmd, timeSeries=FC$flowdata$mdate, 
+stream.label="flow depth (mm/d)")
 legend("topright", legend=c("Owasco Inlet", "Fall Creek"), lty=c(1,2), col=c("black", "red"))
 }

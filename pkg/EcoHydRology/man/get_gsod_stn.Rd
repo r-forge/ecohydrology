@@ -37,7 +37,8 @@ y
 
 ## The function is currently defined as
 function(){
-  tmpdir=readline("Please enter a temp directory to store the datafiles in, remember this directory when parsing with build_gsod_forcing_data()? \n")
+  tmpdir=readline("Please enter a temp directory to store the datafiles in, remember this directory
+  when parsing with build_gsod_forcing_data()? \n")
   dir.create(tmpdir)
   stnlist=GSOD_history
   ANSWER="n"
