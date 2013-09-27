@@ -57,14 +57,13 @@ function(
 	PET<-PET_fromTemp(Jday=day,Tmax_C=Tmax,Tmin_C=Tmin,AvgT=Tav,albedo=albedo,lat_radians=latitude)*1000## mm (Priestley-Taylor)
 	PET[which(PET>PETcap)]<-PETcap#Sets a cap on PET estimates (usually ~ 5mm)
 
-	ETo<- PET * 0.7  #In growing season, ET = ~0.7 PET
-	ETo[which(day<=151)]<-(0.4+0.01*(day[which(day<=151)]-121))*PET[which(day<=151)]## linear increase from May 2- June 1
-	ETo[which(month<5)]<-0.4 * PET[which(month<5)]## until May 2, ET is only 40% of PET
-	ETo[which(day>=274)]<-(0.7-0.01*(day[which(day>=274)]-274))*PET[which(day>=274)]  # decreases after Oct 1 (Shaw and Riha)
-	ETo[which(day>304)] <- 0.4*PET[which(day>304)]  # After 10-31 it is 40%
+	ETo[which(day<=166)]<-(0.1+0.02*(day[which(day<=166)]-121))*PET[which(day<=166)]## linear increase from May 1- June 15
+	ETo[which(month<5)]<-0.1*PET[which(month<5)]									## until May 1, ET is only 10% of PET
+	ETo[which(day>=274)]<-(1-0.02*(day[which(day>=274)]-274))*PET[which(day>=274)]  # 
+	ETo[which(day>319)]<-0.1*PET[which(day>319)]									## After Nov 15, ET is only 10% of PET
 
 	if (!is.null(PETin)) ETo <- PETin  ## Allows users to insert PET themselves
-	ET <- ETo    #  Initiallizing modeled actual ET, equal to ETo when deltaP > 0, but less than ETo on drier days
+	ET <- ETo    #  Initializing modeled actual ET, equal to ETo when deltaP > 0, but less than ETo on drier days
 	# Values to be defined in a loop
 
 	# Initializing vectors for Water Budget Loop, and Runoff estimation
