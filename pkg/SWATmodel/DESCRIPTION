@@ -1,5 +1,5 @@
 Package: SWATmodel
-Version: 0.5.8
+Version: 0.5.9
 Title: A multi-OS implementation of the TAMU SWAT model.
 Author: Fuka, DR, Walter, MT, Steenhuis, TS, and Easton, ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
