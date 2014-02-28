@@ -73,7 +73,7 @@ Journal of Hydrology 300(1-4): 65-75
 \author{
 Josephine Archibald, M. Todd Walter
 }
-\section{Warning } {
+\section{Warning}{
 This function cannot handle NA values in input, and can only be run for continuous daily data.
 For data-sets missing values, run discontinuous segments separately.
 }

@@ -123,7 +123,7 @@ This function is under development and might change substantially in further ver
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
-\section{Warning } {
+\section{Warning}{
 This function cannot handle NA values in input, and can only be run for a daily time-step.
 If Tx < Tn for any day, this will produce an error.
 Currently, the crop coefficients used to estimate PET are specific for deciduous northeastern USA.
