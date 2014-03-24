@@ -69,14 +69,14 @@ getGHCN_shape <- function(lat=NULL, long=NULL, NSdeg=0.5, EWdeg=0.5, StartYear= 
 	##  OPTIONAL: USING A SHAPEFILE ----------------------------------------------------
 	if (useShape) { ##  
 		if (is.null(projection)){	
-			SHP <- readOGR("GIS", "CayIn")
+			SHP <- readOGR(boundaryFold, boundary)
 		} else SHP <- readShapePoly(paste(boundaryFold, boundary, sep="/"), proj4string=CRS(projection)) 
 		if (TransformLatLon) SHP <- spTransform(SHP, CRS(LLproj))  #  Transform the shapefile into lat/lon if it isn't already
 		ALLgages <- junk
 		coordinates(ALLgages) <- ALLgages[,3:2]
 		attributes(ALLgages)$proj4string <- attributes(SHP)$proj4string 
-		ALLgages$wshd <- over(ALLgages, SHP)$Id   # This will be NA for gages outside basin
-		Sub1 <- ALLgages[-which(is.na(ALLgages$wshd)),]  #  Just grab gages within watershed
+		ALLgages$wshd <- over(ALLgages, SHP)[,1]   # This will be NA for gages outside basin
+		Sub1 <- ALLgages[-which(is.na(ALLgages$wshd)),]  #  Removes gages outside watershed
 		SubJunk <- subset(Sub1, LastYear> StartYear  & FirstYear < EndYear & 
 		(Element =="TMAX" | Element=="TMIN" | Element=="PRCP"))  # Make sure it has data within our time of interest and have P or T
 	# ---------------------------------------------------------------------------
