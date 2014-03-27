@@ -1,4 +1,4 @@
-Comp2GHCN#  Function created 3/21/2014 by Jo Archibald (jaa78@cornell.edu)
+#  Function created 3/21/2014 by Jo Archibald (jaa78@cornell.edu)
 
 ##  TWO functions here:  
 ## CompileGHCN :  reads in output from getGHCN_shape or getGHCN and combines the P, Tn and Tx from all stations to give an average P (mm), Tn (mm) and Tx (mm).
@@ -25,7 +25,7 @@ CompileGHCN <- function(GHCNdata, Start = "2000-01-01", End = "2013-12-31", wgt=
 	  New <- rbind(Missing, notMissing)
 	  NOAA_gages[,c((j+1),(j+1+length(GHCNdata)),(j+1+2*length(GHCNdata)))] <- 
 	  New[order(New$date),2:4] / 10  ##  CHANGE HERE if the getGHCN function changes
-
+	
   }
   
   #  Replace -999.9 with a value of NA
@@ -34,11 +34,14 @@ CompileGHCN <- function(GHCNdata, Start = "2000-01-01", End = "2013-12-31", wgt=
     return(x)
   }
   NOAA_gages[,2:ncol(NOAA_gages)]<-sapply(NOAA_gages[,2:ncol(NOAA_gages)], ReplaceNA)
-  
-	NOAA_gages$P <- sapply(apply(NOAA_gages[,2:(1+length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)
-	if (length(sapply(apply(NOAA_gages[,(2+length(GHCNdata)):(1+2*length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)) == nrow(NOAA_gages)){  #  If no temp data is available, there will be no Tn or Tx column returned
-	NOAA_gages$Tx <- sapply(apply(NOAA_gages[,(2+length(GHCNdata)):(1+2*length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)
-	NOAA_gages$Tn <- sapply(apply(NOAA_gages[,(2+2*length(GHCNdata)):(1+3*length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)
+	if (length(GHCNdata) == 1) { 
+		NOAA_gages$P <- NOAA_gages[,2]    ##  If there is only one gage reporting
+		NOAA_gages$Tx <- NOAA_gages[,(2+length(GHCNdata))]
+		NOAA_gages$Tn <- NOAA_gages[,(2+2*length(GHCNdata))]
+	} else  {
+		NOAA_gages$P <- sapply(apply(NOAA_gages[,2:(1+length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)
+		NOAA_gages$Tx <- sapply(apply(NOAA_gages[,(2+length(GHCNdata)):(1+2*length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)
+		NOAA_gages$Tn <- sapply(apply(NOAA_gages[,(2+2*length(GHCNdata)):(1+3*length(GHCNdata))],MARGIN=1,FUN=na.omit),MARGIN=1,FUN=mean)
 	}
 	
   if (!silent) print(summary(NOAA_gages))
@@ -70,8 +73,5 @@ Comp2GHCN <- function(GHCNopt, GHCN2, Start = "2000-01-01", End = "2013-12-31"){
 	} else Tx <- g2$Tx
 	return(data.frame(DATE=g1$DATE, P, Tn, Tx, P_filled))	
 }
-
-
-
 
 
