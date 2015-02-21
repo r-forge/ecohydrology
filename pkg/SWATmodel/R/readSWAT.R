@@ -1,14 +1,17 @@
 readSWAT <-
 function(outfile_type="rch",pathtofile="./"){
+
 if(missing(outfile_type)){print(" 'outfile_type' is missing, should be rch, sub, or.. ask drf28 for other types")}
-sfilename=file(paste(pathtofile,"output.",outfile_type,sep=""))
-nskipline=grep("NYSKIP",readLines("file.cio"))
-nskip=read.fortran(textConnection(readLines(paste(pathtofile,"file.cio",sep=""))[nskipline]),"f20")
-start_year = nskip + read.fortran(textConnection(readLines(paste(pathtofile,"file.cio",sep=""))[9]), "f20")
-icalenline=grep("ICALEN",readLines("file.cio"))
-icalen=read.fortran(textConnection(readLines(paste(pathtofile,"file.cio",sep=""))[icalenline]),"f20")
+sfilename=paste(pathtofile,"/output.",outfile_type,sep="")
+cfilename=paste0(pathtofile,"/file.cio")
+nskipline=grep("NYSKIP",readLines(cfilename))
+nskip=read.fortran(textConnection(readLines(cfilename)[nskipline]),"f20")
+start_year = nskip + read.fortran(textConnection(readLines(cfilename)[9]), "f20")
+icalenline=grep("ICALEN",readLines(cfilename))
+if(length(icalenline) >0 ){
+  icalen=read.fortran(textConnection(readLines(cfilename)[icalenline]),"f20")
+}
 test = readLines(sfilename)
-unlink(sfilename)
 test=test[9:length(test)]
 linelength=nchar(test[2])
 if (outfile_type=="sub"){
