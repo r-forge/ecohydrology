@@ -26,7 +26,13 @@ for(ft in unique(change_params$filetype)){
 				   lastj=j
                                    if(is.na(fread_tmp[, j])){lastj=j-1;break}
                                    if(is.numeric(fread_tmp[,j])){
-                                      if(alter_type=="percent"){
+                                      if(alter_type=="relative"){
+                                          cpmax=file_change_params[i,"max"]
+                                          cpmin=file_change_params[i,"min"]
+                                          newval=(cpmax-fread_tmp[,j])/(cpmax-cpmin)^2*(current-cpmin)^2+fread_tmp[,j]
+				          
+                                          fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],newval)
+                                      } else if(alter_type=="percent"){
 				          fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],fread_tmp[,j]*current)
                                       } else {
                                           fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],as.numeric(current))
