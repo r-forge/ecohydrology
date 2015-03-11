@@ -1,6 +1,5 @@
 alter_files <-
 function(change_params){
-#library(operators)
 filetype=NULL
 for(ft in unique(change_params$filetype)){
         print(ft)
@@ -26,11 +25,15 @@ for(ft in unique(change_params$filetype)){
 				   lastj=j
                                    if(is.na(fread_tmp[, j])){lastj=j-1;break}
                                    if(is.numeric(fread_tmp[,j])){
-                                      if(alter_type=="relative"){
+                                      if(alter_type=="rel_upper"){
                                           cpmax=file_change_params[i,"max"]
                                           cpmin=file_change_params[i,"min"]
                                           newval=(cpmax-fread_tmp[,j])/(cpmax-cpmin)^2*(current-cpmin)^2+fread_tmp[,j]
-				          
+                                          fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],newval)
+                                      } else if(alter_type=="rel_lower"){
+                                          cpmax=file_change_params[i,"max"]
+                                          cpmin=file_change_params[i,"min"]
+                                          newval=(cpmin-fread_tmp)/(cpmax-cpmin)^2*((cpmax-(current-cpmin)/(cpmax-cpmin)*(cpmax-cpmin))-cpmin)^2+fread_tmp
                                           fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],newval)
                                       } else if(alter_type=="percent"){
 				          fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],fread_tmp[,j]*current)

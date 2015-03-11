@@ -45,9 +45,11 @@ Josephine Archibald
 
 \examples{
 data(OwascoInlet)
-OwascoInlet$Streamflow_mmd <- ConvertFlowUnits(cms=OwascoInlet$Streamflow_m3s, WA=271.4, AREAunits="km2")
+OwascoInlet$Streamflow_mmd<-ConvertFlowUnits(cms=OwascoInlet$Streamflow_m3s,WA=271.,AREAunits="km2")
 
-##  The following commented example isn't currently working in Linux systems, but should work in windows/macs
+##  The following commented example isn't currently working in Linux systems, but should 
+##  work in windows/macs
+##
 ##  Get some streamflow (reported in cubic meters per day here):
 # OI <- get_usgs_gage("04235299", "2013-03-01", "2013-05-20")
 # FC <- get_usgs_gage("04234000", "2013-03-01", "2013-05-20")
