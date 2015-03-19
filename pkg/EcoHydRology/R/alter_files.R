@@ -33,7 +33,7 @@ for(ft in unique(change_params$filetype)){
                                       } else if(alter_type=="rel_lower"){
                                           cpmax=file_change_params[i,"max"]
                                           cpmin=file_change_params[i,"min"]
-                                          newval=(cpmin-fread_tmp)/(cpmax-cpmin)^2*((cpmax-(current-cpmin)/(cpmax-cpmin)*(cpmax-cpmin))-cpmin)^2+fread_tmp
+                                          newval=(cpmin-fread_tmp[,j])/(cpmax-cpmin)^2*((cpmax-(current-cpmin)/(cpmax-cpmin)*(cpmax-cpmin))-cpmin)^2+fread_tmp[,j]
                                           fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],newval)
                                       } else if(alter_type=="percent"){
 				          fwrite_tmp[j]=sprintf(fwformat[min(j,length(fwformat))],fread_tmp[,j]*current)
