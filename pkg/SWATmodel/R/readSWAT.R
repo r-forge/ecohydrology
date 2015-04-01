@@ -1,6 +1,8 @@
 readSWAT <-
 function(outfile_type="rch",pathtofile="./"){
-
+library(data.table)
+headloc=c(sub=9,rch=9,hru=9,snu=2)
+dataloc=c(sub=1,rch=1,hru=1,snu=2)
 if(missing(outfile_type)){print(" 'outfile_type' is missing, should be rch, sub, or.. ask drf28 for other types")}
 sfilename=paste(pathtofile,"/output.",outfile_type,sep="")
 cfilename=paste0(pathtofile,"/file.cio")
@@ -11,38 +13,48 @@ icalenline=grep("ICALEN",readLines(cfilename))
 if(length(icalenline) >0 ){
   icalen=read.fortran(textConnection(readLines(cfilename)[icalenline]),"f20")
 }
-test = readLines(sfilename)
-test=test[9:length(test)]
-linelength=nchar(test[2])
-if (outfile_type=="sub"){
-   datalength=10
-   datastartlocs=c(1,11,20,seq(25,linelength-1,datalength))
-   datastoplocs=c(10,19,24,seq(24+datalength,linelength,datalength))
-   numvars=(linelength-25)/datalength
-#
-#  1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,18e10.3,1x,e10.5,3e10.3)
-#
-   if(length(datastartlocs) >= 21){
-    datastartlocs[21:length(datastartlocs)]=datastartlocs[21:length(datastartlocs)]+1
-    datastoplocs[21:length(datastoplocs)]=datastoplocs[21:length(datastoplocs)]+1
-   }
-} else if (outfile_type=="rch"){
-   datalength=12
-   datastartlocs=c(1,11,20,seq(26,linelength,datalength))
-   datastoplocs=c(10,19,25,seq(25+datalength,linelength,datalength))
-   numvars=(linelength-25)/datalength
-} else { print ("You need to add your file type to this function if it is not output.sub or output.rch")}
-  test[1]=gsub("#","X",test[1])
-  test[1]=gsub("/","Y",test[1])
-  swatcolnames=gsub(" ","",substring(test[1],datastartlocs,datastoplocs))
-  swatcolnames=gsub("X","_no_",swatcolnames)
-  swatcolnames=gsub("Y","_per_",swatcolnames)
-  test=test[2:length(test)]
-  swatfiledata=data.frame(lapply(1:length(swatcolnames),function(x){return(data.frame(substr(test,datastartlocs[x],datastoplocs[x])))}))
-  colnames(swatfiledata)<-swatcolnames
-  swatfiledata[, c(1:numvars+3)] <- sapply(swatfiledata[, c(1:numvars+3)], as.character)
-  swatfiledata[, c(2:numvars+3)] <- sapply(swatfiledata[, c(2:numvars+3)], as.numeric)
-  swatfiledata$mdate = as.Date(floor((row(swatfiledata)[,1]-1)/length(unique(swatfiledata$RCH)))+1, origin = paste(start_year - 1, "-12-31", sep = ""))
+myreadLines=function(fname) {
+ s = file.info( fname )$size
+ buf = readChar( fname, s, useBytes=T)
+ strsplit( buf,"\n",fixed=T,useBytes=T)[[1]]
+}
+test = myreadLines(sfilename)
+headstr=test[headloc[outfile_type]]
+headstr=gsub("TOT ([N,P])","TOT_\\1",headstr)
+headstr=gsub("/L([A-Z])","/L \\1",headstr)
+headstr=gsub("LAT Q","LAT_Q",headstr)
+headstr=gsub(" mg/L","_mg/L",headstr)
+headstr=gsub("WTAB ","WTAB_",headstr)
+headstr=gsub("Mg/l","mg/l",headstr)
+headstr=gsub("([A-Z])dgC","\\1C  ",headstr)
+test[headloc[outfile_type]]=headstr
+if(outfile_type=="rch" | outfile_type=="sub" | outfile_type=="snu"){substr(headstr, 1, 4) <- "INFO";test[headloc[outfile_type]]=headstr}
+datastr=test[headloc[outfile_type]+dataloc[outfile_type]]
+varnamestoplocs=unique(sort(c(unlist(gregexpr("[0-z] ",headstr)),unlist(gregexpr("[a-z][A-Z]",headstr)),unlist(gregexpr(")[A-Z]",headstr)),nchar(headstr))))
+varnamestoplocs=varnamestoplocs[varnamestoplocs>0]
+varnamestartlocs=c(1,varnamestoplocs[1:(length(varnamestoplocs)-1)]+1)
+datastoplocs=unique(sort(c(unlist(regexpr("\\.[0-9]{5}E",datastr))-1,unlist(gregexpr("[0-Z] ",datastr)),nchar(datastr))))
+datastoplocs=datastoplocs[datastoplocs>0]
+datastartlocs=c(1,datastoplocs[1:(length(datastoplocs)-1)]+1)
+
+test=test[headloc[outfile_type]:length(test)]
+linelength=nchar(test[(1+dataloc[outfile_type])])
+
+swatcolnames=gsub(" ","",substring(test[1],varnamestartlocs,varnamestoplocs))
+swatcolnames=gsub("#","_no_",swatcolnames)
+swatcolnames=gsub("/","_per_",swatcolnames)
+test1=sub("(\\.[0-9]{5}E)"," \\1",test[(1+dataloc[outfile_type]):length(test)])
+test1=gsub(" +"," ", test1)
+swatfiledata=fread(paste(test1,collapse="\n"))
+setnames(swatfiledata,swatcolnames)
+
+if (outfile_type=="sub"){ uniqunits=length(unique(swatfiledata$SUB))
+} else if (outfile_type=="rch"){ uniqunits=length(unique(swatfiledata$RCH))
+} else if (outfile_type=="hru"){uniqunits=length(unique(swatfiledata$GIS))
+} else if (outfile_type=="snu"){uniqunits=length(unique(swatfiledata$GISnum))
+} else { print ("You need to add your file type to this function if it is not output.sub .rch or .hru")}
+  
+  swatfiledata$mdate = as.Date(floor((row(swatfiledata)[,1]-1)/uniqunits)+1, origin = paste(start_year - 1, "-12-31", sep = ""))
   return(swatfiledata)
 }
 
