@@ -1,0 +1,15 @@
+Package: TauDEM
+Type: Package
+Title: Implementation of the TauDEM
+Version: 0.1.0
+Date: 2015-04-21
+Author: Daniel Fuka
+Maintainer: Daniel Fuka <drf28@cornell.edu>
+Description: Set of functions for processing DEM data based off of 
+        David Tarboton TauDEM.
+License: GPL (>= 2)
+URL:
+        http://rwiki.sciviews.org/doku.php?id=guides:tutorials:hydrological_data_analysis
+Packaged: 2015-04-21 ; dan
+Repository: CRAN
+Date/Publication: 2015-04-21
