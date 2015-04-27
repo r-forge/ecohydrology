@@ -1,0 +1,12 @@
+# in bash
+svn update
+R CMD install TauDEM
+#
+library(rgdal); library(TauDEM); options(width=200)
+tiftest=readGDAL("Google Drive/TopoSWAT/RkSWAT/testbasin/subs3/dem30_3309300UTM21.tif")
+results=Flood(tiftest)
+resultsd8_slope=D8DirSlope(results$resultfel)
+image(resultsd8_slope$resultd8)
+image(resultsd8_slope$resultslope)
+summary(resultsd8_slope$resultslope)
+summary(resultsd8_slope$resultd8)
