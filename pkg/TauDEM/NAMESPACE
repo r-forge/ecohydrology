@@ -1,2 +1,2 @@
 useDynLib(TauDEM)
-export(flood)
+export(Flood, D8DirSlope)

@@ -32,6 +32,7 @@ double xllcenter=0,yllcenter=0;
 int *d1 = dd1-1;
 int *d2 = dd2-1;
 fgrid felevg;
+fgrid fslopeg;
 sgrid sapoolg;
 sgrid sdir;
 igrid larr;
@@ -462,7 +463,6 @@ bool notfdr(short useflowfile, int i, int j)
 int setdf(float mval, float fdmval, short useflowfile,char * newflowfile, int writeflowfile)
 {
         int i,j,k,n,nflat,ni,ip,imin,jn,in,np1,nt;
-        int danint = 0; 
         err = TD_NO_ERROR;
         float fact[9],per=1.;
         /*  initialize internal pointers */
@@ -588,7 +588,7 @@ int setdf(float mval, float fdmval, short useflowfile,char * newflowfile, int wr
         return(err);
 }
 
-int flood(double *input, double *outputfel, double *outputsdir, double *outputlarr, int *nrow, int *ncol, double *cellsize, double *degree){
+int flood(double *input, double *outputfel, int *nrow, int *ncol, double *cellsize, double *degree){
 
   nx = *nrow;
   ny = *ncol;
@@ -647,25 +647,6 @@ int flood(double *input, double *outputfel, double *outputsdir, double *outputla
     }
   }
 
-//  grid->d = (float **)  R_alloc(head.nx,RPFLTDTYPE);
-//  for(i=0; i<head.nx; i++){
-//    grid->d[i] = (float *) R_alloc(head.ny,RPFLTDTYPE);
-//  }
-//  for(i=0; i<head.ny; i++) {
-//    for(j=0; j<head.nx; j++) {
-//      grid->d[j][i]= nodatavalue;
-//    }
-//  }
-//  grid->d = (int **)  R_alloc(head.nx,RPINTDTYPE);
-//  for(i=0; i<head.nx; i++){
-//    grid->d[i] = (int *) R_alloc(head.ny,RPINTDTYPE);
-//  }
-//  grid->nodata= nodatavalue;
-//  for(i=0; i<head.ny; i++) {
-//    for(j=0; j<head.nx; j++) {
-//      grid->d[j][i]= nodatavalue;
-//    }
-//  }
 
         istack = (int) (nx * ny * 0.1);
         pstack=istack;
@@ -691,17 +672,7 @@ int flood(double *input, double *outputfel, double *outputsdir, double *outputla
 
  for(i=0; i < ny; i++){
     for(j=0; j < nx; j++){
-      outputfel[j + (nx * i)] = felevg.d[j][i];
-    }
-  }
- for(i=0; i < ny; i++){
-    for(j=0; j < nx; j++){
-      outputsdir[j + (nx * i)] = felevg.d[j][i];
-    }
-  }
- for(i=0; i < ny; i++){
-    for(j=0; j < nx; j++){
-      outputlarr[j + (nx * i)] = felevg.d[j][i];
+      outputfel[j + (nx * i)] = double(felevg.d[j][i]);
     }
   }
 
@@ -709,5 +680,578 @@ int flood(double *input, double *outputfel, double *outputsdir, double *outputla
    return(0);  /*  ALL OK return from flood  */
 
 }
+//************************************************************************
 
-} 
+void sloped8(float nodata)
+{
+
+        int k,i,j,in,jn;
+        float fact[9],ed;
+        /*  Direction factors  */
+        for(k=1; k<= 8; k++)
+                fact[k]= (float) (1./sqrt(d1[k]*dy*d1[k]*dy+d2[k]*d2[k]*dx*dx));
+
+        for(i=i2; i< n2; i++)for(j=i1; j<n1; j++)
+        {
+                if(sdir.d[j][i] > 0)
+                {
+                        jn=j+d2[sdir.d[j][i]];
+                        in=i+d1[sdir.d[j][i]];
+                        ed = felevg.d[j][i] - felevg.d[jn][in];
+                        float tempvalue = ed*fact[sdir.d[j][i]];
+                        fslopeg.d[j][i]= tempvalue;
+                }
+                else
+                        fslopeg.d[j][i]= nodata;
+        }
+
+}
+//************************************************************************
+
+
+void set2(int i,int j,float *fact,float *elev1, float *elev2, int iter,
+                  int **spos, short *s, short useflowfile)
+{
+/*  This function sets directions based upon secondary elevations for
+  assignment of flow directions across flats according to Garbrecht and Martz
+  scheme.  There are two possibilities:
+        A.  The neighbor is outside the flat set
+        B.  The neighbor is in the flat set.
+        In the case of A the elevation of the neighbor is set to 0 for the purposes
+        of computing slope.  Since the incremental elevations are all positive there is
+        always a downwards slope to such neighbors, and if the previous elevation
+        increment had 0 slope then a flow direction can be assigned.*/
+
+        float slope,slope2,smax,ed;
+        int k,spn,sp,kflat=0;
+        short in,jn;
+        smax=0.;
+        sp=spos[j][i];
+        for(k=1; k<=8; k++)
+        {
+                jn=j+d2[k];
+                in=i+d1[k];
+                spn=spos[jn][in];
+                if(iter <= 1)
+                {
+                        ed = felevg.d[j][i] - felevg.d[jn][in];
+                }
+                else
+                {
+                        ed = elev1[sp] - elev1[spn];
+                }
+                slope=fact[k]* ed;
+                if(spn < 0 || s[spn] < 0)
+                {
+                        /*  The neighbor is outside the flat set.  */
+                        ed=0.;
+                }
+                else
+                {
+                        ed=elev2[spn];
+                }
+                slope2 =fact[k]*(elev2[sp]-ed);
+                        /*  Only if latest iteration slope is
+ //                     positive and previous iteration slope flat  */
+
+//9/13/03  add check for opposing directions to resove a bug reported by Anna Katarina Mahlau
+
+                int adrdirnn=0;
+                if(sdir.d[jn][in] > 0 && sdir.d[jn][in]<=8)adrdirnn=abs(sdir.d[jn][in]-k);  // only calculate if sdir has been really set
+
+//              if(adrdirnn == 4)
+//                      in=in;
+                if(slope2 > smax && slope >= 0. && (felevg.d[j][i] - felevg.d[jn][in])>=0.
+                        && adrdirnn!=4)
+                /*  Only if latest iteration slope is
+                        positive and previous iteration slope flat and real elevation difference not uphill
+                        The elevation check added 3/1/03 to resolve a bug reported by Anna Katarina Mahlau <au@ivu-umwelt.de> */
+                {
+                        smax=slope2;
+                        sdir.d[j][i]=k;
+                }
+        }  /*  End of for  */
+
+}
+
+//************************************************************************
+
+//************************************************************************
+
+void incrise(int n, float *elev1, short *s2,int **spos, int iter, int *sloc)
+{
+
+        /*  This routine implements stage 2 drainage away from higher ground
+        dn is used to flag pixels still being incremented */
+        int done=0,ip,k,ninc,nincold,spn;
+        float ed;
+        short i,j,in,jn;
+        nincold=0;
+        while(done < 1)
+        {
+                done=1;
+                ninc=0;
+                for(ip=0; ip<n; ip++)
+                {
+                        for(k=1; k<=8; k++)
+                        {
+                                j=js[sloc[ip]];
+                                i=is[sloc[ip]];
+                                jn=j+d2[k];
+                                in=i+d1[k];
+                                spn=spos[jn][in];
+
+                                if(iter <= 1)
+                                {
+                                        ed = felevg.d[j][i] - felevg.d[jn][in];
+                                }
+                                else
+                                {
+                                        ed= elev1[sloc[ip]] - elev1[spn];
+                                }
+                                if(ed < 0.)dn[sloc[ip]]=1;
+                                if(spn >=0)
+                                        if(s2[spn] > 0)dn[sloc[ip]] = 1;
+                        }
+                }
+                for(ip=0; ip<n; ip++)
+                {
+                        s2[sloc[ip]]=s2[sloc[ip]]+dn[sloc[ip]];
+                        ninc=ninc+ (dn[sloc[ip]]>0 ? 1: 0);   // DGT 9/13/03 changed to because now dn is not 0 or 1
+                        if(dn[sloc[ip]] == 0)done=0;  /*  if still some not being incremented continue
+                                                                        looping  */
+                }
+//              printf("incrise %d %d\n",ninc,n);
+                if(ninc == nincold)done=1;   /*  If there are no new cells incremented
+                                                                         stop - this is the case when a flat has
+                                                                         no higher ground around it.  */
+                nincold=ninc;
+        }
+
+}
+
+//************************************************************************
+
+void incfall(int n, float *elev1, short *s1,int **spos,
+                         int iter, int *sloc)
+{
+        /* This routine implements drainage towards lower areas - stage 1 */
+        int done=0,donothing,k,ip,ninc,nincold,spn;
+        short st=1,i,j,in,jn;
+        float ed;
+        nincold= -1;
+        while(done < 1)
+        {
+                done=1;
+                ninc=0;
+                for(ip=0; ip<n; ip++)
+                {
+/*                      if      adjacent to same level or lower that drains or
+                                adjacent to pixel with s1 < st and dir not set
+                                do nothing  */
+                        donothing=0;
+                        j=js[sloc[ip]];
+                        i=is[sloc[ip]];
+                        for(k=1; k<=8; k++)
+                        {
+                //7/28/04  DGT Dont cross check added
+                          if(dontcross(k,i,j) ==0){   // Only examine neighbors that do not cross existing flow directions, e.g. due to burn in
+                                jn=j+d2[k];
+                                in=i+d1[k];
+                                spn=spos[jn][in];
+                                if(iter <= 1)
+                                {
+                                        ed= felevg.d[j][i] - felevg.d[jn][in];
+                                }
+                                else
+                                {
+                                        ed = elev1[sloc[ip]] - elev1[spn];
+                                }
+                                //9/13/03  DGT changed conditional below to >=1 <=8 rather than !=0 to also capture 9 case
+                                //decided to revert back to old code.  This did not succeed in flagging the entire pit
+                                if(ed >= 0. && sdir.d[jn][in] != 0)
+                                {
+                                        donothing = 1;  /* If neighbor drains */
+                                }
+                                if(spn >= 0) /* if neighbor is in flat   */
+                                        if(s1[spn] >= 0 && s1[spn] < st   /*  If neighbor is not being  */
+                                                && (sdir.d[jn][in]  == 0 )){
+                                                        donothing = 1;   /*  Incremented  */
+                                        }
+                          }
+                        }   //9/13/03  DGT added ==9 in the above for consistency
+                        if(donothing == 0)
+                        {
+                                s1[sloc[ip]]++;
+                                ninc++;
+                                done=0;
+                        }
+                }   /*  End of loop over all flats  */
+                st=st+1;
+//              printf("Incfall %d %d \n",ninc,n);
+                if(ninc == nincold)
+                {
+                        done = 1;
+//                      printf("There are pits remaining, direction will not be set\n");
+/*  Set the direction of these pits to 9 to flag them   */
+                        for(ip=0; ip<n; ip++)  /*  loop 2 over all flats  */
+                        {
+/*                      if      adjacent to same level or lower that drains or
+                                adjacent to pixel with s1 < st and dir not set
+                                do nothing  */
+                                donothing=0;
+                                j=js[sloc[ip]];
+                                i=is[sloc[ip]];
+                                for(k=1; k<=8; k++)
+                                {
+                                        jn=j+d2[k];
+                                        in=i+d1[k];
+                                        spn=spos[jn][in];
+                                        if(iter <= 1)
+                                        {
+                                                ed= felevg.d[j][i] - felevg.d[jn][in];
+                                        }
+                                        else
+                                        {
+                                                ed= elev1[sloc[ip]]- elev1[spn];
+                                        }
+                                //9/13/03  DGT changed conditional below to >=1 <=8 rather than !=0 to also capture 9 case
+                                //decided to revert back to old code.  This did not succeed in flagging the entire pit
+                                        if(ed >= 0. && sdir.d[jn][in] != 0)donothing = 1;  /* If neighbor drains */
+                                        if(spn >= 0) /* if neighbor is in flat   */
+                                        if(s1[spn] >= 0 && s1[spn] < st   /*  If neighbor is not being  */
+                                                && (sdir.d[jn][in]  == 0 ))donothing = 1;   /*  Incremented  */
+                                }  //9/13/03  DGT added ==9 in the above for consistency
+                                if(donothing == 0)
+                                {
+                                   sdir.d[j][i] = 9;
+
+                                }
+                        }   /*  End of loop 2 over all flats  */
+                }
+                nincold=ninc;
+        }  /*  End of while done loop  */
+}
+
+//************************************************************************
+
+//************************************************************************
+
+int flatrout(int n,int *sloc, short *s, int **spos,int iter,float *elev1,
+                          float *elev2, float *fact, int ns, short useflowfile)
+{
+        int ip,nu, *sloc2,ipp,err=TD_NO_ERROR;
+        float *elev3;
+
+        incfall(n,elev1,s,spos,iter,sloc);
+        for(ip=0; ip < n; ip++)
+        {
+                elev2[sloc[ip]]=(float)(s[sloc[ip]]);
+                s[sloc[ip]]=0;   /*  Initialize for pass 2  */
+        }
+
+        incrise(n,elev1,s,spos,iter,sloc);
+        for(ip=0; ip < n; ip++)
+        {
+                elev2[sloc[ip]] += (float)(s[sloc[ip]]);
+        }
+
+        nu=0;
+        for(ip=0; ip < n; ip++)
+        {
+                set2(is[sloc[ip]],js[sloc[ip]],fact,elev1,elev2,iter,spos,s,useflowfile);
+                if( sdir.d[js[sloc[ip]]][is[sloc[ip]]] == 0)nu++;
+        }
+        if(nu >= n)return(TD_NO_ERROR);  //  Here the recursion is not converging so bail
+        //  DGT 7/31/04 No error reported because this usually occurs at pits and it is OK to have pits be no data
+        if(nu > 0)
+        {
+                /*  Iterate Recursively   */
+                /*  Now resolve flats following the Procedure of Garbrecht and Martz, Journal
+                of Hydrology, 1997.  */
+                iter=iter+1;
+                //        printf("Resolving %d Flats, Iteration: %d \n",nu,iter);
+                sloc2 = (int *)malloc(sizeof(int) * nu);
+                elev3 = (float *)malloc(sizeof(float) *ns);
+
+                if(sloc2 == NULL || elev3 == NULL)
+                {
+                        // printf("Unable to allocate at iteration %d\n",iter);
+                }
+                /*  Initialize elev3  */
+                for(ip=0; ip < ns; ip++)elev3[ip]=0.;
+                /*  Put unresolved pixels on new stacks - keeping in same positions  */
+                ipp=0;
+                for(ip=0; ip<n; ip++)
+                {
+                        if(sdir.d[js[sloc[ip]]][is[sloc[ip]]] == 0)
+                        {
+                                sloc2[ipp]=sloc[ip];
+                                /*   Initialize the stage 1 array for flat routing   */
+                                s[sloc[ip]] = 1;
+                                ipp++;
+
+                        }
+                        else
+                        {
+                        s[sloc[ip]] = -1;  /*  Used to designate out of remaining flat on
+                        higher iterations   */
+                        }
+                        dn[sloc[ip]]=0;  /*  Reinitialize for next time round.  */
+                }
+                err=flatrout(nu,sloc2,s,spos,iter,elev2,elev3,fact,ns,useflowfile);
+                free(sloc2);
+                free(elev3);
+                //  printf("Done iteration %d\nFlats resolved %d\n",iter,n);
+        } /*  end if nu > 0  */
+   return(err);
+}   /*  End flatrout  */
+
+
+//************************************************************************
+
+
+
+int setdfnoflood(float mval, float fdmval, short useflowfile)
+/*  This version is stripped of pit filling  */
+{
+        int i,j,k,ip, n, iter, err=TD_NO_ERROR;
+        float fact[9];
+        short *s;  /*  variables for flat draining   */
+        int **spos, *sloc;
+        float *elev2;
+
+        /*  initialize internal pointers to 0 except where elevation is no data*/
+        for(i=i2+1; i< n2-1; i++)for(j=i1+1; j<n1-1; j++)
+        {
+                if(felevg.d[j][i] <= mval)
+                {
+                        sdir.d[j][i]=MISSINGSHORT ; // -32767
+
+                }
+                else sdir.d[j][i]=0;
+        }
+        /*  Direction factors  */
+        for(k=1; k<= 8; k++)
+                fact[k]= (float) (1./sqrt(d1[k]*dy*d1[k]*dy+d2[k]*d2[k]*dx*dx));
+
+//  Set stream overlay directions
+        if( useflowfile == 1 )
+for(i=i2+1; i< n2-1; i++)
+          for(j=i1+1; j<n1-1; j++)
+          {
+                  {
+                          if(sapoolg.d[j][i] > fdmval )
+                          {
+                                  sdir.d[j][i] = sapoolg.d[j][i];
+                                  larr.d[j][i]=0;
+                          }
+                  }
+          }
+
+//   Compute contrib area using overlayed directions for direction setting
+
+        ccheck=0;   // dont worry about edge contamination
+        useww=0;// dont worry about weights
+for(i=i2+1; i< n2-1; i++)
+          for(j=i1+1; j<n1-1; j++)
+          {
+                  //This allows for a stream overlay
+                  if( sdir.d[j][i] > 0) darea(i,j);
+          }
+
+/*  Set positive slope directions   */
+        n=0;
+        for(i=i2+1; i< n2-1; i++)
+          for(j=i1+1; j<n1-1; j++)
+          {
+                  if( sdir.d[j][i] == 0 )
+                  {
+                          if(felevg.d[j][i]  > mval)
+                          {
+                                  set(i,j,fact,mval,useflowfile);
+                                  if(sdir.d[j][i] == 0)
+                                          n++;
+                          }
+                  }
+          }
+
+  if(n > 0)
+  {
+/*  Now resolve flats following the Procedure of Garbrecht and Martz, Journal
+   of Hydrology, 1997.  */
+
+/*  Memory is utilized as follows
+is, js, dn, s and elev2 are unidimensional arrays storing information for flats.
+sloc is a indirect addressing array for accessing these - used during
+recursive iteration
+spos is a grid of pointers for accessing these to facilitate finding neighbors
+
+The routine flatrout is recursive and at each recursion allocates a new sloc for
+addressing these arrays and a new elev for keeping track of the elevations
+for that recursion level.
+  */
+          iter=1;
+//        printf("Resolving %d Flats, Iteration: %d \n",n,iter);
+  spos = (int **) R_alloc(nx,sizeof(int *));
+  for(j=0; j<nx; j++){
+    spos[j] = (int *) R_alloc(ny,sizeof(int));
+  }
+//  spos = (int **) matalloc(nx, ny, RPINTDTYPE);
+  dn = (short *)malloc(sizeof(short) * n);
+  is = (short *)malloc(sizeof(short) * n);
+  js = (short *)malloc(sizeof(short) * n);
+  s = (short *)malloc(sizeof(short) * n);
+          sloc = (int *)malloc(sizeof(int) * n);
+  elev2 = (float *)malloc(sizeof(float) *n);
+
+  if(dn == NULL || is == NULL || js == NULL || s == NULL ||
+          spos == NULL || elev2 == NULL || sloc == NULL)
+  {
+// printf("Unable to allocate at iteration %d\n",iter);
+  }
+/*  Put unresolved pixels on stack  */
+   ip=0;
+   for(i=i2; i< n2; i++)
+          for(j=i1; j<n1; j++)
+  {
+spos[j][i]=-1;   /*  Initialize stack position  */
+if(sdir.d[j][i] == 0)
+{
+  is[ip]=i;
+  js[ip]=j;
+          dn[ip]=0;
+          sloc[ip]=ip;
+          /*   Initialize the stage 1 array for flat routing   */
+          s[ip] = 1;
+          spos[j][i]=ip;  /*  pointer for back tracking  */
+          ip++;
+//        if(ip > n)printf("PROBLEM - Stack logic\n");
+}
+  }
+  err=flatrout(n,sloc,s,spos,iter,elev2,elev2,fact,n,useflowfile);
+/*  The direction 9 was used to flag pits.  Set these to 0  */
+  for(i=i2; i< n2; i++)
+          for(j=i1; j<n1; j++)
+          {
+                  if(sdir.d[j][i] == 9) sdir.d[j][i]=sdir.nodata;
+                  if(sdir.d[j][i] == 0) sdir.d[j][i]=sdir.nodata;
+          }
+  free(elev2);
+  free(dn);
+  free(is);
+  free(js);
+  free(s);
+  free(sloc);
+//  printf("Done iteration %d\nFlats resolved %d\n",iter,n);
+  } /*  End if n > 0  */
+   return(err);   /*  OK exit from setdir  */
+
+}  /*  End setdfnoflood  */
+
+//************************************************************************
+
+
+int setdird8(double *input, double *outputsdir, double *outputslope,int *nrow, int *ncol, double *cellsize, double *degree){
+
+  nx = *nrow;
+  ny = *ncol;
+  dx = *cellsize;
+  dy = *cellsize;
+  csize = dx;
+
+  /* define directions */
+  d1[1]=0; d1[2]= -1; d1[3]= -1; d1[4]= -1; d1[5]=0; d1[6]=1; d1[7]=1; d1[8]=1;
+  d2[1]=1; d2[2]=1; d2[3]=0; d2[4]= -1; d2[5]= -1; d2[6]= -1; d2[7]=0; d2[8]=1;
+
+  felevg.nodata = -9999;
+  mval=felevg.nodata;
+  felevg.d = (double **) R_alloc(nx,sizeof(double *));
+  for(j=0; j<nx; j++){
+    felevg.d[j] = (double *) R_alloc(ny,sizeof(double));
+  }
+
+  for(i=0; i< ny; i++){
+    for(j=0; j< nx; j++){
+      felevg.d[j][i] = input[j+(nx)*i];
+    }
+  }
+  bndbox[0]=xllcenter-(dx/2);
+  bndbox[1]=yllcenter-(dy/2);
+  bndbox[2]=bndbox[0] + dx * (nx);
+  bndbox[3]=bndbox[1] + dy * (ny);
+
+  for(i=0;i<4;i++) felevg.head.bndbox[i]=bndbox[i];
+
+  sdir.head.dx=dx;
+  sdir.head.dy=dy;
+  sdir.head.nx=nx;
+  sdir.head.ny=ny;
+  for(i=0;i<4;i++)sdir.head.bndbox[i]=felevg.head.bndbox[i];
+  sdir.nodata=MISSINGSHORT;
+
+  sdir.d = (short **) R_alloc(nx,sizeof(short *));
+  for(j=0; j<nx; j++){
+    sdir.d[j] = (short *) R_alloc(ny,sizeof(short));
+  }
+  for(i=0; i<ny; i++) {
+    for(j=0; j<nx; j++) {
+      sdir.d[j][i]= sdir.nodata;
+    }
+  }
+
+
+        i1=0; i2=0; n1=nx; n2=ny;  /*  full grid  */
+        int writeflowfile=1;
+        i=500;j=500;
+        REprintf("neighbors: %f %f %f \n",felevg.d[j-1][i+1],felevg.d[j][i+1],felevg.d[j+1][i+1]);
+        REprintf("neighbors: %f %f %f \n",felevg.d[j-1][i],felevg.d[j][i],felevg.d[j+1][i]);
+        REprintf("neighbors: %f %f %f \n",felevg.d[j-1][i-1],felevg.d[j][i-1],felevg.d[j+1][i-1]);
+
+       REprintf("Hi Dan before setdf!\n %d\n%f\n%f",nx,dy,csize);
+
+        err = setdfnoflood(mval, fdmval, useflowfile);
+
+ for(i=0; i < ny; i++){
+    for(j=0; j < nx; j++){
+      outputsdir[j + (nx * i)] = double(sdir.d[j][i]);
+    }
+  }
+
+ //       if (gridwrite(pfile,sdir,filetype)==0)
+
+        fslopeg.head.dx=dx;
+        fslopeg.head.dy=dy;
+        fslopeg.head.nx=nx;
+        fslopeg.head.ny=ny;
+        for(i=0;i<4;i++) fslopeg.head.bndbox[i]=felevg.head.bndbox[i];
+
+   fslopeg.d = (double **) R_alloc(nx,sizeof(double *));
+   for(j=0; j<nx; j++){
+     fslopeg.d[j] = (double *) R_alloc(ny,sizeof(double));
+   }
+
+   for(i=0; i< ny; i++){
+     for(j=0; j< nx; j++){
+       fslopeg.d[j][i] = -1.0;
+     }
+   }
+  
+   sloped8(fslopeg.nodata);
+
+   for(i=0; i < ny; i++){
+      for(j=0; j < nx; j++){
+        outputslope[j + (nx * i)] = double(fslopeg.d[j][i]);
+      }
+   }
+
+   REprintf("Hi Dan!\n %d\n%f\n%f",nx,dy,csize);
+   return(0);  /*  ALL OK return from flood  */
+
+}
+
+}
+
+
+ 
+ 

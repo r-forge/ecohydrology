@@ -1,9 +1,9 @@
-\name{flood}
-\alias{flood}
+\name{Flood}
+\alias{Flood}
 \title{Fill sinks in a digital elevation model}
 \description{Removes sinks in a digital elevation model by filling depressions}
 \usage{
-  flood(DEM,res,degree) 
+  Flood(DEM,res,degree) 
 }
 \arguments{
   \item{DEM}{A matrix representing a digital elevation model [m] with equally sized pixels and equal x and y resolution}
@@ -25,6 +25,6 @@ For deep sinks or large maps, it may be possible that not all sinks are filled i
 
 \examples{
 data(huagrahuma.dem)
-filled.dem <- flood(huagrahuma.dem, 25, 0.1)}
+filled.dem <- Flood(huagrahuma.dem, 25, 0.1)}
 
 %\keyword{}
