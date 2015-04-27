@@ -588,7 +588,7 @@ int setdf(float mval, float fdmval, short useflowfile,char * newflowfile, int wr
         return(err);
 }
 
-int flood(double *input, double *output, int *nrow, int *ncol, double *cellsize, double *degree){
+int flood(double *input, double *outputfel, double *outputsdir, double *outputlarr, int *nrow, int *ncol, double *cellsize, double *degree){
 
   nx = *nrow;
   ny = *ncol;
@@ -691,7 +691,17 @@ int flood(double *input, double *output, int *nrow, int *ncol, double *cellsize,
 
  for(i=0; i < ny; i++){
     for(j=0; j < nx; j++){
-      output[2 + j + (nx * i)] = felevg.d[j][i];
+      outputfel[j + (nx * i)] = felevg.d[j][i];
+    }
+  }
+ for(i=0; i < ny; i++){
+    for(j=0; j < nx; j++){
+      outputsdir[j + (nx * i)] = felevg.d[j][i];
+    }
+  }
+ for(i=0; i < ny; i++){
+    for(j=0; j < nx; j++){
+      outputlarr[j + (nx * i)] = felevg.d[j][i];
     }
   }
 
