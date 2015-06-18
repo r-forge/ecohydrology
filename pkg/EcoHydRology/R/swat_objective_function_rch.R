@@ -28,7 +28,7 @@ function (x, calib_range, calib_params, flowgage, rch,save_results=F)
     test3$Qm3ps = test3$flow/3600/24
     NS = NSeff(test3$Qm3ps[730:(length(test3$Qm3ps))], test3$FLOW_OUTcms[730:(length(test3$Qm3ps))])
     print(NS)
-    if(save_results){file.copy(list.files(),"../")}
+    if(save_results){file.copy(list.files(),"../",overwrite=T)}
 
     file.remove(list.files())
     setwd("../")

@@ -1250,6 +1250,111 @@ int setdird8(double *input, double *outputsdir, double *outputslope,int *nrow, i
 
 }
 
+int aread8(double *input, double *outputsdir, double *outputslope,int *nrow, int *ncol, double *cellsize, double *degree){
+int aread8(double *input, double *outputarea, double *x, double *y,long nxy, int doall, int contcheck) {
+        int usew=0
+        int i,j,row,col;
+        err = TD_NO_ERROR;
+        ccheck=contcheck;
+        useww=usew;
+        //define directions
+        d1[1]=0; d1[2]= -1; d1[3]= -1; d1[4]= -1; d1[5]=0; d1[6]=1; d1[7]=1; d1[8]=1;
+        d2[1]=1; d2[2]=1; d2[3]=0; d2[4]= -1; d2[5]= -1; d2[6]= -1; d2[7]=0; d2[8]=1;
+
+        //New Gridread function:
+        if (gridread(pfile,&sdir,&filetype) != 0) return (TD_FAILED_GRID_OPEN);
+
+        nx = sdir.head.nx;
+        ny = sdir.head.ny;
+        dx = sdir.head.dx;
+        dy = sdir.head.dy;
+
+        csize = dx;
+        ndvp = sdir.nodata;
+        for (int bnd=0;bnd<4;bnd++) boundbox[bnd]=sdir.head.bndbox[bnd];
+        larr.head.dx=dx;
+        larr.head.dy=dy;
+        larr.head.nx=nx;
+        larr.head.ny=ny;
+        for (bnd=0;bnd<4;bnd++) larr.head.bndbox[bnd]=sdir.head.bndbox[bnd];
+        larr.nodata=-1;
+        err=allocategrid(&larr,sdir.head,larr.nodata);
+        if(err != 0)goto ERROR2;
+        //Allocate area memory
+        //initialize area array to 0, -1 on boundary
+        for(i=0; i< sdir.head.ny; i++)
+        {
+                for(j=0; j< sdir.head.nx; j++)
+        {
+                        if(i!=0 && i!=ny-1 && j!=0 && j!=nx-1 && sdir.d[j][i] > -1)
+                                larr.d[j][i]=0;
+        }
+        }
+        //by default start at first cell of grid
+        row=0; col=0;
+        if(doall == 0)
+        {
+                for (int curXY = 0; curXY < nxy; curXY++)
+                {
+                        //translate the coordinates from a world location to grid cell index
+                        col= (int)floor((x[curXY]-boundbox[0])/csize);
+                        row= (int)floor((boundbox[3]-y[curXY])/csize);
+                        if(row <0 || row > ny || col < 0 || col > nx)
+                        {
+                                //printf("Given coords out of area - whole area will be calculated\n");
+                                row=0; col=0;
+                        }
+                        //call drainage area subroutine for pixel to zero on
+                                        darea(row,col);
+                }
+    }
+    else
+    {
+                //call drainage area subroutine for each area
+                //work from middle outwards to avoid deep recursions
+                for(i=ny/2; i<ny-1; i++)
+                {  for(j=nx/2; j<nx-1; j++)
+                    darea(i,j);
+                for(j=nx/2-1; j>=1; j--)
+                        darea(i,j);
+                }
+                for(i=ny/2-1; i>=1; i--)
+                {  for(j=nx/2; j<nx-1; j++)
+        darea(i,j);
+                for(j=nx/2-1; j>=1; j--)
+                        darea(i,j);
+                }
+        }
+        //write out areas New gridwrite functions :
+        if(usew == 0)
+        {
+                if ( gridwrite(afile,larr,filetype)==0 )
+                        err=TD_NO_ERROR;
+                else
+                {
+                        err=TD_FAILED_GRID_SAVE;
+                        return err;
+                }
+        }
+        else
+        {
+                if ( gridwrite(afile,fareaw,filetype)==0 )
+                        err=TD_NO_ERROR;
+                else{
+                        err=TD_FAILED_GRID_SAVE;
+                        return err;
+                }
+                free(fareaw.d[0]);
+                free(fareaw.d);
+        }
+        free(larr.d[0]);
+        free(larr.d);
+ERROR1:
+        free(sdir.d[0]);
+        free(sdir.d);
+        return(err);
+ }
+
 }
 
 

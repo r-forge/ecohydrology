@@ -19,6 +19,7 @@ myreadLines=function(fname) {
  strsplit( buf,"\n",fixed=T,useBytes=T)[[1]]
 }
 test = myreadLines(sfilename)
+test=gsub("\r","",test)
 headstr=test[headloc[outfile_type]]
 headstr=gsub("TOT ([N,P])","TOT_\\1",headstr)
 headstr=gsub("/L([A-Z])","/L \\1",headstr)
