@@ -4,7 +4,7 @@
 include $(R_HOME)/etc$(R_ARCH)/Makeconf
 PROG =	../rswat2012.exe
 
-SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
+SRCS =	main.f carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
 	allocate_parms.f alph.f anfert.f apex_day.f apply.f ascrv.f atri.f \
 	aunif.f autoirr.f aveval.f bacteria.f biofilm.f biozone.f \
 	bmp_det_pond.f bmp_ri_pond.f bmp_sand_filter.f bmp_sed_pond.f \
@@ -19,7 +19,7 @@ SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
 	hmeas.f hruaa.f hruallo.f hruday.f hrumon.f hrupond.f hrupondhr.f \
 	hruyr.f hydroinit.f icl.f impnd_init.f impndaa.f impndday.f \
 	impndmon.f impndyr.f irr_rch.f irr_res.f irrigate.f irrsub.f jdt.f \
-	killop.f lakeq.f latsed.f layersplit.f lwqdef.f main.f modparm.f \
+	killop.f lakeq.f latsed.f layersplit.f lwqdef.f modparm.f \
 	ndenit.f newtillmix.f nfix.f nitvol.f nlch.f nminrl.f noqual.f npup.f \
 	nrain.f nup.f nuts.f openwth.f operatn.f orgn.f orgncswat.f \
 	origtile.f ovr_sed.f percmacro.f percmain.f percmicro.f pestlch.f \
@@ -52,7 +52,7 @@ SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
 	writed.f writem.f xmon.f ysed.f zero0.f zero1.f zero2.f zero_urbn.f \
 	zeroini.f
 
-OBJS =	carbon_zhang2.o NCsed_leach.o addh.o albedo.o \
+OBJS =	cmain.o arbon_zhang2.o NCsed_leach.o addh.o albedo.o \
 	allocate_parms.o alph.o anfert.o apex_day.o apply.o ascrv.o atri.o \
 	aunif.o autoirr.o aveval.o bacteria.o biofilm.o biozone.o \
 	bmp_det_pond.o bmp_ri_pond.o bmp_sand_filter.o bmp_sed_pond.o \
@@ -67,7 +67,7 @@ OBJS =	carbon_zhang2.o NCsed_leach.o addh.o albedo.o \
 	hmeas.o hruaa.o hruallo.o hruday.o hrumon.o hrupond.o hrupondhr.o \
 	hruyr.o hydroinit.o icl.o impnd_init.o impndaa.o impndday.o \
 	impndmon.o impndyr.o irr_rch.o irr_res.o irrigate.o irrsub.o jdt.o \
-	killop.o lakeq.o latsed.o layersplit.o lwqdef.o main.o modparm.o \
+	killop.o lakeq.o latsed.o layersplit.o lwqdef.o modparm.o \
 	ndenit.o newtillmix.o nfix.o nitvol.o nlch.o nminrl.o noqual.o npup.o \
 	nrain.o nup.o nuts.o openwth.o operatn.o orgn.o orgncswat.o \
 	origtile.o ovr_sed.o percmacro.o percmain.o percmicro.o pestlch.o \
