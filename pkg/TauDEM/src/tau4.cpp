@@ -415,7 +415,7 @@ int sgridread(double *input, sgrid *gsgrid, double nodata, int nrow, int ncol, d
   void ***data;
   int datatype;
   int i, j;
-  double **farr;
+  short **sarr;
   dx=&(gsgrid->head.dx);
   dy=&(gsgrid->head.dy);
   nx=&(gsgrid->head.nx);
@@ -429,13 +429,13 @@ int sgridread(double *input, sgrid *gsgrid, double nodata, int nrow, int ncol, d
   *dx = cellsize;
   *dy = cellsize;
   //gfgrid->nodata = *nodata;
-  farr = (short **) R_alloc(*nx,sizeof(short *));
+  sarr = (short **) R_alloc(*nx,sizeof(short *));
   for(j=0; j<*nx; j++){
-    farr[j] = (short *) R_alloc(*ny,sizeof(short));
+    sarr[j] = (short *) R_alloc(*ny,sizeof(short));
   }
   for(i=0; i< *ny; i++){
     for(j=0; j< *nx; j++){
-      farr[j][i] = input[j+(*nx)*i];
+      sarr[j][i] = input[j+(*nx)*i];
     }
   }
   bndbox[0]=xllcenter-(*dx/2);
@@ -443,7 +443,7 @@ int sgridread(double *input, sgrid *gsgrid, double nodata, int nrow, int ncol, d
   bndbox[2]=bndbox[0] + *dx * (*nx);
   bndbox[3]=bndbox[1] + *dy * (*ny);
   for(i=0;i<4;i++) gsgrid->head.bndbox[i]=bndbox[i];
-  *data = (void **) farr;
+  *data = (void **) sarr;
 
   return(0);  /*  ALL OK return from sgridread */
 }
