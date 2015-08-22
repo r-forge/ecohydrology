@@ -40,9 +40,54 @@ sgrid sdir;
 igrid larr;
 fgrid fareaw;
 fgrid fweight;
+// for source
+short **src;
 
 // extern "C"
 extern "C" {
+
+//************************************************************************
+
+
+/* function to compute area recursively */
+void srcarea(int i,int j)
+  {
+
+int in,jn,k,anmax=0,diff,inmax,jnmax,con=0;
+	if(i!=0 && i!=ny-1 && j!=0 && j!=nx-1 && sdir.d[j][i]!= -1)   /* not on boundary  */  
+{
+  if(larr.d[j][i]< -1)  // not touched yet.
+  {
+
+	  larr.d[j][i]=src[j][i];
+for(k=1; k<=8; k++)
+{  in=i+d1[k];
+   jn=j+d2[k];
+/* test if neighbor drains towards cell excluding boundaries */
+   if( sdir.d[jn][in] >0 && (sdir.d[jn][in]-k==4 || sdir.d[jn][in]-k==-4))
+ {
+                                srcarea(in,jn);
+				if(larr.d[jn][in] < 0)con = -1;
+				else
+				{
+					if(larr.d[jn][in] > anmax)
+					{
+						anmax = larr.d[jn][in];
+						inmax = in;
+						jnmax = jn;
+					}
+					larr.d[j][i]=larr.d[j][i] + larr.d[jn][in];
+				}
+ }
+		   if(sdir.d[jn][in] < 0)con = -1;
+}
+		if(con == -1  && ccheck == 1)larr.d[j][i] = -1;
+		diff=larr.d[j][i]-anmax;
+  }
+}
+	else larr.d[j][i] = -1;
+  REprintf("Some values %d %d %d %d\n",i,j,larr.d[j][i],src[j][i]);
+}
 
 //************************************************************************
 
@@ -1450,142 +1495,71 @@ int aread8(double *input, double *outputarea, double *x, double *y,int *pnxy ,in
         return(0);  /*  ALL OK return from flood  */
  }
 
-}
 //int setdird8(double *input, double *outputsdir, double *outputslope,int *nrow, int *ncol, double *cellsize, double *degree){
+//int flood(double *input, double *outputfel, int *nrow, int *ncol, double *cellsize, double *degree){
 
-#if 0
 //int setdird8(double *input, double *outputsdir, double *outputslope,int *nrow, int *ncol, double *cellsize, double *degree){
-int source(char *areafile,char *slopefile,char *plenfile,char *dirfile, 
-		   char *srcfile, char *elvfile, char *gordfile, char *scafile,
-		   char *fdrfile, int ipar,double *p, int nxy, double *x, double *y, 
-		   int contcheck, int dropan, int masksca)
-{
+int source(double *areafile, //double *slopefile,double *plenfile,
+                   double *dirfile, 
+		   double *srcfile, // double *elvfile, double *gordfile, double  *scafile,
+		   // double *fdrfile, 
+                   int *iparr,double *pr, int *nxyr, double *xr, double *yr, 
+		   int *contcheckr, int *dropanr, int *maskscar,
+                   int *nrow, int *ncol, double *cellsize 
+                   )
+{ 
+
 	double ndvs,ndvp,ndvd,emax,ndve,ndvo,wsum,val;
 	double **selev ;
+        mval=-999;
 	/**********Grid Declarations*************/
         fgrid faagrid;
 	fgrid fplengrid;
 	sgrid sgordgrid;
+        int ipar=*iparr;
+        int nxy=*nxyr;
+        int contcheck=*contcheckr;
+        int dropan=*dropanr;
+        int masksca=*maskscar;
+        double p[4];
+        double *x;
+        double *y;
+        x=(double *) R_alloc(nxy,sizeof(double));
+        y=(double *) R_alloc(nxy,sizeof(double));
+	for(i=0;i<4;i++) p[i]=pr[i];
+	for(i=0;i<nxy;i++) x[i]=xr[i];
+	for(i=0;i<nxy;i++) y[i]=yr[i];
 	//=============================
-	int row, col, i,j,iomax,jomax,bound,ik,jk,k,itresh;
+	int row, col, i,j,iomax,jomax,bound,ik,jk,k,itresh,bnd;
 	err = TD_NO_ERROR;
 	int rcgood=1;
-    ccheck=contcheck;
+        ccheck=contcheck;
+        REprintf("Some values %d %f %d %f %f\n",ipar,p[0],nxy,x[0],y[0]);
+       // return (22);
 	/* define directions */
 	d1[1]=0; d1[2]= -1; d1[3]= -1; d1[4]= -1; d1[5]=0; d1[6]=1; d1[7]=1; d1[8]=1;
 	d2[1]=1; d2[2]=1; d2[3]=0; d2[4]= -1; d2[5]= -1; d2[6]= -1; d2[7]=0; d2[8]=1;
 	/* read grid files */
 	if(ipar == 1)
 	{
-		if(gridread(areafile,&faagrid,&filetype)==0)  
-			err=TD_NO_ERROR;
-		else
-		{
-			  err=TD_FAILED_GRID_OPEN;
-		}
-		nx = faagrid.head.nx; 
+	//	if(gridread(areafile,&faagrid,&filetype)==0)  
+                if (fgridread(areafile,&faagrid,mval,*nrow,*ncol,*cellsize) != 0) return (22);
+
+                nx = faagrid.head.nx; 
 		ny = faagrid.head.ny;
 		dx = faagrid.head.dx;
 		dy = faagrid.head.dy;
 		csize = dx;
 		ndva = faagrid.nodata; 
 		for(i=0;i<4;i++) bndbox[i]=faagrid.head.bndbox[i];
-		if(err != TD_NO_ERROR)goto ERROR1;
 	}
-	if(ipar == 2)
-	{
-		if ( gridread(scafile,&faagrid,&filetype)==0)  
-			err=TD_NO_ERROR;
-		else
-			err=TD_FAILED_GRID_OPEN;
-		nx =faagrid.head.nx;
-		ny = faagrid.head.ny;
-		dx = faagrid.head.dx;
-		dy = faagrid.head.dy;
-		csize = dx;
-		ndva = faagrid.nodata;
-	    for(i=0;i<4;i++) bndbox[i]=faagrid.head.bndbox[i];	
-		if(err != TD_NO_ERROR)goto ERROR1;
-		if ( gridread(slopefile,&fslopeg,&filetype)==0) 
-			err=TD_NO_ERROR;
-		else
-			err=TD_FAILED_GRID_OPEN;
-		ndvs = fslopeg.nodata; 
-		if(err != TD_NO_ERROR)goto ERROR1; 
-	}
-	if(ipar == 3)
-	{
-		//  11/17/08 DGT changed file read from scafile to area file to switch this method to using ad8 input file as the default
-		if ( gridread(areafile,&faagrid,&filetype)==0) 
-			err=TD_NO_ERROR;
-		else 
-			err=TD_FAILED_GRID_OPEN;
-		nx = faagrid.head.nx;
-		ny = faagrid.head.ny;
-		dx = faagrid.head.dx;
-		dy = faagrid.head.dy;
-		csize = dx;
-		ndva = faagrid.nodata;
-		for(i=0;i<4;i++) bndbox[i]=faagrid.head.bndbox[i];
-		if(err != TD_NO_ERROR)goto ERROR1;
-		if ( gridread(plenfile,&fplengrid,&filetype)==0)
-			err=TD_NO_ERROR;
-		else
-			err=TD_FAILED_GRID_OPEN;
-		ndvp = fplengrid.nodata; 
-		if(err != TD_NO_ERROR)goto ERROR1; 
-	}
-	if(ipar == 4)
-	{
-		if( gridread(elvfile,&felevg,&filetype)==0) 
-			err=TD_NO_ERROR;
-		else
-			err=TD_FAILED_GRID_OPEN;
-		nx = felevg.head.nx;
-		ny = felevg.head.ny;
-		dx = felevg.head.dx;
-		dy = felevg.head.dy;
-		csize = dx;
-		ndve = felevg.nodata;
-		for(i=0;i<4;i++) bndbox[i]=felevg.head.bndbox[i];
-		if(err != TD_NO_ERROR)goto ERROR1;  
-	}
-	if(ipar == 5)
-	{ 
-		if ( gridread(gordfile,&sgordgrid,&filetype)==0) 
-			err=TD_NO_ERROR;
-		else
-			err=TD_FAILED_GRID_OPEN;
-		nx = sgordgrid.head.nx;
-		ny = sgordgrid.head.ny;
-		dx = sgordgrid.head.dx;
-		dy = sgordgrid.head.dy;
-		csize = dx;
-		ndvo = sgordgrid.nodata;
-		for(i=0;i<4;i++)bndbox[i]=sgordgrid.head.bndbox[i];
-		if(err != TD_NO_ERROR)goto ERROR1; 
-	}
-	if(ipar == 6)
-	{ 
-		if (gridread(fdrfile,&sgordgrid,&filetype)==0) 
-			err=TD_NO_ERROR;
-		else
-			err=TD_FAILED_GRID_OPEN;
-		nx = sgordgrid.head.nx;
-		ny = sgordgrid.head.ny;
-		dx = sgordgrid.head.dx;
-		dy = sgordgrid.head.dy;
-		csize = dx;
-		ndvo = sgordgrid.nodata;
-		for(i=0;i<4;i++)bndbox[i]=sgordgrid.head.bndbox[i];
-		if(err != TD_NO_ERROR)goto ERROR1; 
-	} 
-	if((src = (short **)matalloc(nx,ny, RPSHRDTYPE)) == NULL)
-	{
-		err=TD_FAILED_MEMORY_ALLOC;
-		//  printf("Could not allocate memory for src\n");
-		goto ERROR1;
-	}  
+        REprintf("Some values %d %d %f %f %f\n",nx,ny,dx,dy,csize);
+//	if((src = (short **)matalloc(nx,ny, RPSHRDTYPE)) == NULL)
+        src = (short **) R_alloc(nx,sizeof(short *));
+        for(j=0; j<nx; j++){
+            src[j] = (short *) R_alloc(ny,sizeof(short));
+        }
+
 /*  Flag sources  */
 	for(i=0; i < ny; i++)
 	  for(j=0; j< nx; j++)
@@ -1595,163 +1569,49 @@ int source(char *areafile,char *slopefile,char *plenfile,char *dirfile,
 		  {
 			  src[j][i] = (faagrid.d[j][i] >= p[0]) ? 1 : 0;
 		  }
-		  else if(ipar == 2)   /*  Slope and area combination   */
-		  {
-			  if( fslopeg.d[j][i] > 0.)
-			  {
-				  val = (faagrid.d[j][i] * pow((double)fslopeg.d[j][i],(double)p[1])) ;
-				  src[j][i] = (val >= p[0])	  ? 1: 0;
-			  }
-		  }else if(ipar == 3)  /*  Slope and Length combination   */
-		  {
-			  if(fplengrid.d[j][i] > 0.)
-			  {
-				  src[j][i] = (faagrid.d[j][i] >= p[0]* pow((double)fplengrid.d[j][i],(double)p[1]))
-				  ? 1: 0;
-			  }
-		  }
-		  else if(ipar == 5)  /*  Grid order threshold  */
-			  src[j][i] = (sgordgrid.d[j][i] >= p[0]) ? 1: 0;
-		  else if(ipar == 6)  /*  Given flow directions threshold  */
-			  src[j][i] = (sgordgrid.d[j][i] > 0) ? 1: 0;
-	  }
-	  if(ipar == 4)  /* Peuker and Douglas algorithm  */
-	  {
-	/*  Initialize internal cells to 1 for Peuker and Douglas algorithm and smooth  */
-	if((selev = (double **)matalloc(nx,ny, RPFLTDTYPE)) == NULL)
-	{
-	  err=TD_FAILED_MEMORY_ALLOC;
-	//  printf("Could not allocate memory for selev\n");
-	  goto ERROR1;
-	}
-	  for(i=0; i <ny; i++)
-		 for(j=0; j<nx; j++)
-		 {
-			  if(i == 0 || i == (ny-1) || j == 0 || j == (nx-1) || felevg.d[j][i] <= ndve)
-			  {
-				  selev[j][i]=felevg.d[j][i];
-			  }
-			  else
-			  {
-				src[j][i] = 1;
-				selev[j][i]=p[1] * felevg.d[j][i];
-				wsum=p[1];
-				if(p[2] > 0.)
-				  for(k=1; k<=7; k=k+2)
-				  {
-					if(felevg.d[j+d2[k]][i+d1[k]] > ndve)
-					{
-			  		  selev[j][i] += felevg.d[j+d2[k]][i+d1[k]] *p[2];
-					  wsum += p[2];
-					}				  
-				  }
-				if(p[3] > 0.)
-				  for(k=2; k<=8; k=k+2)
-				  {
-					if(felevg.d[j+d2[k]][i+d1[k]] > ndve)
-					{
-			  		  selev[j][i] += felevg.d[j+d2[k]][i+d1[k]] *p[3];
-					  wsum += p[3];
-					}				  
-				  }
-			  }
-		  }
-		for (int curcol = 0; curcol < nx; curcol++)
-			for (int currow = 0; currow < ny; currow++)
-				felevg.d[curcol][currow]=selev[curcol][currow];
-		for(i=0; i <ny-1; i++)
-		  for(j=0; j<nx-1; j++)
-		  {
-			  emax= felevg.d[j][i]; 
-			  iomax=0;
-			  jomax=0;   
-			  bound= 0;  /*  .false.  */
-	/*  --FIRST PASS FLAG MAX ELEVATION IN GROUP OF FOUR  */
-			  for(ik=0; ik<2; ik++)
-				  for(jk=1-ik; jk < 2; jk++)
-				  {
-					  if(felevg.d[j+jk][i+ik] > emax)
-					  {
-						  emax=felevg.d[j+jk][i+ik];
-						  iomax=ik;
-						  jomax=jk;
-					  }
-					  if( felevg.d[j+jk][i+ik] <= ndve)
-						 bound= 1;  /*  .true.  */
-				  }
-	/*  c---Unflag max pixel */
-				 src[j+jomax][i+iomax] = 0;
-	/*  c---Unflag pixels where the group of 4 touches a boundary  */
-			  if(bound == 1)
-			  {
-				for(ik=0; ik < 2; ik++)
-				  for(jk=0; jk< 2; jk++)
-				  {
-					  src[j+jk][i+ik]=0;
-				  }
-			  }
-	/* 		  i.e. unflag flats.  */
-				for(ik=0; ik < 2; ik++)
-				  for(jk=0; jk< 2; jk++)
-				  {
-					 if(felevg.d[j+jk][i+ik] == emax)src[j+jk][i+ik] = 0;
-				  }
-		  }
 	  }
 	  
-	  if(ipar == 2){
-		  free(fslopeg.d[0]); free(fslopeg.d); 
-		  free(faagrid.d[0]); free(faagrid.d);
-	  }
-	  if(ipar == 3){
-		 free(fplengrid.d[0]); free(fplengrid.d);
-		 free(faagrid.d[0]); free(faagrid.d);
-	  }
-	  if(ipar == 4){
-		  free(felevg.d[0]); free(felevg.d); 
-		  free(selev[0]); free(selev);  // DGT 9/14/2007
-	  }
-//  DGT 5/16/09  changed not to free for 5 as needed below
-	  if(ipar == 6){
-		  free(sgordgrid.d[0]); free(sgordgrid.d); 
-	  }
 	/*  Now get directions and compute area's  */
-	  if ( gridread(dirfile,&sdir,&filetype)==0) 
-		  err=TD_NO_ERROR;
-	  else
-		  err=TD_FAILED_GRID_OPEN;
+       //   if ( gridread(dirfile,&sdir,&filetype)==0) 
+          if (sgridread(dirfile,&sdir,mval,*nrow,*ncol,*cellsize) != 0) return (22);
+
 	  ndvd = sdir.nodata;  
-	  if(err != TD_NO_ERROR)goto ERROR1; 
-	//allocate memory and headers for larr
-	  larr.head.dx=dx;
-	  larr.head.dy=dy;
-	  larr.head.nx=nx;
-	  larr.head.ny=ny;
-	  larr.nodata=-2;
-	  for(i=0;i<4;i++) larr.head.bndbox[i]=bndbox[i];
-	  larr.nodata = -2;
-	  allocategrid(&larr,larr.head,larr.nodata);
-  		nout=0;
+//	  allocategrid(&larr,larr.head,larr.nodata);
+        for (bnd=0;bnd<4;bnd++) boundbox[bnd]=sdir.head.bndbox[bnd];
+        larr.head.dx=dx;
+        larr.head.dy=dy;
+        larr.head.nx=nx;
+        larr.head.ny=ny;
+        for (bnd=0;bnd<4;bnd++) larr.head.bndbox[bnd]=sdir.head.bndbox[bnd];
+        larr.nodata=-2;
+
+    larr.d = (int **) R_alloc(nx,sizeof(int *));
+  for(j=0; j<nx; j++){
+    larr.d[j] = (int *) R_alloc(ny,sizeof(int));
+  }
+  for(i=0; i<ny; i++) {
+    for(j=0; j<nx; j++) {
+      larr.d[j][i]= larr.nodata;
+    }
+  }
 		itresh=1;
-		if(ipar == 4)itresh = p[0];
-		err=TD_CHANNEL_NETWORK_MISMATCH;   //This flag will indicate no outlet found  12/15/02  DGT moved to outside the if block 
 		// so that code works for at least one outlet found
-		if(nxy >0)
+		//if(nxy >0)
+		if(nxy <0)
 		{
 			for(i=0; i<nxy; i++)
 			{
 				col= (int)floor((x[i]-bndbox[0])/csize);
-				row= (int)floor((bndbox[3]-y[i])/csize);
+				//row= (int)floor((bndbox[3]-y[i])/csize);
+				row= (int)floor((y[i]-bndbox[1])/csize);
  				if(row >0 && row < ny-1 && col > 0 && col < nx-1 
 					&& sdir.d[col][row]>0)  // DGT* this condition added 12/15/02 to not do outlets outside the domain
 					{
 	/* call drainage area subroutine for pixel to zero on  */
+        REprintf("Some values %d %f %f %d %d %f %f %f\n",i,x[i],y[i],col,row,bndbox[0],bndbox[1],faagrid.d[col][row]);
 						srcarea(row,col);
-
-						if(larr.d[col][row] >= itresh)err=TD_NO_ERROR;  // an outlet found so no error
 					}
 			}
-			if(err==TD_CHANNEL_NETWORK_MISMATCH)goto ERROR9;  //  no outlet error
 		}
 		else
 		{
@@ -1782,66 +1642,27 @@ int source(char *areafile,char *slopefile,char *plenfile,char *dirfile,
 			}
 		}
 		//  DGT 5/16/09  Fix to overwrite accumulated source area with grid network orders
-		if(dropan == 1 && ipar == 5)
-		{
-			for(i=1; i < ny-1; i++)
-			for(j=1; j<nx-1; j++)
-			{
-				if(larr.d[j][i] >= itresh && sdir.d[j][i]>0)larr.d[j][i]=sgordgrid.d[j][i];
-				else larr.d[j][i]=0;
-			}
-			//  Now free the memory that could not be free'd above
-			free(sgordgrid.d[0]); free(sgordgrid.d); 
-		}
 
 //free memory for sdir	
-		free(sdir.d[0]);free(sdir.d);
+//		free(sdir.d[0]);free(sdir.d);
 // Moved from below so that could reopen with sca file for sure
-		if(ipar == 1) {free(faagrid.d[0]);free(faagrid.d);} //DGT 1/6/06 changed the conditional from <= 3 to ==1, because faagrid for ipar=2 and 3 is free'd above 
+	//	if(ipar == 1) {free(faagrid.d[0]);free(faagrid.d);} //DGT 1/6/06 changed the conditional from <= 3 to ==1, because faagrid for ipar=2 and 3 is free'd above 
 		// Exclude area with specific catchment area no data
-		if(masksca == 1)
-		{
-			if(gridread(scafile,&faagrid,&filetype)==0)
-				err=TD_NO_ERROR;
-			else
-			{
-		  		err=TD_FAILED_GRID_OPEN;
-				return err;
-			//	AfxMessageBox( LPCTSTR(strcat( "Failed to open sca file for masking: ", scafile) ));
-			}
-			if(err != TD_NO_ERROR)goto ERROR9;
-			for(i=1; i < ny-1; i++)
-			for(j=1; j<nx-1; j++)
-			{
-				if(faagrid.d[j][i] < 0)larr.d[j][i]=0;
-			}
-			free(faagrid.d[0]);free(faagrid.d);  //DGT 9/14/07 to clean up
-		}
-		if ( gridwrite(srcfile,larr,filetype)==0)
-			err=TD_NO_ERROR;
-		else{
-			err=TD_FAILED_GRID_SAVE;
-			//if (srcfile)
-			//	AfxMessageBox( LPCTSTR(strcat( "Failed to save file: ", srcfile) ));
-		}
-	free(src[0]); free(src);
-    free(larr.d[0]); free(larr.d);
+//		if ( gridwrite(srcfile,larr,filetype)==0)
+   REprintf("Some values last %d %f %f %d %d %f %f %f\n",i,x[i],y[i],col,row,bndbox[0],bndbox[1],larr.d[col][row]);
+//   larr.d[col][row]=25;
+   for(i=0; i < ny; i++){
+      for(j=0; j < nx; j++){
+        srcfile[j + (nx * i)] = double(larr.d[j][i]);
+      }
+   }
+  //  free(src[0]); free(src);
+  //  free(larr.d[0]); free(larr.d);
     return(err);
-ERROR9:
-   free(src[0]); free(src);
-   //Kiran added the following statement to clean up.
-    free(larr.d[0]); free(larr.d);
-	if(faagrid.d != NULL) {free(faagrid.d[0]); free(faagrid.d);}
-	if(sdir.d != NULL) {
-		if(sdir.d[0] != NULL)
-			{free(sdir.d[0]); free(sdir.d);
-		}
-	}
-    return(err);
-ERROR1:
-   free(src[0]); free(src);
-   free(larr.d[0]); free(larr.d);
-   return(err);
 }
-#endif
 
+
+
+
+
+}
