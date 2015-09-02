@@ -70,7 +70,8 @@ getGHCN <- function(lat, long, NSdeg=0.5, EWdeg=0.5, StartYear= 2000, EndYear=(a
 	if (!("ghcnd-stations.txt" %in% list.files()) ) download.file(GHCN.DAILY.METADATA.URL, destfile="ghcnd-stations.txt")
 	ghcnSta = readLines("ghcnd-stations.txt") 
 		
-	for (b in GHCNstns$Id){
+        for (b in unique(GHCNstns$Id)){
+
 		download.file(paste("ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/all/", b, ".dly", sep=""), "ghcndailytmp.dly")
 		GHCN[[b]] <- read_ghcn_raw("ghcndailytmp.dly")
 	}	
