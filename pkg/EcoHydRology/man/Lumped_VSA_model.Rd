@@ -134,6 +134,7 @@ Currently, the crop coefficients used to estimate PET are specific for deciduous
 PET_fromTemp
 }
 \examples{
+\dontrun{
 data(OwascoInlet)
 # First get rain and snow-melt input: 
 rsm <- SnowMelt(Date=OwascoInlet$date, precip_mm=OwascoInlet$P_mm, Tmax_C=OwascoInlet$Tmax_C, 
@@ -145,4 +146,4 @@ SATper = 0.27, AWCper = 0.13, StartCond = "wet")
 #  View results:
 hydrograph(streamflow=ConvertFlowUnits(cms=OwascoInlet$Streamflow_m3s, WA=106, AREAunits="mi2"), 
 timeSeries=OwascoInlet$date, streamflow2=Results$modeled_flow, precip=rsm$Rain_mm+rsm$SnowMelt_mm)
-}
+}}

@@ -80,6 +80,7 @@ We are assuming that the Ground heat flux on a daily time-step is zero
 
 
 \examples{
+\dontrun{
 data(OwascoInlet)
 head(OwascoInlet)
 attach(OwascoInlet)
@@ -88,7 +89,7 @@ PETapprox <- PET_fromTemp(Jday=(1+as.POSIXlt(date)$yday), Tmax_C=Tmax_C,
 plot(PETapprox*1000~date, type="l")
 detach(OwascoInlet)
 
-}
+}}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 
