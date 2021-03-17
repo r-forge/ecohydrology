@@ -1,6 +1,6 @@
 Package: SWATmodel
 Version: 0.5.13
-Title: A multi-OS implementation of the TAMU SWAT model.
+Title: A multi-OS implementation of the TAMU SWAT model
 Author: Fuka, DR, Walter, MT, Steenhuis, TS, and Easton, ZM
 Maintainer: Daniel Fuka <drf28@cornell.edu>
 Depends: R (>= 2.10), EcoHydRology, data.table
