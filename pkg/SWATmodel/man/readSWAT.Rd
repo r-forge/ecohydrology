@@ -8,12 +8,16 @@ Read output.* files from SWAT200*
 A function to read output.* files from SWAT200* runs.
 }
 \usage{
-readSWAT(outfile_type)
+readSWAT(outfile_type = "rch", pathtofile = "./")
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{outfile_type}{
  outfile_type ie. "sub","rch",etc.
+}
+  \item{pathtofile}{
+ The Path to the  directory with the output files i.e. "Scenarios/Default/TxtInOut/".
 }
 }
 \author{
