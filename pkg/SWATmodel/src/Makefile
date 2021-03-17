@@ -1,15 +1,12 @@
 DIRS	= SWAT2012
 ECHO	= echo
 
-all : swatp
+all : swat12
 
 swat12 : force_look
 	$(ECHO) looking into swat2012: $(MAKE) $(MFLAGS)
 	cd SWAT2012; $(MAKE) $(MFLAGS)
 
-swatp : force_look
-	$(ECHO) looking into swatp: $(MAKE) $(MFLAGS)
-	cd SWATP; $(MAKE) $(MFLAGS)
 clean :
 	$(ECHO) cleaning up in .
 	-rm -f $(EXE) $(OBJS) $(OBJLIBS)
