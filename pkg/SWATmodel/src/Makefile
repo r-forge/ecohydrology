@@ -1,11 +1,7 @@
-DIRS	= SWAT2005 SWAT2012
+DIRS	= SWAT2012
 ECHO	= echo
 
 all : swatp
-
-swat05 : force_look
-	$(ECHO) looking into swat2005: $(MAKE) $(MFLAGS)
-	cd SWAT2005; $(MAKE) $(MFLAGS)
 
 swat12 : force_look
 	$(ECHO) looking into swat2012: $(MAKE) $(MFLAGS)
