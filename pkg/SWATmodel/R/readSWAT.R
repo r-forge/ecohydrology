@@ -1,6 +1,5 @@
 readSWAT <-
 function(outfile_type="rch",pathtofile="./"){
-library(data.table)
 headloc=c(sub=9,rch=9,hru=9,snu=2)
 dataloc=c(sub=1,rch=1,hru=1,snu=2)
 if(missing(outfile_type)){print(" 'outfile_type' is missing, should be rch, sub, or.. ask drf28 for other types")}
