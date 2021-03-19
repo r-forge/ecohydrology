@@ -10,5 +10,5 @@ swat12:
 
 clean :
 	-rm -f $(EXE) $(OBJS) $(OBJLIBS)
-	-for d in $(DIRS); do (cd $$d; rm -f *~ *.o *.exe *.so) $(MFLAGS) clean ); done
+	-for d in $(DIRS); do (cd $$d; rm -f *~ *.o *.exe *.so *.mod); done
 

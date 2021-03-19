@@ -10,7 +10,7 @@ swat12 : force_look
 clean :
 	$(ECHO) cleaning up in .
 	-rm -f $(EXE) $(OBJS) $(OBJLIBS)
-	-for d in $(DIRS); do (cd $$d; rm -f *~ *.o *.exe *.so); done
+	-for d in $(DIRS); do (cd $$d; rm -f *~ *.o *.exe *.so *.mod); done
 
 force_look :
 	true
