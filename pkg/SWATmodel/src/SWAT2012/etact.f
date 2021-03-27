@@ -109,10 +109,10 @@
       use parm
 
       integer :: j, ib, ly
-!!    real, parameter :: esd = 500., etco = 0.80, effnup = 0.1
-      real :: esd, etco, effnup
-      real :: no3up, es_max, eos1, xx, cej, eaj, pet, esleft
-      real :: sumsnoeb, evzp, eosl, dep, evz, sev
+!!    real*8, parameter :: esd = 500., etco = 0.80, effnup = 0.1
+      real*8 :: esd, etco, effnup
+      real*8 :: no3up, es_max, eos1, xx, cej, eaj, pet, esleft
+      real*8 :: sumsnoeb, evzp, eosl, dep, evz, sev
 
       j = 0
       j = ihru
@@ -170,13 +170,16 @@
 !        if (pot_vol(j) > 1.e-4) es_max = 0.
 
         !! make sure maximum plant and soil ET doesn't exceed potential ET
-        if (pet_day < es_max + ep_max) then
-          es_max = pet_day - ep_max
+        !!if (pet_day < es_max + ep_max) then
+          !!es_max = pet_day - ep_max
           if (pet < es_max + ep_max) then
             es_max = pet * es_max / (es_max + ep_max)
             ep_max = pet * ep_max / (es_max + ep_max)
           end if
-        end if
+          if (pet < es_max + ep_max) then
+            es_max = pet - ep_max - 1.0e-6
+          end if
+        !!end if
 
         !! initialize soil evaporation variables
         esleft = 0.
@@ -206,7 +209,7 @@
           do ib = 1, 10
             if (elevb_fr(ib,hru_sub(j)) <= 0.) exit
             if (tavband(ib,j) > 0.) then 
-              sumsnoeb = sumsnoeb +                                     &
+              sumsnoeb = sumsnoeb +                                     
      &                             snoeb(ib,j) * elevb_fr(ib,hru_sub(j))
             end if
           end do
@@ -216,9 +219,9 @@
             do ib = 1, 10
               if (elevb_fr(ib,hru_sub(j)) <= 0.) exit
               if (tavband(ib,j) > 0.) then
-                snoev = snoev + snoeb(ib,j) * (esleft / sumsnoeb) *     &
+                snoev = snoev + snoeb(ib,j) * (esleft / sumsnoeb) *     
      &                                           elevb_fr(ib,hru_sub(j))
-                snoeb(ib,j) = snoeb(ib,j) - snoeb(ib,j) * (esleft /     &
+                snoeb(ib,j) = snoeb(ib,j) - snoeb(ib,j) * (esleft /     
      &                                                         sumsnoeb)
               end if
             end do
@@ -254,7 +257,7 @@
           evz = 0.
           sev = 0.
           xx = 0.
-          evz = eosl * sol_z(ly,j) / (sol_z(ly,j) + Exp(2.374 -         &
+          evz = eosl * sol_z(ly,j) / (sol_z(ly,j) + Exp(2.374 -         
      &       .00713 * sol_z(ly,j)))
           sev = evz - evzp * esco(j)
           evzp = evz

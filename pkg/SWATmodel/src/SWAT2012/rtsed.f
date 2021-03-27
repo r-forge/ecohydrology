@@ -29,7 +29,7 @@
 !!    inum1       |none          |reach number
 !!    inum2       |none          |inflow hydrograph storage location number
 !!    phi(5,:)    |m^3/s         |flow rate when reach is at bankfull depth
-!!    prf         |none          |Peak rate adjustment factor for sediment
+!!    prf(:)      |none          |Reach peak rate adjustment factor for sediment
 !!                               |routing in the channel. Allows impact of
 !!                               |peak flow rate on sediment routing and
 !!                               |channel reshaping to be taken into account
@@ -80,8 +80,8 @@
       use parm
 
       integer :: jrch
-      real :: qdin, sedin, vc, cyin, cych, depnet, deg1, deg2, dep
-      real :: depdeg, dot, outfract, deg
+      real*8 :: qdin, sedin, vc, cyin, cych, depnet, deg1, deg2, dep
+      real*8 :: depdeg, dot, outfract, deg
 
       jrch = 0
       jrch = inum1
@@ -101,7 +101,7 @@
       sedin = varoute(3,inum2) * (1. - rnum1) + sedst(jrch)
       sedinorg = sedin
 !! initialize reach peak runoff rate
-      peakr = prf * sdti
+      peakr = prf(jrch) * sdti
 
 !! calculate flow velocity
       vc = 0.
@@ -112,8 +112,8 @@
       end if
       if (vc > 5.) vc = 5.
 
-      tbase = 0.
       tbase = ch_l2(jrch) * 1000. / (3600. * 24. * vc)
+ !     tbase = prf(jrch)                 !!!!!!!! commented to match r610
 
       if (tbase > 1.) tbase = 1.
 
@@ -127,10 +127,11 @@
         deg2 = 0.
       dep = 0.
       cyin = sedin / qdin
-      cych = spcon * vc ** spexp
+      cych = spcon(jrch) * vc ** spexp(jrch)
       depnet = qdin * (cych - cyin)
+!!      depnet = rtwtr * (cych - cyin)   !!!!!!!commented to match rev610
       if(abs(depnet) < 1.e-6) depnet = 0.
-      if (vc < vcrit) depnet = 0.
+ !     if (vc < vcrit) depnet = 0.             !!!!!!!!!!!!commented to match r610
 
 !!  tbase is multiplied so that erosion is proportional to the traveltime, 
 !!  which is directly related to the length of the channel
@@ -139,7 +140,7 @@
 !!  from a small channel than a larger channel. Modification made by Balaji Narasimhan
 
       if (depnet > 1.e-6) then
-        deg = depnet * tbase
+        deg = depnet !* tbase      !!!!commented to match rev610
         !! First the deposited material will be degraded before channel bed
         if (deg >= depch(jrch)) then
           deg1 = depch(jrch)
@@ -150,7 +151,7 @@
         endif
         dep = 0.
       else
-        dep = -depnet * tbase
+        dep = -depnet ! * tbase
         deg = 0.
         deg1 = 0.
         deg2 = 0.
@@ -172,8 +173,8 @@
       if (sedst(jrch) < 1.e-6) sedst(jrch) = 0.
 
 !!    Mass balance tests
-!!      ambalsed = sedinorg + deg1 + deg2 - dep - sedrch - sedst(jrch)
-!!      if (ambalsed .gt. 1e-3) write (*,*) iida, jrch, ambalsed
+!! ambalsed = sedinorg + deg1 + deg2 - dep - sedrch - sedst(jrch)
+!! if (ambalsed .gt. 1e-3) write (*,*) iida, jrch, ambalsed
 
 !!  In this default sediment routing sediment is not tracked by particle size
       rch_san = 0.
@@ -186,7 +187,7 @@
 !!    Bank erosion
       rchdy(55,jrch) = 0.
 !!    Channel Degredation
-      rchdy(56,jrch) = deg2
+      rchdy(56,jrch) = deg1 + deg2
 !!    Channel Deposition
       rchdy(57,jrch) = dep
 !!    Floodplain Deposition
@@ -246,4 +247,3 @@
 
       return
       end
-

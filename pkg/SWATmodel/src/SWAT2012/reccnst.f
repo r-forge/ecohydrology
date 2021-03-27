@@ -21,10 +21,8 @@
 !!    flocnst(:)  |m^3 H2O/day   |average daily water loading to reach
 !!    ievent      |none          |rainfall/runoff code
 !!                               |0 daily rainfall/curve number technique
-!!                               |1 daily rainfall/Green&Ampt technique/daily
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
 !!                               |  routing
-!!                               |2 sub-daily rainfall/Green&Ampt technique/
-!!                               |  daily routing
 !!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    ihout       |none          |hydrograph storage location number
 !!    inum1       |none          |file number
@@ -91,8 +89,8 @@
 
 !! zero flow out variables
       do j = 1, mvaro
-        varoute(j,ihout) = 0.
-        if (ievent > 1) then
+      varoute(j,ihout) = 0.
+        if (ievent > 0) then
           do ii = 1, nstep
             hhvaroute(j,ihout,ii) = 0.
           end do
@@ -126,30 +124,29 @@
       varoute(27,ihout) = sedcnst(inum1) * 0.   ! lag
       varoute(28,ihout) = 0.                    ! gravel
 
-      if (ievent > 2) then
+      if (ievent > 0) then
         do ii = 1,nstep
-          hhvaroute(2,ihout,ii) = flocnst(inum1) / real(nstep)
-          hhvaroute(3,ihout,ii) = sedcnst(inum1) / real(nstep)
-          hhvaroute(4,ihout,ii) = orgncnst(inum1) / real(nstep)
-          hhvaroute(5,ihout,ii) = orgpcnst(inum1) / real(nstep)
-          hhvaroute(6,ihout,ii) = no3cnst(inum1) / real(nstep)
-          hhvaroute(7,ihout,ii) = minpcnst(inum1) / real(nstep)
-          hhvaroute(11,ihout,ii) = solpstcnst(inum1) / real(nstep)
-          hhvaroute(12,ihout,ii) = srbpstcnst(inum1) / real(nstep)
-          hhvaroute(13,ihout,ii) = chlacnst(inum1) / real(nstep)
-          hhvaroute(14,ihout,ii) = nh3cnst(inum1) / real(nstep)
-          hhvaroute(15,ihout,ii) = no2cnst(inum1) / real(nstep)
-          hhvaroute(16,ihout,ii) = cbodcnst(inum1) / real(nstep)
-          hhvaroute(17,ihout,ii) = disoxcnst(inum1) / real(nstep)
-          hhvaroute(18,ihout,ii) = bactpcnst(inum1) / real(nstep)
-          hhvaroute(19,ihout,ii) = bactlpcnst(inum1) / real(nstep)
-          hhvaroute(20,ihout,ii) = cmtl1cnst(inum1) / real(nstep)
-          hhvaroute(21,ihout,ii) = cmtl2cnst(inum1) / real(nstep)
-          hhvaroute(22,ihout,ii) = cmtl3cnst(inum1) / real(nstep)
+          hhvaroute(2,ihout,ii) = flocnst(inum1) / dfloat(nstep)
+          hhvaroute(3,ihout,ii) = sedcnst(inum1) / dfloat(nstep)
+          hhvaroute(4,ihout,ii) = orgncnst(inum1) / dfloat(nstep)
+          hhvaroute(5,ihout,ii) = orgpcnst(inum1) / dfloat(nstep)
+          hhvaroute(6,ihout,ii) = no3cnst(inum1) / dfloat(nstep)
+          hhvaroute(7,ihout,ii) = minpcnst(inum1) / dfloat(nstep)
+          hhvaroute(11,ihout,ii) = solpstcnst(inum1) / dfloat(nstep)
+          hhvaroute(12,ihout,ii) = srbpstcnst(inum1) / dfloat(nstep)
+          hhvaroute(13,ihout,ii) = chlacnst(inum1) / dfloat(nstep)
+          hhvaroute(14,ihout,ii) = nh3cnst(inum1) / dfloat(nstep)
+          hhvaroute(15,ihout,ii) = no2cnst(inum1) / dfloat(nstep)
+          hhvaroute(16,ihout,ii) = cbodcnst(inum1) / dfloat(nstep)
+          hhvaroute(17,ihout,ii) = disoxcnst(inum1) / dfloat(nstep)
+          hhvaroute(18,ihout,ii) = bactpcnst(inum1) / dfloat(nstep)
+          hhvaroute(19,ihout,ii) = bactlpcnst(inum1) / dfloat(nstep)
+          hhvaroute(20,ihout,ii) = cmtl1cnst(inum1) / dfloat(nstep)
+          hhvaroute(21,ihout,ii) = cmtl2cnst(inum1) / dfloat(nstep)
+          hhvaroute(22,ihout,ii) = cmtl3cnst(inum1) / dfloat(nstep)
         end do
       end if
 
 
       return
       end
-

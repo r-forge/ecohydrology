@@ -1,8 +1,13 @@
 include $(R_HOME)/etc$(R_ARCH)/Makeconf
 PROG =	../rswat2012.exe
 
-SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
-	allocate_parms.f alph.f anfert.f apex_day.f apply.f ascrv.f atri.f \
+SWATFLAG= -ffree-line-length-200 -ffixed-line-length-none -fmessage-length=0 -funderscoring -fbacktrace -ffpe-trap=invalid,zero,overflow
+
+SRCS =	allocate_parms.f alph.f anfert.f apex_day.f apply.f ascrv.f atri.f \
+	HQDAV.f90 carbon_zhang2.f90 hruday.f90 lid_cistern.f lid_greenroof.f \
+	lid_porpavement.f lid_raingarden.f lidinit.f lids.f log_normal.f \
+	rthvsc.f90 sw_init.f \
+	NCsed_leach.f90 addh.f albedo.f \
 	aunif.f autoirr.f aveval.f bacteria.f biofilm.f biozone.f \
 	bmp_det_pond.f bmp_ri_pond.f bmp_sand_filter.f bmp_sed_pond.f \
 	bmp_wet_pond.f bmpfixed.f bmpinit.f buffer.f burnop.f canopyint.f \
@@ -13,7 +18,7 @@ SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
 	filtw.f finalbal.f gcycl.f getallo.f grass_wway.f graze.f grow.f \
 	gw_no3.f gwmod.f gwmod_deep.f gwnutr.f h2omgt_init.f harvestop.f \
 	harvgrainop.f harvkillop.f header.f headout.f hhnoqual.f hhwatqual.f \
-	hmeas.f hruaa.f hruallo.f hruday.f hrumon.f hrupond.f hrupondhr.f \
+	hmeas.f hruaa.f hruallo.f  hrumon.f hrupond.f hrupondhr.f \
 	hruyr.f hydroinit.f icl.f impnd_init.f impndaa.f impndday.f \
 	impndmon.f impndyr.f irr_rch.f irr_res.f irrigate.f irrsub.f jdt.f \
 	killop.f lakeq.f latsed.f layersplit.f lwqdef.f main.f modparm.f \
@@ -33,7 +38,7 @@ SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
 	res.f resbact.f resetlu.f reshr.f resinit.f resnut.f rewind_init.f \
 	rhgen.f rootfr.f route.f routels.f routeunit.f routres.f rsedaa.f \
 	rseday.f rsedmon.f rsedyr.f rtbact.f rtday.f rteinit.f rthmusk.f \
-	rthpest.f rthr.f rthsed.f rtmusk.f rtout.f rtpest.f rtsed.f \
+	rthpest.f  rthsed.f rtmusk.f rtout.f rtpest.f rtsed.f \
 	rtsed_bagnold.f rtsed_kodatie.f rtsed_Molinas_Wu.f rtsed_yangsand.f \
 	sat_excess.f save.f saveconc.f sched_mgt.f schedule_ops.f \
 	sim_initday.f sim_inityr.f simulate.f slrgen.f smeas.f snom.f \
@@ -49,8 +54,11 @@ SRCS =	carbon_zhang2.f90 NCsed_leach.f90 addh.f albedo.f \
 	writed.f writem.f xmon.f ysed.f zero0.f zero1.f zero2.f zero_urbn.f \
 	zeroini.f
 
-OBJS =	carbon_zhang2.o NCsed_leach.o addh.o albedo.o \
-	allocate_parms.o alph.o anfert.o apex_day.o apply.o ascrv.o atri.o \
+OBJS =	allocate_parms.o alph.o anfert.o apex_day.o apply.o ascrv.o atri.o \
+	HQDAV.o carbon_zhang2.o hruday.o lid_cistern.o lid_greenroof.o \
+	lid_porpavement.o lid_raingarden.o lidinit.o lids.o log_normal.o \
+	rthvsc.o sw_init.o \
+	NCsed_leach.o addh.o albedo.o \
 	aunif.o autoirr.o aveval.o bacteria.o biofilm.o biozone.o \
 	bmp_det_pond.o bmp_ri_pond.o bmp_sand_filter.o bmp_sed_pond.o \
 	bmp_wet_pond.o bmpfixed.o bmpinit.o buffer.o burnop.o canopyint.o \
@@ -61,10 +69,10 @@ OBJS =	carbon_zhang2.o NCsed_leach.o addh.o albedo.o \
 	filtw.o finalbal.o gcycl.o getallo.o grass_wway.o graze.o grow.o \
 	gw_no3.o gwmod.o gwmod_deep.o gwnutr.o h2omgt_init.o harvestop.o \
 	harvgrainop.o harvkillop.o header.o headout.o hhnoqual.o hhwatqual.o \
-	hmeas.o hruaa.o hruallo.o hruday.o hrumon.o hrupond.o hrupondhr.o \
+	hmeas.o hruaa.o hruallo.o hrumon.o hrupond.o hrupondhr.o \
 	hruyr.o hydroinit.o icl.o impnd_init.o impndaa.o impndday.o \
 	impndmon.o impndyr.o irr_rch.o irr_res.o irrigate.o irrsub.o jdt.o \
-	killop.o lakeq.o latsed.o layersplit.o lwqdef.o main.o modparm.o \
+	killop.o lakeq.o latsed.o layersplit.o lwqdef.o main.o \
 	ndenit.o newtillmix.o nfix.o nitvol.o nlch.o nminrl.o noqual.o npup.o \
 	nrain.o nup.o nuts.o openwth.o operatn.o orgn.o orgncswat.o \
 	origtile.o ovr_sed.o percmacro.o percmain.o percmicro.o pestlch.o \
@@ -81,7 +89,7 @@ OBJS =	carbon_zhang2.o NCsed_leach.o addh.o albedo.o \
 	res.o resbact.o resetlu.o reshr.o resinit.o resnut.o rewind_init.o \
 	rhgen.o rootfr.o route.o routels.o routeunit.o routres.o rsedaa.o \
 	rseday.o rsedmon.o rsedyr.o rtbact.o rtday.o rteinit.o rthmusk.o \
-	rthpest.o rthr.o rthsed.o rtmusk.o rtout.o rtpest.o rtsed.o \
+	rthpest.o rthsed.o rtmusk.o rtout.o rtpest.o rtsed.o \
 	rtsed_bagnold.o rtsed_kodatie.o rtsed_Molinas_Wu.o rtsed_yangsand.o \
 	sat_excess.o save.o saveconc.o sched_mgt.o schedule_ops.o \
 	sim_initday.o sim_inityr.o simulate.o slrgen.o smeas.o snom.o \
@@ -100,7 +108,7 @@ OBJS =	carbon_zhang2.o NCsed_leach.o addh.o albedo.o \
 all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(FC) $(FCFLAGS) -o $@ $(OBJS) 
+	$(FC) $(SWATFLAG) -o $@ $(OBJS) 
 
 clean:
 	rm -f $(PROG) $(OBJS) *.mod
@@ -108,14 +116,26 @@ clean:
 .SUFFIXES: $(SUFFIXES) .f
 
 .f.o:
-	$(FC) $(FCFLAGS) -c $<
+	$(FC) $(SWATFLAG) $(FCFLAGS) -c $<
 
 .SUFFIXES: $(SUFFIXES) .f90
 
 .f90.o:
-	$(FC) $(F90FLAGS) -c $<
+	$(FC) $(SWATFLAG) $(F90FLAGS) -c $<
 
 main.o: modparm.f
+HQDAV.o:modparm.o 
+carbon_zhang2.o:modparm.o
+hruday.o:modparm.o
+lid_cistern.o:modparm.o
+lid_greenroof.o:modparm.o
+lid_porpavement.o:modparm.o
+lid_raingarden.o:modparm.o
+lidinit.o:modparm.o
+lids.o:modparm.o
+log_normal.o:modparm.o
+rthvsc.o:modparm.o
+sw_init.o:modparm.o
 NCsed_leach.o:modparm.o
 addh.o:modparm.o
 albedo.o:modparm.o
@@ -194,7 +214,6 @@ hhwatqual.o:modparm.o
 hmeas.o:modparm.o
 hruaa.o:modparm.o
 hruallo.o:modparm.o
-hruday.o:modparm.o
 hrumon.o:modparm.o
 hrupond.o:modparm.o
 hrupondhr.o:modparm.o
@@ -326,7 +345,6 @@ rtday.o:modparm.o
 rteinit.o:modparm.o
 rthmusk.o:modparm.o
 rthpest.o:modparm.o
-rthr.o:modparm.o
 rthsed.o:modparm.o
 rtmusk.o:modparm.o
 rtout.o:modparm.o

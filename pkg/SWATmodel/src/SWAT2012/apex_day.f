@@ -11,10 +11,8 @@
 !!    id1         |julian date   |first day of simulation in year
 !!    ievent      |none          |rainfall/runoff code
 !!                               |0 daily rainfall/curve number technique
-!!                               |1 daily rainfall/Green&Ampt technique/daily
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
 !!                               |  routing
-!!                               |2 sub-daily rainfall/Green&Ampt technique/
-!!                               |  daily routing
 !!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    inum1       |none          |reach number
 !!    ifirstr(:)  |none          |measured data search code
@@ -108,7 +106,7 @@
 
       do j = 1, mvaro
         varoute(j,ihout) = 0.
-        if (ievent > 1) then
+        if (ievent > 0) then
           do ii = 1, nstep
             hhvaroute(j,ihout,ii) = 0.
           end do
@@ -121,8 +119,8 @@
 !!    changes for Mike Winchell if apex.swt files has a different start date than the SWAT run
       if (ifirsta(inum1) == 1) then
         do 
-          read (112+inum1,*) idapa(inum1), iypa(inum1), flodaya(inum1),    
-     & seddaya(inum1), orgndaya(inum1), orgpdaya(inum1), no3daya(inum1),   
+          read (400+inum1,*) idapa(inum1), iypa(inum1), flodaya(inum1),
+     & seddaya(inum1), orgndaya(inum1), orgpdaya(inum1), no3daya(inum1),
      & minpdaya(inum1)
           if(idapa(inum1) == id1 .and. iypa(inum1) == iyr) exit
         end do
@@ -145,14 +143,16 @@
          varoute(15,ihout) = 0.0    
          varoute(16,ihout) = 0.0     
          varoute(17,ihout) = 0.0      
-         varoute(18,ihout) = 0.0      
+         varoute(18,ihout) = 0.0
          varoute(19,ihout) = 0.0       
          varoute(20,ihout) = 0.0      
          varoute(21,ihout) = 0.0      
-         varoute(22,ihout) = 0.0      
-          read (112+inum1,*) idapa(inum1), iypa(inum1), flodaya(inum1),    &
-     & seddaya(inum1), orgndaya(inum1), orgpdaya(inum1), no3daya(inum1),   &
+         varoute(22,ihout) = 0.0 
+         if (curyr /= nbyr .and. iida /= idal) then
+           read (400+inum1,*) idapa(inum1), iypa(inum1), flodaya(inum1),
+     & seddaya(inum1), orgndaya(inum1), orgpdaya(inum1), no3daya(inum1),
      & minpdaya(inum1)
+         endif
       else
          varoute(2,ihout) = 0.0
          varoute(3,ihout) = 0.0              
@@ -176,14 +176,14 @@
          varoute(22,ihout) = 0.0      
       endif
      
-      if (ievent > 2) then
+      if (ievent > 0) then
         do ii = 1, nstep
-          hhvaroute(2,ihout,ii) = flodaya(inum1) / real(nstep)
-          hhvaroute(3,ihout,ii) = seddaya(inum1) / real(nstep)
-          hhvaroute(4,ihout,ii) = orgndaya(inum1) / real(nstep)
-          hhvaroute(5,ihout,ii) = orgpdaya(inum1) / real(nstep)
-          hhvaroute(6,ihout,ii) = no3daya(inum1) / real(nstep)
-          hhvaroute(7,ihout,ii) = minpdaya(inum1) / real(nstep)
+          hhvaroute(2,ihout,ii) = flodaya(inum1) / dfloat(nstep)
+          hhvaroute(3,ihout,ii) = seddaya(inum1) / dfloat(nstep)
+          hhvaroute(4,ihout,ii) = orgndaya(inum1) / dfloat(nstep)
+          hhvaroute(5,ihout,ii) = orgpdaya(inum1) / dfloat(nstep)
+          hhvaroute(6,ihout,ii) = no3daya(inum1) / dfloat(nstep)
+          hhvaroute(7,ihout,ii) = minpdaya(inum1) / dfloat(nstep)
 
         end do
       end if

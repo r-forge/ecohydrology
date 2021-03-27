@@ -54,9 +54,9 @@
 
       integer, intent (in) :: iwave
       integer :: j
-      real :: xx, wt1, er, conc
-      real :: sol_mass, QBC, VBC, YBC, YOC, YW, TOT, YEW, X1, PRMT_21, PRMT_44
-      real :: DK,  V, X3, CO, CS, perc_clyr, latc_clyr  
+      real*8 :: xx, wt1, er, conc
+      real*8 :: sol_mass, QBC, VBC, YBC, YOC, YW, TOT, YEW, X1, PRMT_21, PRMT_44
+      real*8 :: DK,  V, X3, CO, CS, perc_clyr, latc_clyr  
       integer :: k
       latc_clyr = 0.
         
@@ -70,7 +70,7 @@
 
       xx = 0.
         wt1 = 0.  !! conversion factor
-      er = 0.      !! enrichment ratio
+      er = 0. !! enrichment ratio
       if (iwave <= 0) then
         !! HRU calculations
         !xx = sol_n(1,j) + sol_fon(1,j) + sol_mn(1,j)
@@ -110,11 +110,11 @@
         
         !!add by zhang to update soil nitrogen pools
         
-            sol_LSN(1,j) = sol_LSN(1,j) * xx1
-            sol_LMN(1,j) = sol_LMN(1,j) * xx1
-            sol_HPN(1,j) = sol_HPN(1,j) * xx1
-            sol_HSN(1,j) = sol_HSN(1,j) * xx1
-            !sol_BMN(1,j) = sol_BMN(1,j) * xx1
+       sol_LSN(1,j) = sol_LSN(1,j) * xx1
+       sol_LMN(1,j) = sol_LMN(1,j) * xx1
+       sol_HPN(1,j) = sol_HPN(1,j) * xx1
+       sol_HSN(1,j) = sol_HSN(1,j) * xx1
+       !sol_BMN(1,j) = sol_BMN(1,j) * xx1
       end if
       
       !return

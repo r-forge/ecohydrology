@@ -5,9 +5,19 @@
 
       use parm
       
-       ifirstatmo = 1
-       mo_atmo = 0
+!!    Srin co2 (EPA)
+      co2_x2 = 0.
+      co2_x = 0.
       
+      lid_sw_add = 0.
+      lid_farea = 0.
+      rg_sarea = 0.
+      co_p = .1
+      
+      ifirstatmo = 1
+      mo_atmo = 0
+      
+      ires_nut = 0
 !!    apex command initialize
       idapa = 0
       iypa = 0
@@ -61,6 +71,7 @@
       ammonian = 0.
       amp_r = 0.
       ap_ef = 0.
+      atmo_day = 0.
       auto_eff = 0.
       auto_nyr = 0.
       auto_napp = 0.
@@ -134,8 +145,6 @@
       ch_erodmo = 0.      !CB 12/2/09
       ch_cov1 = 0.
       ch_cov2 = 0.
-      ch_eqn = 0
-
       chlacnst = 0.
       chlamon = 0.
       chlayr = 0.
@@ -293,7 +302,7 @@
       icrmx = 0
       iday_fert = 0
       idc = 0
-        idop = 0
+      idop = 0
       idorm = 0
       idplt = 0
       idplrot = 1
@@ -341,6 +350,7 @@
       ireg = 1
       irgage = 0
       irip = 0
+      iroutunit = 0
       irn = 0
       irramt = 0.
       irreff = 1.
@@ -396,10 +406,8 @@
       ndcfrt = 0
       fert_days = 0
       grz_days = 0
-  !! change per JGA irrigation 4/2/2009
       nair = 1
       irr_mx = 0.
-  !! change per JGA irrigation 4/2/2009
       latno3 = 0.
       nicr = 0
       ndmo = 0
@@ -428,11 +436,18 @@
       pc = 0.
       pc_bsn = 0.
 !    Drainmod tile equations  01/2006
-        phubase = 0.
+      phubase = 0.
       pltnfr = 0.
       pltpfr = 0.
       pot_seep = 0.
-      r2adj = 1.
+!----------------------- !Moriasi 4/8/2014  
+      prf = 0.
+      prf_bsn = 0. 
+      spcon_bsn = 0.
+      spexp_bsn = 0.
+      r2adj = 0.
+      r2adj_bsn = 0.
+!----------------------- !Moriasi 4/8/2014       
 !! drainmod tile equations   06/2006
       ranrns = 0.
 !! drainmod tile equations   06/2006
@@ -449,6 +464,10 @@
       rcn_mo = 0.
       drydep_nh4_mo = 0.
       drydep_no3_mo = 0.
+      rammo_d = 0.
+      rcn_d = 0.
+      drydep_nh4_d = 0.
+      drydep_no3_d = 0.
 !! routing 5/3/2010 gsm per jga
       idum = 0
       mhyd1 = 0
@@ -459,11 +478,20 @@
       sdrain_bsn = 0.
       sstmaxd = 0.
       sstmaxd_bsn = 0.
+      re = 0.
+      re_bsn = 0.
+      drain_co = 0.
+      
+ !New water table depth parameters D. Moriasi 4/8/2014
+      sol_swpwt = 0.
+      sol_stpwt = 0.
+      vwt = 0.
+      wat_tbl = 0.         
 !    Drainmod tile equations  01/2006
       rsr1 = 0.
       rsr2 = 0.
-        rsr1 = 0.
-        rsr2 = 0.
+      rsr1 = 0.
+      rsr2 = 0.
       sed_con = 0.
       sepcrk = 0.
       sq_rto = 0.
@@ -471,14 +499,13 @@
 !    Drainmod tile equations  01/2006 
       stmaxd = 0.
       stmaxd_bsn = 0.
-!    Drainmod tile equations  01/2006 
-     
+!    Drainmod tile equations  01/2006      
       sol_ec = 0.
       sol_sand = 0.
       sol_silt = 0.
       sol_clay = 0.
 !!   added for Srini in output.mgt nitrogen and phosphorus nutrients per JGA by gsm 9/8/2011
-      sol_sumn03 = 0.
+      sol_sumno3 = 0.
       sol_sumsolp = 0.
       strsw = 1.
       strsw_sum = 0.
@@ -495,6 +522,7 @@
       sub_lat = 0.
       sub_latq = 0.
       sub_tileq = 0.
+      sub_vaptile = 0.
       sub_latno3 = 0.
       sub_smtmp = 0.
       sub_tileno3 = 0.
@@ -511,12 +539,23 @@
       uh = 0.
       vfsratio = 0.
       vfscon = 0.
-        vfsi = 0.
+      vfsi = 0.
       vfsch = 0.
       wt_shall = 0.
       wshd_aamon = 0.
 !      wshddayo = 0.
       yr_skip = 0
-
+      
+      !initialize flood routing variables
+      do i=1,4
+          IHX(i) = i
+      end do
+      QHY = 0.
+      NHY = 1
+      RCHX = 0.
+      RCSS = 0.
+      QCAP = 0.
+      CHXA = 0.
+      CHXP = 0.
       return
       end

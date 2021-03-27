@@ -1,4 +1,4 @@
-      subroutine sed_pond(kk,flw,sed)
+      subroutine bmp_sed_pond(kk,flw,sed)
       
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine routes water and sediment through a sedimentation pond in the subbasin
@@ -35,7 +35,7 @@
       real*8 :: tsa,mxvol,pdia,ksat,dp,sub_ha,mxh,hweir,phead,pipeflow
       real*8 :: qin,qout,qpnd,qpndi,sweir,spndconc,sedpnde,sedpndi,hpnd
       real*8 :: qweir, qtrns,qpipe,splw,sedconcweir,td,ksed,qevap
-      real, dimension(3,0:nstep), intent(inout) :: flw, sed
+      real*8, dimension(4,0:nstep), intent(inout) :: flw, sed
       
       sb = inum1
       sub_ha = da_ha * sub_fr(sb)
@@ -88,6 +88,9 @@
             !Transmission loss through infiltration 
             qtrns = ksat * tsa / 1000./ 60. * idt
             qpnd = qpnd - qtrns
+            bmp_recharge(sb) = bmp_recharge(sb) 
+     &                         + qtrns / (sub_ha*10000.- tsa) *1000.
+                       
             If (qpnd<0) then
               qpnd = 0.
               qtrns = 0.
@@ -119,6 +122,7 @@
             flw(1,ii) = qin / ((sub_ha - tsa / 10000.) *10.)
             flw(2,ii) = qout / ((sub_ha - tsa / 10000.) *10.) !mm
             flw(3,ii) = qweir / ((sub_ha - tsa / 10000.) *10.) !mm
+            flw(4,ii) = qtrns / (sub_ha *10000. - tsa) * 1000.  !mm
          Endif
         
          !---------------------------------------------------------
@@ -152,7 +156,7 @@
         
         !Estimate TSS removal due to sedimentation
          if (spndconc>sp_sede(sb,kk)) then
-           ksed = min(134.8,41.1 * hpnd ** (-0.999))  !decay coefficient, Huber et al. 2006
+           ksed = min(134.8,41.1 * hpnd ** -0.999)  !decay coefficient, Huber et al. 2006
            td = qpnd / qpipe / nstep !detention time, day
            spndconc = (spndconc - sp_sede(sb,kk)) * exp(-ksed * td) + 
      &           sp_sede(sb,kk)
@@ -179,7 +183,7 @@
 
 
       return
-      end subroutine
+      end subroutine bmp_sed _pond
    
  !-------------------------------------------------------------------------------
       function pipeflow(d,h)

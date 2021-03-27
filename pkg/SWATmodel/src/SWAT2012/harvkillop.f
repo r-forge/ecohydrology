@@ -127,16 +127,16 @@
       integer :: j, k
       
 !!   change per JGA 8/31/2011 gsm PUT YIELD IN modparm.f
-!!      real :: wur, hiad1, yield, yieldn, yieldp, yldpst
-      real :: wur, hiad1, yieldn, yieldp, yldpst
-      real :: resnew, rtresnew 
+!!      real*8 :: wur, hiad1, yield, yieldn, yieldp, yldpst
+      real*8 :: wur, hiad1, yldpst
+      real*8 :: resnew, rtresnew 
 
 
       !!By Zhang
       !!=============
-      real :: BLG1, BLG2, BLG3,  CLG, sf
-      real :: sol_min_n, resnew_n, resnew_ne
-      real :: LMF, LSF, LSLF, LSNF,LMNF 
+      real*8 :: BLG1, BLG2, BLG3,  CLG, sf
+      real*8 :: sol_min_n, resnew_n, resnew_ne
+      real*8 :: LMF, LSF, LSLF, LSNF,LMNF 
       orgc_f = 0.
       BLG1 = 0.
       BLG2 = 0.
@@ -179,9 +179,8 @@
           wur = 0.
           wur = 100. * plt_et(j) / plt_pet(j)
         endif
-
-        hiad1 = (hvstiadj(j) - wsyf(idplt(j))) *                        &
-     &      (wur / (wur + Exp(6.13 - .0883 * wur))) +                   &
+        hiad1 = (hvstiadj(j) - wsyf(idplt(j))) *                        
+     &      (wur / (wur + Exp(6.13 - .0883 * wur))) +                   
      &      wsyf(idplt(j))
 
         if (hiad1 > hvsti(idplt(j))) then 
@@ -218,16 +217,16 @@
           resnew = (1. - rwt(j)) * (1. - hiad1) * bio_ms(j)
           !! remove stover during harvkillop
           resnew = resnew * (1. - xx)
-          rtresnew = rwt(j) * bio_ms(j)      
+          rtresnew = rwt(j) * bio_ms(j) 
         endif
       endif
       end if 
       
       if (yield < 0.) yield = 0.
       if (resnew < 0.) resnew = 0.
-      if (rtresnew < 0.) rtresnew = 0.      ! Armen 19 May 2008
-                                                            ! I would avoid this check, it is
-                                                            ! safer to know if variable is negative
+      if (rtresnew < 0.) rtresnew = 0. ! Armen 19 May 2008
+               ! I would avoid this check, it is
+               ! safer to know if variable is negative
 
       !!add by zhang
       !!=================
@@ -250,7 +249,7 @@
       yieldn = Min(yieldn, 0.80 * plantn(j))
       yieldp = Min(yieldp, 0.80 * plantp(j))
 
-      !! Armen 19 May 2008 / 21 January 2008      
+      !! Armen 19 May 2008 / 21 January 2008 
       !! fraction of roots in each layer
       call rootfr
 
@@ -299,51 +298,51 @@
     
 
                 !if (k == 1) then
-                    sf = 0.05
+               sf = 0.05
                 !else
-                    !sf = 0.1
-                !end if      
+               !sf = 0.1
+                !end if 
 
                !kg/ha  
-                sol_min_n = 0.      
+                sol_min_n = 0. 
                 sol_min_n = (sol_no3(1,j)+sol_nh3(1,j))
                 
                 resnew = resnew
-                resnew_n = ff1 * (plantn(j) - yieldn)              
-                  resnew_ne = resnew_n + sf * sol_min_n
-                  
-                     !Not sure 1000 should be here or not!
-                  !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
-                  !RLN is the ratio of lignin to nitrogen in the newly added residue
-                  RLN = (resnew * CLG/(resnew_n+1.E-5))
-                  RLR = MIN(.8, resnew * CLG/(resnew+1.E-5))
-                  
-                  LMF = 0.85 - 0.018 * RLN
-                  if (LMF <0.01) then
-                      LMF = 0.01
-                  else
-                      if (LMF >0.7) then
-                          LMF = 0.7
-                      end if
-                  end if              
+                resnew_n = ff1 * (plantn(j) - yieldn)         
+             resnew_ne = resnew_n + sf * sol_min_n
+             
+                !Not sure 1000 should be here or not!
+             !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
+             !RLN is the ratio of lignin to nitrogen in the newly added residue
+             RLN = (resnew * CLG/(resnew_n+1.E-5))
+             RLR = MIN(.8, resnew * CLG/(resnew+1.E-5))
+             
+             LMF = 0.85 - 0.018 * RLN
+             if (LMF <0.01) then
+                 LMF = 0.01
+             else
+                 if (LMF >0.7) then
+                     LMF = 0.7
+                 end if
+             end if         
                 !if ((resnew * CLG/(resnew_n+1.E-5)) < 47.22) then
-                    !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
+               !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
                 !else
-                    !    LMF = 0.
-                !end if       
+               !    LMF = 0.
+                !end if  
 
                 LSF =  1 - LMF  
-                
+           
                 sol_LM(1,j) = sol_LM(1,j) + LMF * resnew
                 sol_LS(1,j) = sol_LS(1,j) + LSF * resnew
-                
+           
 
                 
                 !here a simplified assumption of 0.5 LSL
                 !LSLF = 0.0
                 !LSLF = CLG          
                 
-                sol_LSL(1,j) = sol_LSL(1,j) + RLR*resnew                
+                sol_LSL(1,j) = sol_LSL(1,j) + RLR*resnew           
                 sol_LSC(1,j) = sol_LSC(1,j) + 0.42*LSF * resnew  
                 
                 sol_LSLC(1,j) = sol_LSLC(1,j) + RLR*0.42*resnew
@@ -352,17 +351,17 @@
                 !X3 = MIN(X6,0.42*LSF * resnew/150) 
                 
                 if (resnew_n >= (0.42 * LSF * resnew /150)) then
-                   sol_LSN(1,j)=sol_LSN(1,j)+0.42*LSF*resnew / 150
-                     sol_LMN(1,j) = sol_LMN(1,j) + resnew_n - 
+                sol_LSN(1,j) = sol_LSN(1,j) + 0.42 * LSF * resnew / 150
+                sol_LMN(1,j) = sol_LMN(1,j) + resnew_n - 
      &                         (0.42 * LSF * resnew / 150) + 1.E-25
                 else
-                     sol_LSN(1,j) = sol_LSN(1,j) + resnew_n
-                     sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
-                end if      
-              
-                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5)      
-                
-                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew      
+                sol_LSN(1,j) = sol_LSN(1,j) + resnew_n
+                sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
+                end if 
+         
+                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5) 
+           
+                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew 
                 !LMNF = sol_LMN(1,j)/(sol_LM(1,j) + 1.E-5)           
                 
                 !update no3 and nh3 in soil
@@ -411,49 +410,49 @@
          
 
                 if (l == 1) then
-                    sf = 0.05
+               sf = 0.05
                 else
-                    sf = 0.1
-                end if      
+               sf = 0.1
+                end if 
 
                !kg/ha  
-                sol_min_n = 0.      
+                sol_min_n = 0. 
                 sol_min_n = (sol_no3(l,j)+sol_nh3(l,j))
-                                
+                           
                 resnew = rtfr(l) *rtresnew 
-                resnew_n = rtfr(l) *ff2 * (plantn(j) - yieldn)             
-                  resnew_ne = resnew_n + sf * sol_min_n
-                      !Not sure 1000 should be here or not!
-                  !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
-                  RLN = (resnew * CLG/(resnew_n+1.E-5))
-                  RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
-                  
-                  LMF = 0.85 - 0.018 * RLN
-                  if (LMF <0.01) then
-                      LMF = 0.01
-                  else
-                      if (LMF >0.7) then
-                          LMF = 0.7
-                      end if
-                  end if              
+                resnew_n = rtfr(l) *ff2 * (plantn(j) - yieldn)        
+             resnew_ne = resnew_n + sf * sol_min_n
+                 !Not sure 1000 should be here or not!
+             !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
+             RLN = (resnew * CLG/(resnew_n+1.E-5))
+             RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
+             
+             LMF = 0.85 - 0.018 * RLN
+             if (LMF <0.01) then
+                 LMF = 0.01
+             else
+                 if (LMF >0.7) then
+                     LMF = 0.7
+                 end if
+             end if         
                 !if ((resnew * CLG/(resnew_n+1.E-5)) < 47.22) then
-                    !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
+               !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
                 !else
-                    !    LMF = 0.
-                !end if       
+               !    LMF = 0.
+                !end if  
 
                 LSF =  1 - LMF  
-                
+           
                 sol_LM(l,j) = sol_LM(l,j) + LMF * resnew
                 sol_LS(l,j) = sol_LS(l,j) + LSF * resnew
-                
+           
 
                 
                 !here a simplified assumption of 0.5 LSL
                 LSLF = 0.0
                 LSLF = CLG          
                 
-                sol_LSL(l,j) = sol_LSL(l,j) + RLR* LSF * resnew                
+                sol_LSL(l,j) = sol_LSL(l,j) + RLR* LSF * resnew           
                 sol_LSC(l,j) = sol_LSC(l,j) + 0.42*LSF * resnew  
                 
                 sol_LSLC(l,j) = sol_LSLC(l,j) + RLR*0.42*LSF * resnew
@@ -462,17 +461,17 @@
                 !X3 = MIN(X6,0.42*LSF * resnew/150) 
                 
                 if (resnew_ne >= (0.42 * LSF * resnew /150)) then
-                   sol_LSN(l,j) = sol_LSN(l,j)+0.42*LSF*resnew/150
-                     sol_LMN(l,j) = sol_LMN(l,j) + resnew_ne - 
+                sol_LSN(l,j) = sol_LSN(l,j) + 0.42 * LSF * resnew / 150
+                sol_LMN(l,j) = sol_LMN(l,j) + resnew_ne - 
      &                         (0.42 * LSF * resnew / 150) + 1.E-25
                 else
-                     sol_LSN(l,j) = sol_LSN(l,j) + resnew_ne
-                     sol_LMN(l,j) = sol_LMN(l,j) + 1.E-25
-                end if      
-              
-                !LSNF = sol_LSN(l,j)/(sol_LS(l,j)+1.E-5)      
-                
-                sol_LMC(l,j) = sol_LMC(l,j) + 0.42 * LMF * resnew      
+                sol_LSN(l,j) = sol_LSN(l,j) + resnew_ne
+                sol_LMN(l,j) = sol_LMN(l,j) + 1.E-25
+                end if 
+         
+                !LSNF = sol_LSN(l,j)/(sol_LS(l,j)+1.E-5) 
+           
+                sol_LMC(l,j) = sol_LMC(l,j) + 0.42 * LMF * resnew 
                 !LMNF = sol_LMN(l,j)/(sol_LM(l,j) + 1.E-5)           
                 
                 !update no3 and nh3 in soil

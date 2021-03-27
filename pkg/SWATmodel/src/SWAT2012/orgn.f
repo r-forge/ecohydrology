@@ -61,14 +61,14 @@
 
       integer, intent (in) :: iwave
       integer :: j
-      real :: xx, wt1, er, conc
+      real*8 :: xx, wt1, er, conc
 
       j = 0
       j = ihru
 
       xx = 0.
       wt1 = 0.    !! conversion factor
-      er = 0.            !! enrichment ratio
+      er = 0.  !! enrichment ratio
       if (iwave <= 0) then
         !! HRU calculations
         xx = sol_orgn(1,j) + sol_aorgn(1,j) + sol_fon(1,j)
@@ -98,9 +98,12 @@
         sedorgn(j) = .001 * conc * sedyld(j) / (da_ha * sub_fr(iwave))
       end if
 
+      !! bmp adjustment
+      sedorgn(j) = sedorgn(j) * bmp_pn(j)
+      
       !! update soil nitrogen pools only for HRU calculations
       if (iwave <= 0 .and. xx > 1.e-6) then
-       sol_aorgn(1,j) = sol_aorgn(1,j) - sedorgn(j) *                   &
+       sol_aorgn(1,j) = sol_aorgn(1,j) - sedorgn(j) *                   
      &                                             (sol_aorgn(1,j) / xx)
        sol_orgn(1,j) = sol_orgn(1,j) - sedorgn(j) * (sol_orgn(1,j) / xx)
        sol_fon(1,j) = sol_fon(1,j) - sedorgn(j) * (sol_fon(1,j) / xx)

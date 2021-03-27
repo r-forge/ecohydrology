@@ -28,10 +28,10 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 !!
       use parm
-      real :: latqout, gwqout, latqrunon, surfqrunon, latqlyr
+      real*8 :: latqout, gwqout, latqrunon, surfqrunon, latqlyr
 
 !!    compute infiltration from surface runon to next landscape unit
-      real :: ls_overq, ls_latq, ls_tileq, ls_gwq
+      real*8 :: ls_overq, ls_latq, ls_tileq, ls_gwq
 
 !!    water
 !      if (rnum1 > 1.e-4) return
@@ -63,8 +63,8 @@
       sed = varoute(3,inum2) * rnum1
       !! use surface runoff (mm) for eiq - m3/(10 * 100*km2) = mm
       ru_eiq(inum3,inum1) = ls_overq / (1000. * daru_km(inum3,inum1))
-      trancap = ru_ktc(inum3,inum1) * ru_c(inum3,inum1) *               &
-     &        ru_eiq(inum3,inum1) * ru_k(inum3,inum1) *                 &
+      trancap = ru_ktc(inum3,inum1) * ru_c(inum3,inum1) *               
+     &        ru_eiq(inum3,inum1) * ru_k(inum3,inum1) *                 
      &        ru_a(inum3,inum1)**1.4 * ru_ovs(inum3,inum1)**1.4
       trancap = trancap * daru_km(inum3,inum1) * 100.   !! t/ha -> t
       if (sed > trancap) then
@@ -150,7 +150,7 @@
     !    surfq_ru(jj) = surfqout / (10. * xx)
     !    latq_ru(jj) = latqout / (10. * xx)
     !    infl_ru(jj) = inflpcp
-        varoute(2,ihout) = varoute(2,ihout) + surfqout + latqout +      &
+        varoute(2,ihout) = varoute(2,ihout) + surfqout + latqout +      
      &                                                         gwqout 
       end if
       end if
@@ -225,6 +225,6 @@
       do ii = 29, mvaro
         varoute(ii,inum2) = 0.
       end do
-             
+        
       return
       end

@@ -53,8 +53,8 @@
       use parm
 
       integer :: k, iyp, idap, l, inum3sprev
-      real :: rabsb
-      real, dimension (mrg) :: slrmeas
+      real*8 :: rabsb
+      real*8, dimension (mrg) :: slrmeas
 
       !! initialize variables for the day
       slrmeas = 0.
@@ -96,8 +96,10 @@
         end do
 
       return
-! 5200 format (7x,300f8.3)
-! 5300 format (i4,i3,300f8.3)
- 5200 format (7x,1800f8.3)
- 5300 format (i4,i3,1800f8.3)
+
+ !5200 format (7x,1800f8.3)
+ !5300 format (i4,i3,1800f8.3)
+ 5200 format (7x,1900f8.3)              !! for pouya
+ 5300 format (i4,i3,1900f8.3)           !! for pouya
+
       end

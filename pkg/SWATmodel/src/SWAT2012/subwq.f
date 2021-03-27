@@ -75,7 +75,7 @@
       use parm
 
       integer :: j
-      real :: tn, tp, qtot, org_c, tn_tp, wtmp, ww, xx, yy, zz, flow_cms
+      real*8 :: tn, tp, qtot, org_c, tn_tp, wtmp, ww, xx, yy, zz, flow_cms
 
       j = 0
       j = ihru
@@ -107,7 +107,7 @@
           
                   
           !! calculate carbonaceous biological oxygen demand (CBOD)
-          cbodu(j) = 2.7 * org_c / (qdr(j) * hru_km(j))
+          cbodu(j) = cbodu(j) + 2.7 * org_c / (qdr(j) * hru_km(j)) !jaehak 2016
 
           !! calculate dissolved oxygen saturation concentration
           !! QUAL2E equation III-29

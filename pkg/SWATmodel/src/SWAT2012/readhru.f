@@ -48,10 +48,20 @@
 !!    lat_sed(:)  |g/L           |sediment concentration in lateral flow
 !!    lat_ttime(:)|days          |lateral flow travel time
 !!    ov_n(:)     |none          |Manning's "n" value for overland flow
+!!    n_reduc     |              |nitrogen uptake reduction factor (not currently used; defaulted 300.)
+!!    n_lag       |dimensionless |lag coefficient for calculating nitrate concentration in subsurface
+!!                                 drains (0.001 - 1.0) 
+!!    n_ln        |dimensionless |power function exponent for calculating nitrate concentration in 
+!!                                 subsurface drains (1.0 - 3.0)
+!!    n_lnco      |dimensionless |coefficient for power function for calculating nitrate concentration 
+!!                                 in subsurface drains (0.5 - 4.0)
 !!    pot_fr(:)   |km2/km2       |fraction of HRU area that drains into pothole
+!!    pot_k       |(mm/hr)       |hydraulic conductivity of soil surface of pothole 
+!!                   [defaults to condcutivity of upper soil (0.01--10.) layer]
 !!    pot_no3l(:) |1/day         |nitrate decay rate in impounded area
 !!    pot_nsed(:) |mg/L          |normal sediment concentration in impounded
 !!                               |water (needed only if current HRU is IPOT)
+!!    pot_solp(:) |1/d           | soluble P loss rate in the pothole (.01 - 0.5)
 !!    pot_tile(:) |m3/s          |average daily outflow to main channel from
 !!                               |tile flow if drainage tiles are installed in
 !!                               |pothole (needed only if current HRU is IPOT)
@@ -63,12 +73,24 @@
 !!                               |depression/impounded area (read in as mm
 !!                               |and converted to m^3) (needed only if current
 !!                               |HRU is IPOT)
+!!    r2adj       |dimensionless |curve number retention parameter adjustment factor to 
+!!                                 adjust surface runoff for flat slopes (0.5 - 3.0)
 !!    rip_fr(:)   |km2/km2       |fraction of HRU area that drains into riparian 
 !!                               |zone
 !!    rsdin(:)    |kg/ha         |initial residue cover
 !!    slsoil(:)   |m             |slope length for lateral subsurface flow
 !!    slsubbsn(:) |m             |average slope length for subbasin
+!!    surlag      |days          |Surface runoff lag time.
+!!                               |This parameter is needed in subbasins where
+!!                               |the time of concentration is greater than 1 
+!!                               |day. SURLAG is used to create a "storage" for
+!!                               |surface runoff to allow the runoff to take 
+!!                               |longer than 1 day to reach the subbasin outlet
 !!    usle_ls(:)  |none          |USLE equation length slope (LS) factor
+!!Modified parameter variable! D. Moriasi 4/8/2014
+!!    r2adj       |none          |retention parameter adjustment factor (greater than 1)
+
+!----------------------------------------------------------------------------------------------
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ LOCAL DEFINITIONS ~ ~ ~
@@ -93,7 +115,9 @@
 
       character (len=80) :: titldum
       integer :: eof
-      real :: xm, sin_sl, epcohru, escohru
+      real*8 :: xm, sin_sl, epcohru, escohru
+
+      
 
       eof = 0
       escohru = 0.
@@ -112,8 +136,10 @@
       if (eof < 0) exit
       read (108,*,iostat=eof) escohru
       if (eof < 0) exit
+      !escohru = 0.05                       !!!! remove after test
       read (108,*,iostat=eof) epcohru 
       if (eof < 0) exit
+      !epsohru = 0.05       !!!! remove after test
       read (108,*,iostat=eof) rsdin(ihru) 
       if (eof < 0) exit
       read (108,*,iostat=eof) erorgn(ihru) 
@@ -182,19 +208,63 @@
         read (108,*,iostat=eof) pot_solpl(ihru)
         if (eof < 0) exit
         read (108,*,iostat=eof) pot_k(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) n_reduc(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) n_lag(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) n_ln(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) n_lnco(ihru)
+!-------------------------------------------------------Moriasi 4/8/2014        
+        if (eof < 0) exit
+        read (108,*,iostat=eof) surlag(ihru)
+        if (eof < 0) exit
+!-------------------------------------------------------Moriasi 4/8/2014 
+        read (108,*,iostat=eof) r2adj(ihru) !Soil retention parameter D. Moriasi 4/8/2014
+        if (eof < 0) exit
+        read (108,*,iostat=eof) cmn(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) cdn(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) nperco(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) phoskd(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) psp(ihru)
+        if (eof < 0) exit 
+        read (108,*,iostat=eof) sdnco(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) iwetile(ihru)
+        if (eof < 0) exit
+        read (108,*,iostat=eof) iwetgw(ihru)
       exit
       end do
+      
+      if (iwetile(ihru) <= 0) iwetile(ihru) = 0
+      if (iwetgw(ihru) <= 0) iwetgw(ihru) = 0
 
+      if (n_reduc(ihru) <= 0.) n_reduc(ihru) = 300.
+      if (n_lag(ihru) <= 0.) n_lag(ihru) = 0.25
+      if (n_ln(ihru) <= 0.) n_ln(ihru) = 2.0
+      if (n_lnco(ihru) <= 0.) n_lnco(ihru) = 2.0
 
 !!    compare .hru input values to .bsn input values
       if (escohru > 1.e-4) esco(ihru) = escohru
       if (epcohru > 1.e-4) epco(ihru) = epcohru
 
 !!    set default values
-      if (dep_imp(ihru) <=0.) dep_imp(ihru) = depimp_bsn
-!     if (ddrain(ihru) <= 0.) ddrain(ihru) = 1000.
-!     if (tdrain(ihru) <= 0.) tdrain(ihru) = 24.
-!     if (gdrain(ihru) <= 0.) gdrain(ihru) = 96.
+      if (dep_imp(ihru) <= 0.) dep_imp(ihru) = depimp_bsn
+      if (surlag(ihru) <= 0.) surlag(ihru) = surlag_bsn 
+      if (cdn(ihru) <= 0.) cdn(ihru) = cdn_bsn
+      if (nperco(ihru) <= 0.) nperco(ihru) = nperco_bsn
+      if (cmn(ihru) <= 0.) cmn(ihru) = cmn_bsn
+      if (phoskd(ihru) <= 0.) phoskd(ihru) = phoskd_bsn
+      if (psp(ihru) <= 0.) psp(ihru) = psp_bsn
+      if (sdnco(ihru) <= 0.) sdnco(ihru) = sdnco_bsn
+!New and modified parameters D. Moriasi 4/8/2014
+      if (r2adj(ihru) <= 0.) r2adj(ihru) = r2adj_bsn
+      if (r2adj(ihru) > 0.95) r2adj(ihru) = 0.95
 !! comment the following line for the hru_fraction data !!
       if (hru_fr(ihru) <= 0.) hru_fr(ihru) = .0000001
       if (slsubbsn(ihru) <= 0.) slsubbsn(ihru) = 50.0
@@ -209,7 +279,7 @@
       if (dis_stream(ihru) <= 0.) dis_stream(ihru) = 35.0
 
 !! armen & stefan changes for SWAT-C
-           if (cf(ihru) <= 0.) cf(ihru)= 1.0
+      if (cf(ihru) <= 0.) cf(ihru)= 1.0
       if (cfh(ihru) <= 0.) cfh(ihru)= 1.0
       if (cfdec(ihru) <= 0.) cfdec(ihru)= 0.055
 !! armen & stefan end
@@ -220,18 +290,18 @@
       sin_sl = 0.
       xm = .6 * (1. - Exp(-35.835 * hru_slp(ihru)))
       sin_sl = Sin(Atan(hru_slp(ihru)))
-      usle_ls(ihru) = (slsubbsn(ihru)/22.128)**xm * (65.41 * sin_sl *   &
+      usle_ls(ihru) = (slsubbsn(ihru)/22.128)**xm * (65.41 * sin_sl *   
      &                sin_sl + 4.56 * sin_sl + .065)
 
 !!    other calculations
       hru_km(ihru) = sub_km(i) * hru_fr(ihru)
       hru_ha(ihru) = hru_km(ihru) * 100.
       lat_sed(ihru) = lat_sed(ihru) * 1.e-3     !!mg/L => g/L
-      pot_vol(ihru) = 10. * pot_volmm(ihru) * hru_ha(ihru)    !! mm => m^3  Srini pothole   NUBZ
-      pot_volx(ihru) = 10. * pot_volxmm(ihru) * hru_ha(ihru)  !! mm => m^3
-      pot_tile(ihru) = 10. * pot_tilemm(ihru) * hru_ha(ihru)  !! mm => m^3
+      pot_vol(ihru) = pot_volmm(ihru)
+      pot_volx(ihru) = pot_volxmm(ihru)
+      pot_tile(ihru) = pot_tilemm(ihru)
 
-      xx = pot_vol(ihru) / 1000000.  !! mg/L * m3 * 1000L/m3 * t/1,000,000,000   Srini pothole
+      xx = 10. * pot_volmm(ihru) * hru_ha(ihru) / 1000000.  !! mg/L * m3 * 1000L/m3 * t/1,000,000,000   Srini pothole
       pot_sed(ihru) = pot_nsed(ihru) * xx
       pot_san(ihru) = 0. 
       pot_sil(ihru) = 0. 

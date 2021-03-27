@@ -55,8 +55,8 @@
 !!                                  |depression/impounded area
 !!    qday           |mm H2O        |surface runoff loading to main channel from
 !!                                  |HRU for day
-!!    rainsub(:,:)       |mm H2O        |precipitation for the time step during the
-!!                                                      |day in HRU
+!!    rainsub(:,:)  |mm H2O        |precipitation for the time step during the
+!!         |day in HRU
 !!    sed_stl(:)     |kg/kg         |fraction of sediment remaining suspended in
 !!                                  |impoundment after settling for one day
 !!    sedyld(:)      |metric tons   |daily soil loss caused by water erosion 
@@ -90,7 +90,7 @@
 !!    name           |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    pot_no3(:)     |kg N          |amount of nitrate in pothole water body
-!!    pot_solp(:)     |kg N          |amount of soluble p in pothole water body
+!!    pot_solp(:)    |1/d           | soluble P loss rate in the pothole (.01 - 0.5)
 !!    pot_orgn(:)     |kg N          |amount of organic N in pothole water body
 !!    pot_orgp(:)     |kg N          |amount of organic P in pothole water body
 !!    pot_mpa(:)     |kg N          |amount of active mineral pool P in pothole water body
@@ -160,18 +160,18 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Abs, Min, Max
+!!    Intrinsic: abs, Min, Max
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
         use parm
 
-      real, parameter :: pi = 3.1416
+      real*8, parameter :: pi = 3.1416
       integer :: j, ly,kk,ll,k
-      real :: potsep, sumo, potev, cnv, potpcp, spillo,no3in
-      real :: sedloss, no3loss, yy, dg, excess, stmax, sedsetl
-        real :: sanloss, silloss, claloss, sagloss, lagloss, xx
-      real :: potmm,minpsloss,minpaloss, solploss, orgnloss, orgploss
+      real*8 :: potsep, sumo, potev, cnv, potpcp, spillo,no3in
+      real*8 :: sedloss, no3loss, yy, dg, excess, stmax, sedsetl
+        real*8 :: sanloss, silloss, claloss, sagloss, lagloss, xx
+      real*8 :: potmm,minpsloss,minpaloss, solploss, orgnloss, orgploss, rto
       j = 0
       j = ihru
 
@@ -243,9 +243,9 @@
 
         !! update sediment in pothole  
           pot_sed(j) = pot_sed(j) + hhsedy(j,k) * 
-     &      Abs(pot_fr(j)) 
+     &      abs(pot_fr(j)) 
           potsedi(j) = potsedi(j) + hhsedy(j,k) *  ! incoming sediment cumulative for the day, tons
-     &      Abs(pot_fr(j))
+     &      abs(pot_fr(j))
 
         pot_san(j) = pot_san(j) + sanyld(j) / nstep * pot_fr(j) 
         potsani(j) = pot_san(j) 
@@ -259,7 +259,7 @@
         potlagi(j) = pot_lag(j) 
 
         yy = 1. - pot_fr(j)
-            xx = 1. - 1. / nstep * pot_fr(j)
+       xx = 1. - 1. / nstep * pot_fr(j)
         hhsedy(j,k) = hhsedy(j,k) * yy
         sanyld(j) = sanyld(j) * xx
         silyld(j) = silyld(j) * xx
@@ -267,7 +267,7 @@
         sagyld(j) = sagyld(j) * xx
         lagyld(j) = lagyld(j) * xx
 
-            !       update forms of N and P in pothole
+       !       update forms of N and P in pothole
         xx = pot_fr(j) * hru_ha(j) / nstep
         pot_no3(j) = pot_no3(j) + no3in * xx
         pot_solp(j) = pot_solp(j) + surqsolp(j) * xx
@@ -299,7 +299,7 @@
 
 !       if overflow, then send the overflow to the HRU surface flow  
         if (pot_vol(j) > pot_volx(j)) then
-              hhqday(k) = hhqday(k) + (pot_vol(j)- pot_volx(j)) / cnv
+         hhqday(k) = hhqday(k) + (pot_vol(j)- pot_volx(j)) / cnv
           spillo = pot_vol(j)- pot_volx(j)
           pot_vol(j) = pot_volx(j)
           xx = spillo / (spillo + pot_volx(j))
@@ -403,8 +403,8 @@
          potsep = Min(potsep, pot_vol(j))
          pot_vol(j) = pot_vol(j) - potsep
          pot_seep(j)= pot_seep(j)+ potsep
-             
-             sol_st(1,j) = sol_st(1,j) + potsep / hru_ha(j) / 10.
+        
+        sol_st(1,j) = sol_st(1,j) + potsep / hru_ha(j) / 10.
 
 !        redistribute water so that no layer exceeds maximum storage
           do ly = 1, sol_nly(j)
@@ -430,7 +430,7 @@
           do ly = 1, sol_nly(j)
             sol_sw(j) = sol_sw(j) + sol_st(ly,j)
           end do
-              
+         
 !       compute evaporation from water surface  NUBZ - I moved this before the if(pot_vol
           if (laiday(j) < evlai) then
             potev = (1. - laiday(j) / evlai) * pet_day * evpot(j)/ nstep
@@ -440,22 +440,22 @@
 
             pot_evap(j)= pot_evap(j) + potev
           endif
-             
+        
           if (iprint==3) then
-              write (125,2000)i,j,curyr,k,pot_vol(j),potsa(j),spillo,potsep,   
-     &       potev,sol_sw(j),potpcpmm,potflwi(j) / cnv,                    
-     &       potsedi(j) / hru_ha(j),potflow,potsedo / hru_ha(j)
+         write (125,2000)i,j,curyr,k,pot_vol(j),potsa(j),spillo,potsep,   
+     &       potev,sol_sw(j),potpcpmm,potflwi(j) / cnv,               
+     &       potsedi(j) / hru_ha(j),potflwo,potsedo / hru_ha(j)
           endif
-              
+         
         if (pot_vol(j) > 1.e-6) then
-            !         compute flow from surface inlet tile
+       !         compute flow from surface inlet tile
           tileo = Min(pot_tile(j)/nstep, pot_vol(j))
           sumo = sumo + tileo
           tile_out(j) = tile_out(j) + tileo
 !          if (tile_out(j) > 1.e-6) then    !! Srin 12/15/2011     
             sedloss = pot_sed(j) * tileo / pot_vol(j)
             sedloss = Min(sedloss, pot_sed(j))            
-                    
+          
             pot_sed(j) = pot_sed(j) - sedloss
             potsedo = potsedo + sedloss
             hhsedy(j,k) = hhsedy(j,k) + sedloss
@@ -463,7 +463,7 @@
             no3loss = Min(no3loss, pot_no3(j))
             pot_no3(j) = pot_no3(j) - no3loss
             surqno3(j) = surqno3(j) + no3loss / hru_ha(j)
-                    
+          
             solploss = pot_solp(j) *  tileo / pot_vol(j)
             solploss = Min(solploss, pot_solp(j))
             pot_solp(j) = pot_solp(j) - solploss
@@ -472,7 +472,7 @@
             orgnloss = Min(orgnloss, pot_orgn(j))
             pot_orgn(j) = pot_orgn(j) - orgnloss
             sedorgn(j) = sedorgn(j) + orgnloss / hru_ha(j)
-                  orgploss = pot_orgp(j) *  tileo / pot_vol(j)
+        orgploss = pot_orgp(j) *  tileo / pot_vol(j)
             orgploss = Min(orgploss, pot_orgp(j))
             pot_orgp(j) = pot_orgp(j) - orgploss
             sedorgp(j) = sedorgp(j) + orgploss / hru_ha(j)
@@ -532,7 +532,7 @@
           pot_vol(j) = pot_vol(j) - tileo
           hhqday(k) = hhqday(k) + tileo / cnv
         end if
-            end if
+       end if
         end do
         
  !       summary calculations

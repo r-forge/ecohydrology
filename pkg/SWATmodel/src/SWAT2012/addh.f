@@ -6,12 +6,10 @@
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    hhvaroute(:,:,:)|varies    |routing storage array for hourly time step
-!!    ievent      |none          |rainfall/runoff code
+!    ievent      |none          |rainfall/runoff code
 !!                               |0 daily rainfall/curve number technique
-!!                               |1 daily rainfall/Green&Ampt technique/daily
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
 !!                               |  routing
-!!                               |2 sub-daily rainfall/Green&Ampt technique/
-!!                               |  daily routing
 !!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    ihout       |none          |outflow hydrograph storage location number
 !!    inum1       |none          |hydrograph storage location number of 
@@ -50,14 +48,14 @@
 
 !! add loadings and store in new hydrograph location
       if (varoute(2,inum1) + varoute(2,inum2) > 0.1) then
-      varoute(1,ihout) = (varoute(1,inum1) * varoute(2,inum1) +         &
-     &                    varoute(1,inum2) * varoute(2,inum2)) /        &
+      varoute(1,ihout) = (varoute(1,inum1) * varoute(2,inum1) +         
+     &                    varoute(1,inum2) * varoute(2,inum2)) /        
      &                             (varoute(2,inum1) + varoute(2,inum2))
-      varoute(18,ihout) = (varoute(18,inum1) * varoute(2,inum1) +       &
-     &                    varoute(18,inum2) * varoute(2,inum2)) /       &
+      varoute(18,ihout) = (varoute(18,inum1) * varoute(2,inum1) +       
+     &                    varoute(18,inum2) * varoute(2,inum2)) /       
      &                             (varoute(2,inum1) + varoute(2,inum2))
-      varoute(19,ihout) = (varoute(19,inum1) * varoute(2,inum1) +       &
-     &                    varoute(19,inum2) * varoute(2,inum2)) /       &
+      varoute(19,ihout) = (varoute(19,inum1) * varoute(2,inum1) +       
+     &                    varoute(19,inum2) * varoute(2,inum2)) /       
      &                             (varoute(2,inum1) + varoute(2,inum2))
       end if
       do ii = 2, 17
@@ -70,23 +68,26 @@
 
 
 !! add hydrograph points (hourly time step)
-      if (ievent > 2) then
-   !     do kk = 1, 24
+      if (ievent > 0) then
         do kk = 1, nstep  ! modified for urban modeling by J.Jeong 4/15/2008
           if (hhvaroute(2,inum1,kk) + hhvaroute(2,inum2,kk) > 0.1) then
-            hhvaroute(1,ihout,kk) = (hhvaroute(1,inum1,kk) *            &
-     &                  hhvaroute(2,inum1,kk) + hhvaroute(1,inum2,kk) * &
-     &                hhvaroute(2,inum2,kk)) / (hhvaroute(2,inum1,kk) + &
+            hhvaroute(1,ihout,kk) = (hhvaroute(1,inum1,kk) *            
+     &                  hhvaroute(2,inum1,kk) + hhvaroute(1,inum2,kk) * 
+     &                hhvaroute(2,inum2,kk)) / (hhvaroute(2,inum1,kk) + 
      &                                            hhvaroute(2,inum2,kk))
           end if
         end do
         do ii = 2, mvaro
-   !       do kk = 1, 24
           do kk = 1, nstep  ! modified for urban modeling by J.Jeong 4/15/2008
-            hhvaroute(ii,ihout,kk) = hhvaroute(ii,inum1,kk) +           &
-     &                                            hhvaroute(ii,inum2,kk)
+            hhvaroute(ii,ihout,kk) = hhvaroute(ii,inum1,kk) +           
+     *                                            hhvaroute(ii,inum2,kk)
           end do
         end do
+        
+        DO K = 1, nstep
+          QHY(K,ihout,IHX(1))=QHY(K,inum1,IHX(1))+QHY(K,inum2,IHX(1)) !flood routing jaehak 2017
+        END DO
+
       endif
       
       do ii = 29, mvaro

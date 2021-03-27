@@ -48,7 +48,7 @@
       use parm
 
       integer :: j
-      real :: r2, bb, pb, cnimp, surfqimp
+      real*8 :: r2, bb, pb, cnimp, surfqimp
 
       j = 0
       j = ihru
@@ -77,7 +77,7 @@
         if (pb > 0.) then
           surfqimp = pb * pb / (precipday + .8 * r2)
         end if
-        surfq(j) = surfq(j) * (1. - fcimp(urblu(j))) +                  &
+        surfq(j) = surfq(j) * (1. - fcimp(urblu(j))) +                  
      &                                        surfqimp * fcimp(urblu(j))
       end if    
 

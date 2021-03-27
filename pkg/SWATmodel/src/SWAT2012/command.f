@@ -133,8 +133,8 @@
             call print_hyd
           case (2) 
             call route
-            if (dtp_onoff(inum1)==1) call det_pond  !route detention pond J.Jeong feb 2010
-            if (wtp_onoff(inum1)==1) call wet_pond  !route wetention pond J.Jeong june 2010
+            if (dtp_onoff(inum1)==1) call bmp_det_pond  !route detention pond J.Jeong feb 2010
+            if (wtp_onoff(inum1)==1) call bmp_wet_pond  !route wetention pond J.Jeong june 2010
             call sumhyd
             call print_hyd
           case (3) 
@@ -154,7 +154,7 @@
             call recmon
             call sumhyd
           case (8) 
-            call recyear
+            call recyear            
             call sumhyd
           case (9) 
             call save
@@ -169,7 +169,7 @@
           case (13) 
             call apex_day
           case (14)
-            call saveconc
+            if (curyr > nyskip) call saveconc
           case (17)
             call routeunit
             call sumhyd

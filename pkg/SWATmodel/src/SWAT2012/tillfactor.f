@@ -16,25 +16,25 @@
       use parm
       
       integer, intent (in) :: jj
-      real, intent (in) :: bmix
+      real*8, intent (in) :: bmix
       integer :: l, m1, m2
-      real :: emix, dtil
-      real :: sol_thick(sol_nly(jj))
+      real*8 :: emix, dtil
+      real*8 :: sol_thick(sol_nly(jj))
       
       emix = emix - bmix ! this is to avoid affecting tillage factor with biological mixing
       
       if (emix > 0.) then
 
         do l=1, sol_nly(jj)
-                  
+        
           if (sol_z(l,jj) <= dtil) then
-            emix = emix
+       emix = emix
           else if (sol_z(l,jj) > dtil .AND. sol_z(l-1,jj) < dtil) then 
-            emix = emix * (dtil - sol_z(l-1,jj)) / sol_thick(l)
+       emix = emix * (dtil - sol_z(l-1,jj)) / sol_thick(l)
           else
-            emix = 0.
+       emix = 0.
           end if
-                  
+        
           ! to save computation time if emix = 0 here then the other layers can be avoided
           ! tillage always proceeds from top to bottom
           if (emix == 0.) exit
@@ -47,17 +47,17 @@
 
           ! empirical solution for x when y is known and y=x/(x+exp(m1-m2*x)) 
           if (yy > 0.01) then
-             xx1 = yy ** exp(-0.13 + 1.06 * yy)
-             xx2 = exp(0.64 + 0.64 * yy ** 100.)
-             xx = xx1 * xx2
+        xx1 = yy ** exp(-0.13 + 1.06 * yy)
+        xx2 = exp(0.64 + 0.64 * yy ** 100.)
+        xx = xx1 * xx2
           end if
 
           csdr = xx + emix
           tillagef(l,jj) = zz * (csdr / (csdr + exp(m1 - m2 * csdr)))
 
-        end do            
-            
+        end do  
+       
       end if
-            
+       
       return
       end subroutine

@@ -303,26 +303,26 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Real
+!!    Intrinsic: real*8
 !!    SWAT: hruaa, impndaa, rchaa, subaa, stdaa
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
       use parm
 
-      real :: yrs, xx, xmm, sumno3, sumorgn, summinp, sumorgp
+      real*8 :: yrs, xx, xmm, sumno3, sumorgn, summinp, sumorgp
       integer :: j, nnro, nicr, k, ly, ic, ii
 
 !! calculate number of years simulated
       yrs = 0.
       do j = 1, nbyr
         xx = 0.
-        xx = 366. - Real(leapyr)
+        xx = 366. - dfloat(leapyr)
         if (j > nyskip) then
           if (j == 1 .and. idaf > 0) then
-            yrs = yrs + (xx - (Real(idaf) - 1. - Real(fcstcnt))) / xx
+            yrs = yrs + (xx - (dfloat(idaf) - 1. - dfloat(fcstcnt))) / xx
           elseif (j == nbyr .and. idal > 0) then
-            yrs = yrs + ((Real(idal) - Real(fcstcnt)) / xx)
+            yrs = yrs + ((dfloat(idal) - dfloat(fcstcnt)) / xx)
           else
             yrs = yrs + 1.
           end if
@@ -349,7 +349,7 @@
       aairr = aairr / yrs
       do j = 1, nhru
         do nicr = 1, mcrhru(j)
-          if (ncrops(nicr,j) > 0) then
+          if (ncrops(nicr,j) > 0) then            
             yldn(nicr,j) = yldkg(nicr,j) /  ncrops(nicr,j)
             bio_aahv(nicr,j) = bio_hv(nicr,j) / ncrops(nicr,j)  
           else
@@ -403,7 +403,7 @@
       wshd_pstdg = wshd_pstdg / yrs
       !! calculate monthly averages
       do j = 1, 12
-        xmm = Real(ndmo(j)) / Real(ndays(j+1) - ndays(j))
+        xmm = dfloat(ndmo(j)) / dfloat(ndays(j+1) - ndays(j))
         if (xmm > 0.) then
           do k = 1, 8
             wshd_aamon(j,k) = wshd_aamon(j,k) / xmm
@@ -425,6 +425,8 @@
       !! calculate watershed nutrient averages
       wshd_pup = wshd_pup / yrs
       wshd_plch = wshd_plch / yrs
+      wshd_pinlet = wshd_pinlet / yrs
+      wshd_ptile = wshd_ptile / yrs
       wshd_pal = wshd_pal / yrs
       wshd_pas = wshd_pas / yrs
       wshd_ftotn = wshd_ftotn / yrs
@@ -433,9 +435,9 @@
       wshd_fixn = wshd_fixn / yrs  !! fix
 
       if (cswat == 0) then
-            wshd_hmn = wshd_hmn / yrs  !! humus n for active
-            wshd_rwn = wshd_rwn / yrs  !! active to stable
-            wshd_hmp = wshd_hmp / yrs  !! humus min on active org         
+       wshd_hmn = wshd_hmn / yrs  !! humus n for active
+       wshd_rwn = wshd_rwn / yrs  !! active to stable
+       wshd_hmp = wshd_hmp / yrs  !! humus min on active org    
       end if
 
         wshd_rmn = wshd_rmn / yrs  !! min from fresh orgn
@@ -465,9 +467,9 @@
             sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j)
           end if
           if (cswat == 1) then
-                sumorgn = sumorgn + sol_orgn(ly,j) + sol_fon(ly,j) +
+           sumorgn = sumorgn + sol_orgn(ly,j) + sol_fon(ly,j) +
      &        sol_mn(ly,j)
-                sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j) +
+           sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j) +
      &        sol_mp(ly,j)
           end if
           !!add by zhang
@@ -475,10 +477,10 @@
           if (cswat == 2) then
             sumorgn = sumorgn + sol_LMN(ly,j) + sol_LSN(ly,j) +
      &        sol_HPN(ly,j) + sol_BMN(ly,j) + sol_HSN(ly,j)
-            sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j)            
+            sumorgp = sumorgp + sol_fop(ly,j) + sol_orgp(ly,j)       
           end if
           !!add by zhang
-          !!=======================          
+          !!=======================     
           
           summinp = summinp + sol_solp(ly,j) + sol_actp(ly,j) +
      &              sol_stap(ly,j)
@@ -522,7 +524,7 @@
         write (30,5500)
         do j = 1, nhru
           if (hrupest(j) == 1) then
-                write (30,5600) subnum(j), hruno(j), yrs,               &
+                write (30,5600) subnum(j), hruno(j), yrs,               
      &                     (hrupsta(k,1,j), hrupsta(k,2,j), k = 1, npmx)
           end if
         end do
@@ -532,8 +534,8 @@
       do idmm = 1, mhyd
         ic = ihouts(idmm)
         if (ic > 0) then
-        write(11123,9400) icodes(idmm), ic, inum1s(idmm), inum2s(idmm), &
-     &               inum3s(idmm),subed(ic),recmonps(ic),reccnstps(ic), &
+        write(11123,9400) icodes(idmm), ic, inum1s(idmm), inum2s(idmm), 
+     &               inum3s(idmm),subed(ic),recmonps(ic),reccnstps(ic), 
      &               (shyd(ii,ic), ii = 1, 8)
         end if
       end do
@@ -560,12 +562,12 @@
       end if
 
 !! write life span of septic HRUs (time to first failure, years)
-      write(173,'(a50)') 'Year the first failure occured'
-      write(173,'(1/,a5,a7)') 'HRU','Failyr'
+      write(173,'(1/,a50)') ' Year the first failure occurred'
+      write(173,'(1/,20x,a5,a7)') 'HRU',' Failyr'
       do j=1,nhru
         if (isep_opt(j)/=0) then
-          if(failyr(j)==0) write(173,'(i5,a7)') j,'No Fail'
-          if(failyr(j)/=0) write(173,'(i5,f7.3)') j,failyr(j)
+          if(failyr(j)==0) write(173,'(20x,i5,a8)') j,' No Fail'
+          if(failyr(j)/=0) write(173,'(20x,i5,f7.3)') j,failyr(j)
         end if
       end do
 

@@ -9,10 +9,8 @@
 !!    hhqday(:)   |mm H2O        |surface runoff for the hour in HRUS
 !!    ievent      |none          |rainfall/runoff code
 !!                               |0 daily rainfall/curve number technique
-!!                               |1 daily rainfall/Green&Ampt technique/daily
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
 !!                               |  routing
-!!                               |2 sub-daily rainfall/Green&Ampt technique/
-!!                               |  daily routing
 !!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    ihru        |none          |HRU number
 !!    surfq(:)    |mm H2O        |surface runoff in the HRU for the day
@@ -40,7 +38,7 @@
       use parm
  
       integer :: j, ii
-      real :: voli
+      real*8 :: voli
 
       j = 0
       j = ihru
@@ -52,7 +50,7 @@
         surfq(j) = 0.
       endif
 
-      if (ievent >= 2) then
+      if (ievent > 0) then
         voli = 0.
         voli = voltot
         do ii = 1, nstep  !j.jeong 4/24/2009

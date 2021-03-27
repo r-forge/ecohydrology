@@ -127,9 +127,9 @@
       use parm
 
       integer, intent (in) :: k
-      real :: vol, sed, pndsa, xx, targ, tpco, phosk, nitrok, chlaco
+      real*8 :: vol, sed, pndsa, xx, targ, tpco, phosk, nitrok, chlaco
       integer :: iseas
-      real :: san, sil, cla, sag, lag, inised, finsed,setsed,remsetsed
+      real*8 :: san, sil, cla, sag, lag, inised, finsed,setsed,remsetsed
 
 
         !! store initial values
@@ -213,7 +213,7 @@
                 targ = pnd_evol(k)
               else
                 xx = Min(sol_sw(k) / sol_sumfc(k),1.)
-                targ = pnd_pvol(k) + .5 * (1. - xx) * (pnd_evol(k) -    &
+                targ = pnd_pvol(k) + .5 * (1. - xx) * (pnd_evol(k) -    
      &                                                      pnd_pvol(k))
               end if
             else
@@ -221,7 +221,7 @@
                 targ = pnd_evol(k)
               else
                 xx = Min(sol_sw(k) / sol_sumfc(k),1.)
-                targ = pnd_pvol(k) + .5 * (1. - xx) * (pnd_evol(k) -    &
+                targ = pnd_pvol(k) + .5 * (1. - xx) * (pnd_evol(k) -    
      &                                                      pnd_pvol(k))
               end if
             end if
@@ -241,7 +241,7 @@
              if (trappnd > 1.) trappnd = 1.
              susp = 1. - trappnd
           else
-             susp = 0.
+             susp = 1.
           endif
                
           pnd_sed(k) = (sed * vol + susp * pndsedin) / pnd_vol(k)
@@ -262,7 +262,7 @@
           if (sed_stl(k) < 1.e-6) sed_stl(k) = 0.0
           if (pnd_sed(k) > pnd_nsed(k)) then
             inised = pnd_sed(k)
-            pnd_sed(k) = (pnd_sed(k) - pnd_nsed(k)) * sed_stl(k) +      &
+            pnd_sed(k) = (pnd_sed(k) - pnd_nsed(k)) * sed_stl(k) +      
      &                                                       pnd_nsed(k)
             finsed = pnd_sed(k)
             setsed = inised - finsed
@@ -286,7 +286,7 @@
                 remsetsed = remsetsed - pnd_sag(k)
                 pnd_sag(k) = 0.
                 if (pnd_sil(k) >= remsetsed) then
-                    pnd_sil(k) = pnd_sil(k) - remsetsed
+               pnd_sil(k) = pnd_sil(k) - remsetsed
                   remsetsed = 0.
                 else
                   remsetsed = remsetsed - pnd_sil(k)
@@ -313,7 +313,7 @@
           pndlago = pnd_lag(k) * pndflwo
  
           !! net change in amount of sediment in pond for day
-          pndsedc = vol * sed + pndsedin - pndsedo - pnd_sed(k) *       &
+          pndsedc = vol * sed + pndsedin - pndsedo - pnd_sed(k) *       
      &                                                        pnd_vol(k)
 
           !! determine settling rate
@@ -343,7 +343,7 @@
 
           tpco = 0.
           if (pnd_vol(k) + pndflwo > 0.1) then
-          tpco = 1.e+6 * (pnd_solp(k) + pnd_orgp(k) + pnd_psed(k) +     &
+          tpco = 1.e+6 * (pnd_solp(k) + pnd_orgp(k) + pnd_psed(k) +     
      &                            pnd_solpg(k)) / (pnd_vol(k) + pndflwo)
           else
             tpco = 0.

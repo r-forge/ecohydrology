@@ -69,7 +69,7 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Exp, Abs
+!!    Exp, abs
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
@@ -78,8 +78,9 @@
       character (len=80) :: titldum
 !      integer :: j, nly, n, jj, flag, eof
       integer :: j, nly, eof            !claire: jj, n, and flag are not used 12/02/09
-!      real :: xx, plt_zmx, yy
-      real :: plt_zmx                   !Claire, xx and yy are not used 12/2/09
+!      real*8 :: xx, plt_zmx, yy
+      real*8 :: plt_zmx                   !Claire, xx and yy are not used 12/2/09
+      real*8 :: dep_new
 
 !!    initialize local variables
       nly = 0
@@ -118,19 +119,20 @@
       read (107,5000) (sol_rock(j,ihru), j = 1, nly)
       read (107,5000) sol_alb(ihru)
       read (107,5000) usle_k(ihru)
-!    change below double subscripted sol_ec statement 1/27/09 when making septic changes
+!    change double subscripted sol_ec statement 1/27/09 when making septic changes
       read (107,5000,iostat=eof) (sol_ec(j,ihru), j = 1, nly)
-!    change below double subscripted sol_ec statement 1/27/09 when making septic changes
+      if (eof < 0) exit
+!    change double subscripted sol_ec statement 1/27/09 when making septic changes
 
-      !! MJW added rev 490
-      !!CaCo3 content (%) 
-      if (eof < 0) exit      
-        read (107,5000,iostat=eof) (sol_cal(j,ihru), j = 1, nly)       
-      !! PH-H20  
-      if (eof < 0) exit
+      !! MJW added rev 490      
+      !! PH-H20 
         read (107,5000,iostat=eof) (sol_ph(j,ihru), j = 1, nly) 
-      
-      if (eof < 0) exit
+        if (eof < 0) exit
+        
+      !!CaCo3 content (%)  
+        read (107,5000,iostat=eof) (sol_cal(j,ihru), j = 1, nly)  
+        if (eof < 0) exit
+
       exit
       end do
 
@@ -139,8 +141,9 @@
          if (sol_rock(j,ihru) > 98.0) sol_rock(j,ihru) = 98.0
          if (sol_awc(j,ihru) <= .01) sol_awc(j,ihru) = .01
          if (sol_awc(j,ihru) >= .80) sol_awc(j,ihru) = .80
+         if (sol_cbn(j,ihru) < 1.e-6) sol_cbn(j,ihru) = .10
          sol_n(j,ihru) = sol_cbn(j,ihru) / 11.0
-      end do      
+      end do 
       !!Armen January 2009 end
 
 !!    add 10mm layer at surface of soil
@@ -163,7 +166,7 @@
                   sol_sand(j,ihru) = sol_sand(j-1,ihru) !!! Claire 2 Dec 2009
                   sol_silt(j,ihru) = sol_silt(j-1,ihru) !!! Claire 2 Dec 2009
                   sol_ph(j,ihru) = sol_ph(j-1,ihru) !! mjw rev 490
-                      sol_cal(j,ihru) = sol_cal(j-1,ihru) !! mjw rev 490
+                 sol_cal(j,ihru) = sol_cal(j-1,ihru) !! mjw rev 490
       !!Armen January 2009 end
 !    change below double subscripted sol_ec statement 1/27/09 when making septic changes
           sol_ec(j,ihru) = sol_ec(j-1,ihru)

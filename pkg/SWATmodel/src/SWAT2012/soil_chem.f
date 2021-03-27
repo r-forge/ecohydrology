@@ -101,7 +101,7 @@
 !!    xx          |none          |variable to hold value
 !!    zdst        |none          |variable to hold value
 !!    labfrac     |none          |fraction of total soil mineral P which is labile
-!!    soil_TP        |kg/ha         |Total Soil Mineral P
+!!    soil_TP   |kg/ha         |Total Soil Mineral P
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 
@@ -110,13 +110,13 @@
       use parm
 
       integer :: nly, j, jj, n
-      real :: xx, dg, wt1, zdst, soldepth, sumno3, sumorgn, summinp
-      real :: sumorgp, solpst, soil_TP, labfrac,solp
+      real*8 :: xx, dg, wt1, zdst, soldepth, sumno3, sumorgn, summinp
+      real*8 :: sumorgp, solpst, soil_TP, labfrac,solp
       
       !!by zhang
       !!=============
-          real :: sol_mass
-          real :: FBM, FHP, RTNO, FHS, X1, RTO, sol_min_n
+          real*8 :: sol_mass
+          real*8 :: FBM, FHP, RTNO, FHS, X1, RTO, sol_min_n
           sol_mass = 0.
           DG = 0.
           FBM = 0.
@@ -218,11 +218,11 @@
           sol_orgn(j,i) = sol_orgn(j,i) * wt1      !! mg/kg => kg/ha
         else
           !! assume C:N ratio of 10:1
-          sol_orgn(j,i) = 10000. * (sol_cbn(j,i) / 11.) * wt1  !! CN ratio was 14 before 01-22-09 Armen
+          sol_orgn(j,i) = 10000. * (sol_cbn(j,i) / 14.) * wt1  !! CN ratio changed back to 14 cibin 03022012
         end if
         sol_aorgn(j,i) = sol_orgn(j,i) * nactfr
         sol_orgn(j,i) = sol_orgn(j,i) * (1. - nactfr)
-        sumorgn = sumorgn + sol_aorgn(j,i) + sol_orgn(j,i) +            &
+        sumorgn = sumorgn + sol_aorgn(j,i) + sol_orgn(j,i) +            
      &            sol_fon(j,i)
 
         if (sol_orgp(j,i) > 0.0001) then
@@ -240,48 +240,47 @@
         end if
 
         !! Set active pool based on dynamic PSP MJW
-            
+       
           if (sol_P_model == 0) then 
             !! Allow Dynamic PSP Ratio
             !! convert to concentration
             solp = sol_solp(j,i) / conv_wt(j,i) * 1000000.
             !! PSP = -0.045*log (% clay) + 0.001*(Solution P, mg kg-1) - 0.035*(% Organic C) + 0.43
             if (sol_clay(j,i) > 0.) then
-              psp = -0.045 * log(sol_clay(j,i))+ (0.001 * solp) 
-              psp = psp - (0.035  * sol_cbn(j,i)) + 0.43 
+              psp(i) = -0.045 * log(sol_clay(j,i))+ (0.001 * solp) 
+              psp(i) = psp(i) - (0.035  * sol_cbn(j,i)) + 0.43 
             else
-              psp = 0.4
-            endif               
+              psp(i) = 0.4
+            endif     
             !! Limit PSP range
-            if (psp <.05) then
-              psp = 0.05
+            if (psp(i) <.05) then
+              psp(i) = 0.05
+            else if (psp(i) > 0.9) then
+              psp(i) = 0.9
             end if
-            if (psp > 0.9) then
-              psp = 0.9
             end if
-          end if
           
-        sol_actp(j,i) = sol_solp(j,i) * (1. - psp) / psp
+        sol_actp(j,i) = sol_solp(j,i) * (1. - psp(i)) / psp(i)
 
           !! Set Stable pool based on dynamic coefficant
           if (sol_P_model == 0) then  !! From White et al 2009 
             !! convert to concentration for ssp calculation
             actp = sol_actp(j,i) / conv_wt(j,i) * 1000000.
-                solp = sol_solp(j,i) / conv_wt(j,i) * 1000000.
+           solp = sol_solp(j,i) / conv_wt(j,i) * 1000000.
             !! estimate Total Mineral P in this soil based on data from sharpley 2004
-                ssp = 25.044 * (actp + solp)**(-0.3833)
-                !!limit SSP Range
-                if (SSP > 7.) SSP = 7.
-                if (SSP < 1.) SSP = 1.                    
-                sol_stap(j,i) = SSP * (sol_actp(j,i) + sol_solp(j,i))!define stableP
+           ssp = 25.044 * (actp + solp)** -0.3833
+           !!limit SSP Range
+           if (SSP > 7.) SSP = 7.
+           if (SSP < 1.) SSP = 1.          
+           sol_stap(j,i) = SSP * (sol_actp(j,i) + sol_solp(j,i))!define stableP
          else
       !! The original code
-              sol_stap(j,i) = 4. * sol_actp(j,i)
+         sol_stap(j,i) = 4. * sol_actp(j,i)
          end if
 
         sol_hum(j,i) = sol_cbn(j,i) * wt1 * 17200.
         xx = sol_z(j,i)
-        summinp = summinp + sol_solp(j,i) + sol_actp(j,i) +             &
+        summinp = summinp + sol_solp(j,i) + sol_actp(j,i) +             
      &        sol_stap(j,i)
         sumorgp = sumorgp + sol_orgp(j,i) + sol_fop(j,i)
       end do
@@ -294,25 +293,25 @@
       !! By Zhang for C/N cycling
       !!=============================== 
       if (cswat == 2) then
-      if (rsdin(i) > 0.) sol_rsd(1,i) = rsdin(i)            
+      if (rsdin(i) > 0.) sol_rsd(1,i) = rsdin(i)  
       do j = 1, nly
-            !!kg/ha sol mass in each layer
-            if (j == 1) then
-                sol_mass = (sol_z(j,i)) / 1000.
-          !&                                    10000. * sol_bd(j,ihru)* 1000. *                  
-          !&                                          (1- sol_rock(j,ihru) / 100.)
+       !!kg/ha sol mass in each layer
+       if (j == 1) then
+           sol_mass = (sol_z(j,i)) / 1000.
+          !&      10000. * sol_bd(j,ihru)* 1000. *   
+          !&       (1- sol_rock(j,ihru) / 100.)
             sol_mass = sol_mass * 10000. * sol_bd(j,i)* 1000.
-            sol_mass = sol_mass * (1- sol_rock(j,i) / 100.)       
+            sol_mass = sol_mass * (1- sol_rock(j,i) / 100.)  
             
-            else
-                sol_mass = (sol_z(j,i) - sol_z(j-1,i)) / 1000.
-          !&                                    10000. * sol_bd(j,ihru)* 1000. *                  
-          !&                                          (1- sol_rock(j,ihru) / 100.)
+       else
+           sol_mass = (sol_z(j,i) - sol_z(j-1,i)) / 1000.
+          !&      10000. * sol_bd(j,ihru)* 1000. *   
+          !&       (1- sol_rock(j,ihru) / 100.)
             sol_mass = sol_mass * 10000. * sol_bd(j,i)* 1000.
-            sol_mass = sol_mass * (1- sol_rock(j,i) / 100.)                   
-            end if
-            !!kg/ha mineral nitrogen
-            sol_min_n = sol_no3(j,i)+sol_nh3(j,i)           
+            sol_mass = sol_mass * (1- sol_rock(j,i) / 100.)    
+       end if
+       !!kg/ha mineral nitrogen
+       sol_min_n = sol_no3(j,i)+sol_nh3(j,i)      
  
         !XCB = 0.2
         !mm
@@ -367,8 +366,8 @@
         !FBM = 0.02
         !FHS = 0.54
         !FHP = 0.44
-                        
-            !NCC = 0
+         
+       !NCC = 0
         !IF(NCC==0)THEN
             !sol_WBM(j,ihru)=FBM*X1
             sol_BM(j,i)=FBM*sol_WOC(j,i)                             
@@ -392,7 +391,7 @@
             X1=sol_rsd(j,i) /1000.  
             !!skip std in SWAT                                                                   
             !IF(j==1)X1=X1+STD(j)/1000.
-                                                                          
+                                                                  
             sol_LM(j,i)=500.*X1                                        
             sol_LS(j,i)=sol_LM(j,i)                                    
             sol_LSL(j,i)=.8*sol_LS(j,i)                              
@@ -407,7 +406,7 @@
             sol_WOC(j,i)=sol_WOC(j,i)+sol_LSC(j,i)+sol_LMC(j,i)        
             !sol_WON(j,ihru)=sol_WON(j,ihru)+sol_LSN(j,ihru)+sol_WLMN(j,ihru)
             sol_WON(j,i)=sol_WON(j,i)+sol_LSN(j,i)+sol_LMN(j,i)
-            !END IF             
+            !END IF   
             
             !if (sol_orgn(j,i) > 0.0001) then
             !  sol_orgn(j,i) = sol_orgn(j,i) * wt1      !! mg/kg => kg/ha
@@ -423,14 +422,12 @@
             sumorgn = sumorgn + sol_aorgn(j,i) + sol_orgn(j,i) +
      &           sol_fon(j,i) + sol_BMN(j,i)
         
-            
-      end do      
+       
+      end do 
       
       end if
-      !! By Zhang for C/N cycling
-      !!=============================== 
-      
-            
+      !! By Zhang for C/N cycling      
+       
       !!May need to think about moving the following lines which appear before in this module to the end of this module,
       !!because orgn has been re-calculated.
       !!============================

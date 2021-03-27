@@ -155,7 +155,7 @@
       use parm
 
       integer :: j, l, it
-      real :: gc, gc1, swf, frt_t, xx
+      real*8 :: gc, gc1, swf, frt_t, xx
 
       j = 0
       j = ihru
@@ -170,15 +170,15 @@
         if (cfrt_kg(j) > 0.) then
           l = 1
           if (cswat == 0 .or. cswat == 1) then
-          sol_no3(l,j) = sol_no3(l,j) + cfrt_kg(j) *                    &
+          sol_no3(l,j) = sol_no3(l,j) + cfrt_kg(j) *                    
      &                 (1. - fnh3n(it)) * fminn(it)
-          sol_fon(l,j) = sol_fon(l,j) + cfrt_kg(j) *                    &
+          sol_fon(l,j) = sol_fon(l,j) + cfrt_kg(j) *                    
      &                 forgn(it)
-          sol_nh3(l,j) = sol_nh3(l,j) + cfrt_kg(j) *                    &
+          sol_nh3(l,j) = sol_nh3(l,j) + cfrt_kg(j) *                    
      &                 fnh3n(it) * fminn(it)
-          sol_solp(l,j) = sol_solp(l,j) + cfrt_kg(j) *                  &
+          sol_solp(l,j) = sol_solp(l,j) + cfrt_kg(j) *                  
      &                 fminp(it)
-          sol_fop(l,j) = sol_fop(l,j) + cfrt_kg(j) *                    &
+          sol_fop(l,j) = sol_fop(l,j) + cfrt_kg(j) *                    
      &                 forgp(it)
           end if
 
@@ -241,9 +241,9 @@
           frt_t = 0.
           frt_t = bact_swf * cfrt_kg(j) / 1000.
 
-          bactp_plt(j) = gc * bactpdb(it) * frt_t * 100. +              &
+          bactp_plt(j) = gc * bactpdb(it) * frt_t * 100. +              
      &           bactp_plt(j)
-          bactlp_plt(j) = gc * bactlpdb(it) * frt_t * 100. +            &  
+          bactlp_plt(j) = gc * bactlpdb(it) * frt_t * 100. +            
      &           bactlp_plt(j)
 
           bactpq(j) = gc1 * bactpdb(it)  * frt_t * 100. + bactpq(j)
@@ -264,33 +264,33 @@
         iday_fert(j) = 1
 
         !! summary calculations
-        cfertn = cfertn + cfrt_kg(j) *                                  &
+        cfertn = cfertn + cfrt_kg(j) *                                  
      &               (fminn(it) + forgn(it))
-        cfertp = cfertp + cfrt_kg(j) *                                  &
+        cfertp = cfertp + cfrt_kg(j) *                                  
      &               (fminp(it) + forgp(it))
         tcfrtn(j) = tcfrtn(j) + cfertn
         tcfrtp(j) = tcfrtp(j) + cfertp
 
         if (curyr > nyskip) then
-          wshd_ftotn = wshd_ftotn + cfrt_kg(j) *                        &
+          wshd_ftotn = wshd_ftotn + cfrt_kg(j) *                        
      &                 hru_dafr(j) * (fminn(it) + forgn(it))
-          wshd_forgn = wshd_forgn + cfrt_kg(j) *                        &
+          wshd_forgn = wshd_forgn + cfrt_kg(j) *                        
      &                 hru_dafr(j) * forgn(it)
-          wshd_fno3 = wshd_fno3 + cfrt_kg(j) *                          &
+          wshd_fno3 = wshd_fno3 + cfrt_kg(j) *                          
      &                hru_dafr(j) * fminn(it) * (1. - fnh3n(it))
-          wshd_fnh3 = wshd_fnh3 + cfrt_kg(j) * hru_dafr(j)              &
+          wshd_fnh3 = wshd_fnh3 + cfrt_kg(j) * hru_dafr(j)              
      &               * fminn(it) * fnh3n(it)
-          wshd_ftotp = wshd_ftotp + cfrt_kg(j) *                        &
+          wshd_ftotp = wshd_ftotp + cfrt_kg(j) *                        
      &                 hru_dafr(j) * (fminp(it) + forgp(it))
-          wshd_fminp = wshd_fminp + cfrt_kg(j) *                        &
+          wshd_fminp = wshd_fminp + cfrt_kg(j) *                        
      &                 hru_dafr(j) * fminp(it)
-          wshd_forgp = wshd_forgp + cfrt_kg(j) *                        &
+          wshd_forgp = wshd_forgp + cfrt_kg(j) *                        
      &                 hru_dafr(j) * forgp(it)
         end if
           
         if (imgt ==1) then
          write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida,
-     *      "         ",
+     *      hru_km(j), "         ",
      *      "CONT FERT", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *      sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j), cfrt_kg(j)
         end if
@@ -307,6 +307,6 @@
         ncf(j) = ncf(j) + 1
       end if
 
-1000  format (a5,1x,a4,3i6,2a15,7f10.2,20x,f10.2)
+1000  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,20x,f10.2)
       return
       end

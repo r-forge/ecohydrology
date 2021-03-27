@@ -71,9 +71,9 @@
       use parm
 
       integer :: jrch
-      real :: wtrin, scoef, p, tbase, topw, vol, c, rh
-        real :: volrt, maxrt, adddep, addp, addarea, vc, aaa
-        real :: rttlc1, rttlc2, rtevp1, rtevp2, det
+      real*8 :: wtrin, scoef, p, tbase, topw, vol, c, rh
+        real*8 :: volrt, maxrt, adddep, addp, addarea, vc, aaa
+        real*8 :: rttlc1, rttlc2, rtevp1, rtevp2, det
 
       jrch = 0
       jrch = inum1
@@ -86,7 +86,7 @@
       vol = wtrin + rchstor(jrch)
 
 !! Find average flowrate in a day
-      volrt = vol / 86400
+      volrt = vol / 86400.
 
 !! Find maximum flow capacity of the channel at bank full
       c = 0.
@@ -146,22 +146,21 @@
         topw = 5 * ch_w(2,jrch) + 2. * (rchdep - ch_d(jrch)) * 4.
       end if
 
-!!      Time step of simulation (in hour)
+!! Time step of simulation (in hour)
         det = 24.
 
       if (sdti > 0.) then
         !! calculate velocity and travel time
-            vc = sdti / rcharea  
+       vc = sdti / rcharea  
         vel_chan(jrch) = vc
         rttime = ch_l2(jrch) * 1000. / (3600. * vc)
 
 
         !! calculate volume of water leaving reach on day
         scoef = 0.
-         rtwtr = 0.
-        scoef = 2. * det / (2. * rttime + det)
+        rtwtr = 0.
+        scoef =  det / (rttime + det)
         if (scoef > 1.) scoef = 1.
-
         rtwtr = scoef * (wtrin + rchstor(jrch))
 
 !! calculate amount of water in channel at end of day
@@ -215,7 +214,7 @@
           if (rchdep <= ch_d(jrch)) then
             rtevp = aaa * ch_l2(jrch) * 1000. * topw
           else
-              if (aaa <=  (rchdep - ch_d(jrch))) then
+         if (aaa <=  (rchdep - ch_d(jrch))) then
               rtevp = aaa * ch_l2(jrch) * 1000. * topw
             else
               rtevp = (rchdep - ch_d(jrch)) 
@@ -264,7 +263,7 @@
 !! area) so precipitation is accounted for in subbasin loop
 
 !!      volinprev(jrch) = wtrin
-!!      qoutprev(jrch) = rtwtr
+!! qoutprev(jrch) = rtwtr
 
       if (rtwtr < 0.) rtwtr = 0.
       if (rchstor(jrch) < 0.) rchstor(jrch) = 0.

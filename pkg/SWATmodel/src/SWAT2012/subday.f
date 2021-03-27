@@ -58,8 +58,8 @@
       use parm
 
       integer :: sb, ii
-      real :: sub_ha
-      real, dimension (msubo) :: pdvab, pdvb
+      real*8 :: sub_ha
+      real*8, dimension (msubo) :: pdvab, pdvb
 
       sb = 0
       sb = hru_sub(ihru)
@@ -69,8 +69,6 @@
 
       pdvab = 0.
       pdvb = 0.
-      
-      ii = icl(iida)
 
       pdvab(1) = sub_subp(sb)
       pdvab(2) = sub_snom(sb)
@@ -93,15 +91,18 @@
       pdvab(19) = sub_chl(sb) / sub_ha
       pdvab(20) = sub_cbod(sb) / sub_ha
       pdvab(21) = sub_dox(sb) / sub_ha
-      pdvab(22) = sub_tileno3(sb)
+      pdvab(22) = sub_tileno3(sb)    !! tileno3
+      pdvab(23) = sub_tileq(sb)      !! tile flow  jane f.
+      pdvab(24) = sub_vaptile(sb)    !! phos due to crack flow
+
 
       if (ipdvab(1) > 0) then
         do ii = 1, itotb
           pdvb(ii) = pdvab(ipdvab(ii))
         end do
-        if (icalen == 0) write(31,1000)sb, subgis(sb), iida, sub_km(sb),&
-     &                                        (pdvb(ii), ii = 1, itotb)
-        if (icalen == 1) write(31,1001)sb, subgis(sb), i_mo, icl(iida), &
+        if (icalen == 0) write(31,1000)sb, subgis(sb), iida, sub_km(sb),
+     &                                    (pdvb(ii), ii = 1, itotb)
+        if (icalen == 1) write(31,1001)sb, subgis(sb), i_mo, icl(iida), 
      &         iyr, sub_km(sb), (pdvb(ii), ii = 1, itotb)
  
 !!    added for binary files 3/25/09 gsm line below and write (66666
@@ -110,13 +111,13 @@
      &                                        (pdvb(ii), ii = 1, itotb)
             endif
       else
-        if (icalen == 0)write(31,1000) sb, subgis(sb), iida, sub_km(sb),&
-     &                                        (pdvab(ii), ii = 1, msubo)
-        if (icalen == 1)write(31,1001) sb, subgis(sb), i_mo, icl(iida), &
+        if (icalen == 0)write(31,1000) sb, subgis(sb), iida, sub_km(sb),
+     &                                (pdvab(ii), ii = 1, msubo)
+        if (icalen == 1)write(31,1001) sb, subgis(sb), i_mo, icl(iida), 
      &         iyr, sub_km(sb), (pdvab(ii), ii = 1, msubo)
 !!    added for binary files 3/25/09 gsm line below and write (6666
               if (ia_b == 1) then
-                write(66666) sb, subgis(sb), iida, sub_km(sb),             &
+                write(66666) sb, subgis(sb), iida, sub_km(sb),        
      &                                        (pdvab(ii), ii = 1, msubo)
               endif
         
@@ -127,7 +128,7 @@
 !     changed for jennifer b.
 !1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,18f10.3)
 !1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,21f10.3)
- 1000 format ('BIGSUB',i4,1x,i8,1x,i4,e10.5,18e10.3,1x,e10.5,3e10.3)
- 1001 format('BIGSUB',i4,1x,i8,1x,i2,1x,i2,1x,i4,1x,e10.5,18e10.3,1x,   &
-     &  e10.5, 3e10.3)
+ 1000 format ('BIGSUB',i5,1x,i8,1x,i4,e10.5,18e10.3,1x,e10.5,5e10.3)
+ 1001 format('BIGSUB',i5,1x,i8,1x,i2,1x,i2,1x,i4,1x,e10.5,18e10.3,1x,   
+     &  e10.5, 5e10.3)
       end 

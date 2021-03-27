@@ -38,7 +38,7 @@
 
       integer, intent (in) :: iwave
       integer :: j
-      real :: cy
+      real*8 :: cy
  
       j = 0
       j = ihru
@@ -56,7 +56,7 @@
       cy = 0.
       if (iwave > 0) then
         !! subbasin sediment calculations
-        cy = .1 * sedyld(j) / (da_ha * sub_fr(iwave) * sub_surfq(iwave) &
+        cy = .1 * sedyld(j) / (da_ha * sub_fr(iwave) * sub_surfq(iwave) 
      &                                                          + 1.e-6)
       else
         !! HRU sediment calculations

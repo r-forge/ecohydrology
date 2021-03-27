@@ -96,8 +96,8 @@
       use parm
 
       integer :: j, k, ir
-      real, dimension(mlyr) :: wuse
-      real :: sum, xx, gx, reduc, sump
+      real*8, dimension(mlyr) :: wuse
+      real*8 :: sum, xx, gx, reduc, sump
 
       j = 0
       j = ihru
@@ -191,7 +191,6 @@
           else
             reduc = 1.
           endif
-          reduc = 1.
           wuse(k) = wuse(k) * reduc
 
           if (sol_st(k,j) < wuse(k)) then

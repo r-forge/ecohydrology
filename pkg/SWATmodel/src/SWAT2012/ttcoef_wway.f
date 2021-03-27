@@ -72,7 +72,7 @@
  
 
       integer :: jj, k
-      real :: fps, d, b, p, a, qq1, rh, tt1, tt2, aa
+      real*8 :: fps, d, b, p, a, qq1, rh, tt1, tt2, aa
       
       k = ihru
       
@@ -86,11 +86,11 @@
       
 !!    If side slope is not set in .rte file then assume this default
 !!    If it is main reach default side slope to 2:1 if it is a waterway default to 8:1
-      if (chside(k) <= 1.e-6) then
+      !if (chside(k) <= 1.e-6) then
          chsslope = 8.
-      else
-         chsslope = chside(k)
-      end if
+      !else
+      !   chsslope = chside(k)
+      !end if
 
       fps = 4.
       d = grwat_d(k)

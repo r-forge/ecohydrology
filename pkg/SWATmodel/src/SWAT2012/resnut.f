@@ -76,7 +76,7 @@
       use parm
 
       integer :: jres, iseas
-      real :: nitrok, phosk, tpco, chlaco
+      real*8 :: nitrok, phosk, tpco, chlaco, conc_p, conc_n
 
       jres = 0
       jres = inum1
@@ -110,17 +110,36 @@
       res_nh3(jres) = res_nh3(jres) + varoute(14,inum2)
       res_no2(jres) = res_no2(jres) + varoute(15,inum2)
       res_solp(jres) = res_solp(jres) + varoute(7,inum2)
+      
+      conc_p = (res_orgp(jres) + res_solp(jres)) / res_vol(jres)
+      conc_n = (res_orgn(jres) + res_no3(jres) + res_nh3(jres) + 
+     & res_no2(jres)) / res_vol(jres)
+      conc_n = res_no3(jres) / res_vol(jres)
 
       !! settling rate/mean depth
       !! part of equation 29.1.3 in SWAT manual
-      phosk = 0.
-      nitrok = 0.
-      phosk = psetlr(iseas,jres) * ressa * 10000. /                     &
-     &                                         (res_vol(jres) + resflwo)
-      phosk = Min(phosk, 1.)
-      nitrok = nsetlr(iseas,jres) * ressa * 10000. /                    &
-     &                                         (res_vol(jres) + resflwo)
+!! ires_nut = 1 new equations 0 = old equations (Ikenberry)
+      if (ires_nut == 1) then
+        phosk = ressa * 10000. * (conc_p - con_pirr(jres)) * 
+     &    theta(psetlr(iseas,jres), theta_p(jres), tmpav(res_sub(jres)))
+        nitrok = ressa * 10000. * (conc_n - con_nirr(jres)) * 
+     &    theta(nsetlr(iseas,jres), theta_n(jres), tmpav(res_sub(jres)))
+      else
+        phosk = psetlr(iseas,jres) * ressa * 10000. /         
+     &                                       (res_vol(jres) + resflwo)
+        nitrok = nsetlr(iseas,jres) * ressa * 10000. /        
+     &                                       (res_vol(jres) + resflwo)
+      endif
+      nitrok = Max(nitrok, 0.)
+      phosk = Max(phosk, 0.)
       nitrok = Min(nitrok, 1.)
+      phosk = Min(phosk, 1.)
+      
+!!! charles ikenberry output file 
+!      write (2222,2222) iyr, i, res_vol(jres), res_no3(jres), ressa, 
+!     &   conc_n, con_nirr(jres), nsetlr(iseas,jres), theta_n(jres),
+!     &   tmpav(res_sub(jres)), nitrok
+!2222  format (2i6, 9f12.4)
 
       !! remove nutrients from reservoir by settling
       !! other part of equation 29.1.3 in SWAT manual
@@ -136,7 +155,7 @@
       chlaco = 0.
       res_chla(jres) = 0.
       res_seci(jres) = 0.
-      tpco = 1.e+6 * (res_solp(jres) + res_orgp(jres)) /                &
+      tpco = 1.e+6 * (res_solp(jres) + res_orgp(jres)) /                
      &                                         (res_vol(jres) + resflwo)
       if (tpco > 1.e-4) then
         !! equation 29.1.6 in SWAT manual

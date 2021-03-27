@@ -4,7 +4,7 @@
 !!    this subroutine performs in-stream nutrient transformations and water
 !!    quality calculations
 
-!!      adapted by Ann van Griensven, Belgium
+!! adapted by Ann van Griensven, Belgium
 
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name         |units         |definition
@@ -224,18 +224,18 @@
       use parm
 
       integer :: jrch
-      real :: wtrin, chlin, algin, orgnin, ammoin, nitratin, nitritin
-      real :: orgpin, dispin, cbodin, disoxin, tday, wtmp, fll, gra
-      real :: lambda, fnn, fpp, algi, fl_1, xx, yy, zz, ww, cinn, heatin
-      real :: uu, vv, cordo, f1, algcon, orgncon, nh3con, no2con, no3con
-      real :: orgpcon, solpcon, cbodcon, o2con, wtrtot, bc1mod, bc2mod
-      real :: thgra = 1.047, thrho = 1.047, thrs1 = 1.024
-      real :: thrs2 = 1.074, thrs3 = 1.074, thrs4 = 1.024, thrs5 = 1.024
-      real :: thbc1 = 1.083, thbc2 = 1.047, thbc3 = 1.047, thbc4 = 1.047
-      real :: thrk1 = 1.047, thrk2 = 1.024, thrk3 = 1.024, thrk4 = 1.060
-!      real :: thrk5 = 1.047, thrk6 = 1.0, thrs6 = 1.024, thrs7 = 1.0
-      real  ::   dalgae, dchla, dorgn, dnh4, dno2, dno3,dorgp,dsolp
-      real  ::   dbod, ddisox  
+      real*8 :: wtrin, chlin, algin, orgnin, ammoin, nitratin, nitritin
+      real*8 :: orgpin, dispin, cbodin, disoxin, tday, wtmp, fll, gra
+      real*8 :: lambda, fnn, fpp, algi, fl_1, xx, yy, zz, ww, cinn, heatin
+      real*8 :: uu, vv, cordo, f1, algcon, orgncon, nh3con, no2con, no3con
+      real*8 :: orgpcon, solpcon, cbodcon, o2con, wtrtot, bc1mod, bc2mod
+      real*8 :: thgra = 1.047, thrho = 1.047, thrs1 = 1.024
+      real*8 :: thrs2 = 1.074, thrs3 = 1.074, thrs4 = 1.024, thrs5 = 1.024
+      real*8 :: thbc1 = 1.083, thbc2 = 1.047, thbc3 = 1.047, thbc4 = 1.047
+      real*8 :: thrk1 = 1.047, thrk2 = 1.024, thrk3 = 1.024, thrk4 = 1.060
+!      real*8 :: thrk5 = 1.047, thrk6 = 1.0, thrs6 = 1.024, thrs7 = 1.0
+      real*8 :: dalgae, dchla, dorgn, dnh4, dno2, dno3,dorgp,dsolp
+      real*8 :: dbod, ddisox  
 
       jrch = 0
       jrch = inum1
@@ -270,7 +270,7 @@
          o2con  = rch_dox(jrch)
          wtmp = wattemp(jrch)
 
-c      write(104,*) 't',jrch,disoxin, wtrin, rch_dox(jrch)      
+c write(104,*) 't',jrch,disoxin, wtrin, rch_dox(jrch) 
 c         o2con = (disoxin * wtrin + rch_dox(jrch) * rchwtr) / wtrtot
 
          !! calculate temperature in stream
@@ -308,7 +308,7 @@ c         o2con = (disoxin * wtrin + rch_dox(jrch) * rchwtr) / wtrtot
       if (o2con2.gt.30.) o2con2=30.
         cordo = 1.0 - Exp(-0.6 * o2con2)
 !       write(104, *) cordo, 'cordo'
-              if (o2con.le.0.001) o2con=0.001
+         if (o2con.le.0.001) o2con=0.001
       if (o2con.gt.30.) o2con=30.
         cordo = 1.0 - Exp(-0.6 * o2con)
 
@@ -320,14 +320,14 @@ c         o2con = (disoxin * wtrin + rch_dox(jrch) * rchwtr) / wtrtot
         bc2mod = bc2(jrch) * cordo
 !! end O2 impact calculations
 
-C      tday is the calculation time step = 1 day
+C tday is the calculation time step = 1 day
          tday = 1.0
 
 !! algal growth
          !! calculate light extinction coefficient 
          !! (algal self shading) QUAL2E equation III-12
          if (ai0 * algcon > 1.e-6) then
-           lambda = lambda0 + (lambda1 * ai0 * algcon) + lambda2 *      &
+           lambda = lambda0 + (lambda1 * ai0 * algcon) + lambda2 *      
      &                                        (ai0 * algcon) ** (.66667)
          else
            lambda = lambda0
@@ -354,7 +354,7 @@ C      tday is the calculation time step = 1 day
          !! daylight average light intensity QUAL2E equation III-7b
          fl_1 = 0.
          fll = 0.
-         fl_1 = (1. / (lambda * rchdep)) *                              &
+         fl_1 = (1. / (lambda * rchdep)) *                              
      &        Log((k_l + algi) / (k_l + algi * (Exp(-lambda * rchdep))))
          fll = 0.92 * (dayl(hru1(jrch)) / 24.) * fl_1
 
@@ -381,7 +381,7 @@ C      tday is the calculation time step = 1 day
          !! QUAL2E equation III-2
          dalgae = 0.
        setl=min(1.,Theta(rs1(jrch),thrs1,wtmp)/ rchdep)
-         dalgae = algcon + (Theta(gra,thgra,wtmp) * algcon -            &
+         dalgae = algcon + (Theta(gra,thgra,wtmp) * algcon -            
      &    Theta(rhoq,thrho,wtmp) * algcon - setl * algcon) * tday
          if (dalgae < 0.00001) algae(jrch) = 0.00001
 
@@ -423,8 +423,8 @@ C      tday is the calculation time step = 1 day
          end if
          ww = Theta(rk1(jrch),thrk1,wtmp) * cbodcon
 
-         if(rchdep.gt.0.001) xx = Theta(rk4(jrch),thrk4,wtmp)           &
-     &         / (rchdep * 1000.)
+         if(rchdep.gt.0.001) xx = Theta(rk4(jrch),thrk4,wtmp)           
+     &    / (rchdep * 1000.)
          if (nh3con.gt.0.001) then
          yy = ai5 * Theta(bc1mod,thbc1,wtmp) * nh3con
          else
@@ -436,7 +436,7 @@ C      tday is the calculation time step = 1 day
          no2con=0.001
          end if
          ddisox = o2con + (uu + vv - ww - xx - yy - zz) * tday
-            o2proc=o2con-ddisox
+       o2proc=o2con-ddisox
          if (ddisox < 0.00001) ddisox = 0.00001 
 !! end oxygen calculations
 
@@ -456,7 +456,7 @@ C      tday is the calculation time step = 1 day
         !! calculate fraction of algal nitrogen uptake from ammonia
         !! pool QUAL2E equation III-18
         f1 = 0.
-        f1 = p_n * nh3con / (p_n * nh3con + (1. - p_n) * no3con +       &
+        f1 = p_n * nh3con / (p_n * nh3con + (1. - p_n) * no3con +       
      &                                                            1.e-6)
         
         !! calculate ammonia nitrogen concentration at end of day
@@ -599,9 +599,6 @@ C      tday is the calculation time step = 1 day
         ddisox = 0.0   
         soxy = 0.0
       endif
-
-
-
 
       return
       end

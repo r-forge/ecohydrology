@@ -1,9 +1,9 @@
       subroutine layersplit(dep_new)
 
-      use parm
+      use parm, junk=>layersplit
       integer nly,n,j
       integer :: flag
-      real, intent(in):: dep_new
+      real*8, intent(in):: dep_new
       nly = sol_nly(ihru)
 
 !!    create a septic layer
@@ -44,9 +44,9 @@
             sol_mc(n,ihru) = sol_mc(n-1,ihru)
             sol_mn(n,ihru) = sol_mn(n-1,ihru)
             sol_mp(n,ihru) = sol_mp(n-1,ihru)
-                sol_n(n,ihru) = sol_n(n-1,ihru)
-                sol_ph(n,ihru) = sol_ph(n-1,ihru) !! MJW rev 490
-                sol_cal(n,ihru) = sol_cal(n-1,ihru) !! MJW rev 490
+           sol_n(n,ihru) = sol_n(n-1,ihru)
+           sol_ph(n,ihru) = sol_ph(n-1,ihru) !! MJW rev 490
+           sol_cal(n,ihru) = sol_cal(n-1,ihru) !! MJW rev 490
 
           end do
           sol_z(j,ihru) = dep_new
@@ -55,6 +55,5 @@
       end do
       
       iseptic = j 
-      end        
-       
-       
+      end
+

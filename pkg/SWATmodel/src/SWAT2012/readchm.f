@@ -61,7 +61,7 @@
 
       character (len=80) :: titldum
       integer :: j, eof, k, newpest, pstnum
-      real :: pltpst, solpst, pstenr
+      real*8 :: pltpst, solpst, pstenr
 
       eof = 0
 
@@ -89,7 +89,7 @@
       if (eof < 0) exit
       read (106,5000,iostat=eof) titldum
       if (eof < 0) exit
-!!      end do
+!! end do
 
       do j = 1, mpst
         pstnum = 0
@@ -129,7 +129,7 @@
       close (106)
       
       do j = 1, mlyr
-        if (pperco_sub(j,ihru) <= 1.e-6) pperco_sub(j,ihru) = pperco
+        if (pperco_sub(j,ihru) <= 1.e-6) pperco_sub(j,ihru) = pperco_bsn
       end do
 
       return

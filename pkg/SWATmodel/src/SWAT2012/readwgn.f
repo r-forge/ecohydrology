@@ -123,7 +123,7 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Sin, Cos, Tan, Abs, Acos, Log, Exp, MaxVal
+!!    Intrinsic: Sin, Cos, Tan, abs, Acos, Log, Exp, MaxVal
 !!    SWAT: Aunif, Dstn1
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
@@ -131,10 +131,10 @@
       use parm
 
       character (len=80) :: titldum
-      real :: xx, lattan, x1, x2, x3, tav, tmin, tmax, rain_yrs
-      real :: summx_t, summn_t, summm_p, sum, rnm2, r6, xlv, pcp
-      real, dimension (12) :: rainhhmx, rain_hhsm, pcpmm, pcpd
-      real :: tmpsoil, sffc, rndm1, dl
+      real*8 :: xx, lattan, x1, x2, x3, tav, tmin, tmax, rain_yrs
+      real*8 :: summx_t, summn_t, summm_p, sum, rnm2, r6, xlv, pcp
+      real*8, dimension (12) :: rainhhmx, rain_hhsm, pcpmm, pcpd
+      real*8 :: tmpsoil, sffc, rndm1, dl
       integer :: mon, mdays, j, m1, nda, xrnd
 
 
@@ -150,7 +150,7 @@
       read (114,5200) (tmpmn(mon,i),mon = 1,12)
       read (114,5200) (tmpstdmx(mon,i),mon = 1,12)
       read (114,5200) (tmpstdmn(mon,i),mon = 1,12)
-      read (114,5200) (pcpmm(mon),mon = 1,12)
+      read (114,5201) (pcpmm(mon),mon = 1,12)
       read (114,5200) (pcp_stat(mon,2,i),mon = 1,12)  !pcpstd
       read (114,5200) (pcp_stat(mon,3,i),mon = 1,12)  !pcpskw
       read (114,5200) (pr_w(1,mon,i),mon = 1,12)
@@ -183,11 +183,11 @@
 !! daylength=2*acos(-tan(sd)*tan(lat))/omega
 !! where solar declination, sd, = -23.5 degrees for minimum daylength in
 !!                      northern hemisphere and -tan(sd) = .4348
-!!       absolute value is taken of tan(lat) to convert southern hemisphere
+!!       dabsolute value is taken of tan(lat) to convert southern hemisphere
 !!                      values to northern hemisphere
 !!       the angular velocity of the earth's rotation, omega, = 15 deg/hr or
 !!                      0.2618 rad/hr and 2/0.2618 = 7.6394
-      x1 = .4348 * Abs(lattan)      
+      x1 = .4348 * abs(lattan)      
       if (x1 < 1.) x2 = Acos(x1) 
                          !!x1 will be >= 1. if sub_lat > 66.5 or < -66.5
       daylmn(i) = 7.6394 * x2
@@ -195,12 +195,12 @@
 !! calculate day length threshold for dormancy
       if (dorm_hr < -1.e-6) then
         dl = 0.
-         if (Abs(sub_lat(i)) > 40.) then
+         if (abs(sub_lat(i)) > 40.) then
           dl = 1.
-         else if (Abs(sub_lat(i)) < 20.) then
+         else if (abs(sub_lat(i)) < 20.) then
           dl = -1.
          else
-         dl = (Abs(sub_lat(i)) - 20.) / 20.
+         dl = (abs(sub_lat(i)) - 20.) / 20.
          end if
       else
          dl = dorm_hr
@@ -212,7 +212,7 @@
       rain_hhsm = 0.
       rain_hhsm(1) = (rainhhmx(12) + rainhhmx(1) + rainhhmx(2)) / 3.
       do mon = 2, 11
-        rain_hhsm(mon) = (rainhhmx(mon-1) + rainhhmx(mon) +             &
+        rain_hhsm(mon) = (rainhhmx(mon-1) + rainhhmx(mon) +             
      &                     rainhhmx(mon+1)) / 3.
       end do
       rain_hhsm(12) = (rainhhmx(11) + rainhhmx(12) + rainhhmx(1)) / 3.
@@ -246,7 +246,7 @@
         else
         !! if pr_w values good, use calculated pcpd based on these values
         !! using first order Markov chain
-        pcpd(mon) = mdays * pr_w(1,mon,i) /                             &
+        pcpd(mon) = mdays * pr_w(1,mon,i) /                             
      &                              (1. - pr_w(2,mon,i) + pr_w(1,mon,i))
     
         end if
@@ -353,4 +353,5 @@
  5000 format (a)
  5100 format (12x,f7.2)
  5200 format (12f6.2)
+ 5201 format (12f6.1)  
       end

@@ -70,8 +70,8 @@
 
       integer :: ist, isnum, eof
 
-      real :: sptq,sptbodin,spttssconc,spttnconc,sptnh4conc,sptno3conc
-      real :: sptno2conc,sptorgnconc,spttpconc,sptminp,sptorgp,sptfcoli
+      real*8 :: sptq,sptbodin,spttssconc,spttnconc,sptnh4conc,sptno3conc
+      real*8 :: sptno2conc,sptorgnconc,spttpconc,sptminp,sptorgp,sptfcoli
 
       isnum = 0
       eof = 0
@@ -91,7 +91,7 @@
        
         sptname = ""
         idspttype = 0 
-         sptq = 0.
+        sptq = 0.
         sptbodin = 0.
         spttssconc = 0.
         spttnconc = 0.
@@ -122,10 +122,10 @@
           sptorgp = 0.9
         endif
         
-!      assign a flag to identify which septic system (1-26) should be selected
+! assign a flag to identify which septic system (1-26) should be selected
 
         sptnames(ist) = sptname
-         sptqs(ist) = sptq  
+        sptqs(ist) = sptq  
         sptbodconcs(ist) = sptbodin
         spttssconcs(ist) = spttssconc
         spttnconcs(ist) = spttnconc

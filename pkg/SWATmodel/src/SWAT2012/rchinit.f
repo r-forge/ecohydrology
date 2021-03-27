@@ -10,10 +10,8 @@
 !!    hru_sub(:)  |none          |subbasin in whic HRU/reach is located
 !!    ievent      |none          |rainfall/runoff code
 !!                               |0 daily rainfall/curve number technique
-!!                               |1 daily rainfall/Green&Ampt technique/daily
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
 !!                               |  routing
-!!                               |2 sub-daily rainfall/Green&Ampt technique/
-!!                               |  daily routing
 !!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    ihout       |none          |outflow hydrograph storage location number
 !!    inum1       |none          |reach number
@@ -98,7 +96,7 @@
 !! zero flow out variables
       do ii = 1, mvaro
         varoute(ii,ihout) = 0.
-        if (ievent > 2) then
+        if (ievent > 0) then
           do kk = 1, nstep ! changed from 24 to nstep for urban modeling by J.Jeong 4/16/2008
             hhvaroute(ii,ihout,kk) = 0.
           end do
@@ -171,7 +169,6 @@
       rchdy(58,jrch) = 0.
 !!    Total suspended sediments
       rchdy(59,jrch) = 0.
-
 
       return
       end

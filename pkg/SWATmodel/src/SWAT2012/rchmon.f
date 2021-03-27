@@ -106,7 +106,7 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Real, Log10
+!!    Intrinsic: real*8, Log10
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
@@ -114,15 +114,15 @@
 
       integer, intent (in) :: mdays
       integer :: j
-      real, dimension (mrcho) :: pdvar, pdvr
-      real, dimension (11) :: srch_av
+      real*8, dimension (mrcho) :: pdvar, pdvr
+      real*8, dimension (11) :: srch_av
 
       do j = 1, subtot
 
         !! calculate monthly averages where applicable
         srch_av = 0.
-        srch_av(1) = rchmono(1,j) / Real(mdays)
-        srch_av(2) = rchmono(2,j) / Real(mdays)
+        srch_av(1) = rchmono(1,j) / dfloat(mdays)
+        srch_av(2) = rchmono(2,j) / dfloat(mdays)
         !! take log10 of monthly flow for graphing
         if (ilog > 0) then
           if (srch_av(1) > 1.) then
@@ -136,9 +136,9 @@
             srch_av(2) = 0.
           end if
         end if
-        srch_av(5) = rchmono(5,j) / Real(mdays)
-        srch_av(10) = rchmono(10,j) / Real(mdays)
-        srch_av(11) = rchmono(11,j) / Real(mdays)
+        srch_av(5) = rchmono(5,j) / dfloat(mdays)
+        srch_av(10) = rchmono(10,j) / dfloat(mdays)
+        srch_av(11) = rchmono(11,j) / dfloat(mdays)
 
         pdvar = 0. 
         pdvr = 0.
@@ -200,25 +200,25 @@
           end do
 
           if (iscen == 1 .and. isproj == 0) then
-          write (7,5000) j, subgis(j), mo_chk, rch_dakm(j),             &
-     &                                         (pdvr(ii), ii = 1, itotr)
+          write (7,5000) j, subgis(j), mo_chk, rch_dakm(j),           
+     &                                    (pdvr(ii), ii = 1, itotr)
           else if (isproj == 1) then
-          write (20,5000) j, subgis(j), mo_chk, rch_dakm(j),            &
-     &                                         (pdvr(ii), ii = 1, itotr)
+          write (20,5000) j, subgis(j), mo_chk, rch_dakm(j),            
+     &                                    (pdvr(ii), ii = 1, itotr)
           else if (iscen == 1 .and. isproj == 2) then 
-          write (7,6000) j, subgis(j), mo_chk, rch_dakm(j),             &
+          write (7,6000) j, subgis(j), mo_chk, rch_dakm(j),             
      &                              (pdvr(ii), ii = 1, itotr),iyr  
           endif
         else
  !  increase to 44 in loops below from 42 gsm 10/17/2011      
           if (iscen == 1 .and. isproj == 0) then
-          write (7,5000) j, subgis(j), mo_chk, rch_dakm(j),             &
-     &                                        (pdvar(ii), ii = 1, 44)    
+          write (7,5000) j, subgis(j), mo_chk, rch_dakm(j),             
+     &                                (pdvar(ii), ii = 1, 44)    
           else if (isproj == 1) then
-          write (20,5000) j, subgis(j), mo_chk, rch_dakm(j),            &
-     &                                        (pdvar(ii), ii = 1, 44)    
+          write (20,5000) j, subgis(j), mo_chk, rch_dakm(j),            
+     &                                (pdvar(ii), ii = 1, 44)    
           else if (iscen == 1 .and. isproj == 2) then
-          write (7,6000) j, subgis(j), mo_chk, rch_dakm(j),             &
+          write (7,6000) j, subgis(j), mo_chk, rch_dakm(j),             
      &                              (pdvar(ii), ii = 1, 44), iyr     
 
           endif
@@ -226,7 +226,6 @@
       end do
 
       return
- 5000 format ('REACH ',i4,1x,i8,1x,i5,46e12.4)
- 6000 format ('REACH ',i4,1x,i8,1x,i5,46e12.4,1x,i4)
+ 5000 format ('REACH ',i5,1x,i8,1x,i5,47e12.4)
+ 6000 format ('REACH ',i5,1x,i8,1x,i5,47e12.4,1x,i4)
       end
-

@@ -73,8 +73,8 @@
 
       integer, intent (in) :: jj
       integer :: itime, pt, ihour, nhour, k
-      real :: vv, blm, qmn, uplm, dur, ab, ajp, altc, pkrain, rtp
-      real :: xk1, xk2, xkp1, xkp2, rx, pkrr, sumrain
+      real*8 :: vv, blm, qmn, uplm, dur, ab, ajp, altc, pkrain, rtp
+      real*8 :: xk1, xk2, xkp1, xkp2, rx, pkrr, sumrain
 
 
       !! calculate maximum half-hour rainfall
@@ -139,8 +139,8 @@
       do
         if (pt >= Int(rtp)) exit
         rx = 0.
-        rx = pkrain - pkrr * xkp1 *                                     &
-     &                       (1. - Exp((Real(pt) - rtp) / (60. * xkp1)))
+        rx = pkrain - pkrr * xkp1 *                                     
+     &                       (1. - Exp((dfloat(pt) - rtp) / (60. * xkp1)))
         rainsub(jj,itime) = rx - sumrain
         pt = pt + idt
         itime = itime + 1
@@ -153,8 +153,8 @@
       do
         if (pt >= Int(dur * 60.)) exit
         rx = 0.
-        rx = pkrain + pkrr * xkp2 *                                     &
-     &                       (1. - Exp((rtp - Real(pt)) / (60. * xkp2)))
+        rx = pkrain + pkrr * xkp2 *                                     
+     &                       (1. - Exp((rtp - dfloat(pt)) / (60. * xkp2)))
         rainsub(jj,itime) = rx - sumrain
         pt = pt + idt
         itime = itime + 1
@@ -170,4 +170,3 @@
 
       return
       end
-

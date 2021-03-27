@@ -162,15 +162,15 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Max, Exp, Sqrt, Min, Abs
+!!    Intrinsic: Max, Exp, Sqrt, Min, abs
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
       use parm
 
       integer :: j, k, kk
-      real :: rmn1, rmp, xx, csf, rwn, hmn, hmp, r4, cnr, cnrf, cpr
-      real :: cprf, ca, decr, rdc, wdn, cdg, sut
+      real*8 :: rmn1, rmp, xx, csf, rwn, hmn, hmp, r4, cnr, cnrf, cpr
+      real*8 :: cprf, ca, decr, rdc, wdn, cdg, sut
 
       j = 0
       j = ihru
@@ -212,19 +212,19 @@
 
           !! compute flow from active to stable pools
           rwn = 0.
-          rwn = .1e-4 * (sol_aorgn(k,j) * (1. / nactfr - 1.) -          &
+          rwn = .1e-4 * (sol_aorgn(k,j) * (1. / nactfr - 1.) -          
      &                                                    sol_orgn(k,j))
           if (rwn > 0.) then
             rwn = Min(rwn, sol_aorgn(k,j))
           else
-            rwn = -(Min(Abs(rwn), sol_orgn(k,j)))
+            rwn = -(Min(abs(rwn), sol_orgn(k,j)))
           endif
           sol_orgn(k,j) = Max(1.e-6, sol_orgn(k,j) + rwn)
           sol_aorgn(k,j) = Max(1.e-6, sol_aorgn(k,j) - rwn)
 
           !! compute humus mineralization on active organic n
           hmn = 0.
-          hmn = cmn * csf * sol_aorgn(k,j)
+          hmn = cmn(j) * csf * sol_aorgn(k,j)
           hmn = Min(hmn, sol_aorgn(k,j))
           !! compute humus mineralization on active organic p
           xx = 0.
@@ -281,16 +281,16 @@
         end if
             decr = Max(decr_min, decr)
             decr = Min(decr, 1.)
-            sol_rsd(k,j) = amax1(1.e-6,sol_rsd(k,j))
+            sol_rsd(k,j) = dmax1(1.e-6,sol_rsd(k,j))
             rdc = decr * sol_rsd(k,j)
             sol_rsd(k,j) = sol_rsd(k,j) - rdc
             if (sol_rsd(k,j) < 0.) sol_rsd(k,j) = 0.
             rmn1 = decr * sol_fon(k,j)
-            sol_fop(k,j) = amax1(1.e-6,sol_fop(k,j))
+            sol_fop(k,j) = dmax1(1.e-6,sol_fop(k,j))
             rmp = decr * sol_fop(k,j)
 
             sol_fop(k,j) = sol_fop(k,j) - rmp
-            sol_fon(k,j) = amax1(1.e-6,sol_fon(k,j))
+            sol_fon(k,j) = dmax1(1.e-6,sol_fon(k,j))
             sol_fon(k,j) = sol_fon(k,j) - rmn1
             sol_no3(k,j) = sol_no3(k,j) + .8 * rmn1
             sol_aorgn(k,j) = sol_aorgn(k,j) + .2 * rmn1
@@ -301,8 +301,8 @@
 !!  compute denitrification
         wdn = 0.   
         if (i_sep(j) /= k .or. isep_opt(j) /= 1) then
-          if (sut >= sdnco) then
-            wdn = sol_no3(k,j) * (1. - Exp(-cdn * cdg * sol_cbn(k,j)))
+          if (sut >= sdnco(j)) then
+            wdn = sol_no3(k,j) * (1. - Exp(-cdn(j) * cdg * sol_cbn(k,j)))
           else
             wdn = 0.
           endif
@@ -310,8 +310,8 @@
         end if
 ! septic changes 1/28/09 gsm
 
-!                  call ndenit(k,j,cdg,wdn,0.05)
-      !!      end if
+!   call ndenit(k,j,cdg,wdn,0.05)
+      !! end if
 
           !! summary calculations
           if (curyr > nyskip) then

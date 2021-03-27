@@ -29,6 +29,7 @@
 !!                                |1 measured monthly outflow
 !!                                |2 simulated controlled outflow-target release
 !!                                |3 measured daily outflow
+!!                                |4 stage/volume/outflow relationship                                  
 !!    iyres(:)     |none          |year of the simulation that the reservoir 
 !!                                |becomes operational
 !!    mores(:)     |none          |month the reservoir becomes operational
@@ -115,7 +116,7 @@
       character (len=80) :: titldum
       character (len=13) :: resdayo, resmono
       integer :: eof, mon, j
-      real :: resdif, targ, lnvol, res_d50
+      real*8 :: resdif, targ, lnvol, res_d50
 
 !!    initialize local variables
       resdayo = ""
@@ -205,6 +206,23 @@
         if (eof < 0) exit
         read (105,*,iostat=eof) starg_fps(i)
         if (eof < 0) exit
+        read (105,*,iostat=eof) nostep
+        if (eof < 0) exit
+        read (105,*,iostat=eof) weirc(i)
+        if (eof < 0) exit
+        read (105,*,iostat=eof) weirk(i)
+        if (eof < 0) exit
+        read (105,*,iostat=eof) weirw(i)
+        if (eof < 0) exit
+        read (105,*,iostat=eof) acoef(i)
+        if (eof < 0) exit
+        read (105,*,iostat=eof) bcoef(i)
+        if (eof < 0) exit
+        read (105,*,iostat=eof) ccoef(i)
+        if (eof < 0) exit
+!! code added for C. Ikenberry to swicth from new (1) to old (0) equations in resnut.f
+        read (105,*,iostat=eof) ires_nut
+        if (eof < 0) exit
         exit
       end do
 
@@ -212,12 +230,19 @@
       if (res_sub(i) <= 0) res_sub(i) = 1
       if (ndtargr(i) <= 0) ndtargr(i) = 15
       if (res_d50 <= 0) res_d50 = 10.
+      if (nostep <= 0) nostep = 24
+      if (weirc(i) <= 0) weirc(i) = 1.
+      if (weirk(i) <= 0) weirk(i) = 150000.0
+      if (weirw(i) <= 0) weirw(i) = 2.0 
+      if (acoef(i) <= 0) acoef(i) = 1.0
+      if (bcoef(i) <= 0) bcoef(i) = 1.75
+      if (ccoef(i) <= 0) ccoef(i) = 1.0
       if (res_pvol(i) + res_evol(i) > 0.) then
         if (res_pvol(i) <= 0) res_pvol(i) = 0.9 * res_evol(i)
       else
         if (res_pvol(i) <= 0) res_pvol(i) = 60000.0
       end if
-      if (res_evol(i) <= 0.0) res_evol(i) = 1.11 * res_pvol(i)           
+      if (res_evol(i) <= 0.0) res_evol(i) = 1.11 * res_pvol(i)      
       if (res_psa(i) <= 0.0) res_psa(i) = 0.08 * res_pvol(i)
       if (res_esa(i) <= 0.0) res_esa(i) = 1.5 * res_psa(i) 
       targ = 0.
@@ -273,7 +298,7 @@
 !!    calculate shape parameters for surface area equation
       resdif = 0.
       resdif = res_evol(i) - res_pvol(i)
-      if ((res_esa(i) - res_psa(i)) > 0. .and. resdif > 0.) then      
+      if ((res_esa(i) - res_psa(i)) > 0. .and. resdif > 0.) then 
       lnvol = 0.
       lnvol = Log10(res_evol(i)) - Log10(res_pvol(i))
       if (lnvol > 1.e-4) then
@@ -283,23 +308,23 @@
       end if
         if (br2(i) > 0.9) then
           br2(i) = 0.9
-          br1(i) = (res_psa(i)/res_pvol(i)) ** 0.9
+          br1(i) = res_psa(i)/(res_pvol(i) ** 0.9)
         else
-          br1(i) = (res_esa(i)/res_evol(i)) ** br2(i)
+          br1(i) = res_esa(i)/(res_evol(i) ** br2(i))
         end if  
       else
         br2(i) = 0.9
-        br1(i) = (res_psa(i)/res_pvol(i)) ** 0.9
+        br1(i) = res_psa(i)/(res_pvol(i) ** 0.9)
       end if
 
 !! calculate sediment settling rate
-      if(ievent<3) then
+      if(ievent== 0) then
         sed_stlr(i) = Exp(-.184 * res_d50)
       else
-        sed_stlr(i) = Exp(-.184 * res_d50 / nstep)      !! urban modeling by J.Jeong
+        sed_stlr(i) = Exp(-.184 * res_d50 / nstep) !! urban modeling by J.Jeong
       endif
 !!     xx = res_stlr_co * res_d50
-!!      if (xx > 20.) xx = 20.
+!! if (xx > 20.) xx = 20.
 !!    sed_stlr(i) = Exp(-xx)
 
 !! read in monthly release data

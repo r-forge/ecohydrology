@@ -14,7 +14,7 @@
 !!    bactlpq(:)  |# cfu/m^2     |less persistent bacteria in soil solution
 !!    bactlps(:)  |# cfu/m^2     |less persistent bacteria attached to soil
 !!                               |particles
-!!    bactminlp   |# cfu/m^2     |Threshold detection level for lestt persistent
+!!    bactminlp   |# cfu/m^2     |Threshold detection level for less persistent
 !!                               |bacteria
 !!                               |when bacteria levels drop to this amount the 
 !!                               |model considers bacteria in the soil to be
@@ -150,7 +150,7 @@
       use parm
 
       integer :: j
-      real :: bpq, blpq, bps, blps, wt1, cbact, xx
+      real*8 :: bpq, blpq, bps, blps, wt1, cbact, xx
 
       j = 0
       j = ihru
@@ -176,14 +176,16 @@
       end if
    
 !! compute bacteria die-off and re-growth on foilage
-      bactp_plt(j) = bactp_plt(j) * Exp(-Theta(wp20p_plt,thbact,
+      if (tmpav(j) > 1.e-6) then
+        bactp_plt(j) = bactp_plt(j) * Exp(-Theta(wp20p_plt,thbact,
      &    tmpav(j))) - bactminp
-      bactp_plt(j) = Max(0., bactp_plt(j))
-      if (bactp_plt(j) < bactminp) bactp_plt(j) = 0.
-      bactlp_plt(j) = bactlp_plt(j) * Exp(-Theta(wp20lp_plt,thbact,
+        bactp_plt(j) = Max(0., bactp_plt(j))
+        if (bactp_plt(j) < bactminp) bactp_plt(j) = 0.
+        bactlp_plt(j) = bactlp_plt(j) * Exp(-Theta(wp20lp_plt,thbact,
      &    tmpav(j))) - bactminlp
-      bactlp_plt(j) = Max(0., bactlp_plt(j))
-      if (bactlp_plt(j) < bactminlp) bactlp_plt(j) = 0.
+        bactlp_plt(j) = Max(0., bactlp_plt(j))
+        if (bactlp_plt(j) < bactminlp) bactlp_plt(j) = 0.
+      endif
 
 !! compute bacteria die-off and re-growth in surface soil layer
       bpq = 0.
@@ -212,13 +214,13 @@
       if (bactlps(j) < bactminlp) bactlps(j) = 0.
 
 !! compute bacteria in the runoff
-      bactrop = bactpq(j) * surfq(j) /                                  &
+      bactrop = bactpq(j) * surfq(j) /                                  
      &                        (sol_bd(1,j) * sol_z(1,j) * bactkdq)
       bactrop = Min(bactrop, bactpq(j))
       bactrop = Max(bactrop, 0.)
       bactpq(j) = bactpq(j) - bactrop
 
-      bactrolp = bactlpq(j) * surfq(j) /                                &
+      bactrolp = bactlpq(j) * surfq(j) /                                
      &                          (sol_bd(1,j) * sol_z(1,j) * bactkdq)
       bactrolp = Min(bactrolp, bactlpq(j))
       bactrolp = Max(bactrolp, 0.)
@@ -243,13 +245,13 @@
       end if
 
 !! compute bacteria incorporated into the soil
-      bactlchp = bactpq(j) * sol_prk(1,j) / ((conv_wt(1,j) / 1000.)     &
+      bactlchp = bactpq(j) * sol_prk(1,j) / ((conv_wt(1,j) / 1000.)     
      &                                                       * bactmx)
       bactlchp = Min(bactlchp, bactpq(j))
       bactlchp = Max(bactlchp, 0.)
       bactpq(j) = bactpq(j) - bactlchp
 
-      bactlchlp = bactlpq(j) * sol_prk(1,j) / ((conv_wt(1,j) / 1000.)   &
+      bactlchlp = bactlpq(j) * sol_prk(1,j) / ((conv_wt(1,j) / 1000.)   
      &                                                       * bactmx)
       bactlchlp = Min(bactlchlp, bactlpq(j))
       bactlchlp = Max(bactlchlp, 0.)

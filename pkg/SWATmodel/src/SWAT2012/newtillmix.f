@@ -7,7 +7,7 @@
 !!    Mixing was extended to all layers
 !!    A subroutine to simulate stimulation of organic matter decomposition was added
 !!    March 2009: testing has been minimal and further adjustments are expected
-!!    use with caution and report anomalous results to akemanian@brc.tamus.edu and jeff.arnold@ars.usda.edu
+!!    use with caution 
 
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name          |units         |definition
@@ -92,7 +92,7 @@
 !!    sol_stap(:,:) |kg P/ha       |amount of phosphorus in the soil layer
 !!                                 |stored in the stable mineral phosphorus pool
 !!    sumix(:)      |none          |sum of mixing efficiencies in HRU
-!!    min_res(:)      |kg/ha               |Min residue allowed due to implementation of 
+!!    min_res(:) |kg/ha     |Min residue allowed due to implementation of 
 !!                                 |residue managment in the OPS file.
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -112,8 +112,8 @@
 !!                               |that is being redistributed between 
 !!                               |mixed layers
 !!    thtill(:)   |none          |fraction of soil layer that is mixed
-!!    sol_msm                               | sol_mass mixed
-!!    sol_msn                               | sol_mass not mixed
+!!    sol_msm      | sol_mass mixed
+!!    sol_msn      | sol_mass not mixed
 !!    maxmix      |none          | maximum mixing eff to preserve specified minimum residue cover
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -126,20 +126,20 @@
       use parm
 
       integer, intent (in) :: jj
-      real, intent (in) :: bmix
+      real*8, intent (in) :: bmix
 !$$$$$$       integer :: l, k, nl, a
       integer :: l, k              !CB 12/2/09 nl and a are not used.
-      real :: emix, dtil, XX, WW1, WW2, WW3, WW4, maxmix
-!$$$$$$       real :: thtill(sol_nly(jj)), smix(20+npmx)  
+      real*8 :: emix, dtil, XX, WW1, WW2, WW3, WW4, maxmix
+!$$$$$$       real*8 :: thtill(sol_nly(jj)), smix(20+npmx)  
       !!by zhang
       !!=============   
-      real :: smix(22+npmx+12)        !CB 12/2/09 thtill is not used. mjw rev 490
+      real*8 :: smix(22+npmx+12)        !CB 12/2/09 thtill is not used. mjw rev 490
       !!changed the dimension from 22 + npmx to 22 + npmx + 12
       !!by zhang
       !!=============
-      real :: sol_mass(sol_nly(jj))
-      real :: sol_thick(sol_nly(jj)), sol_msm(sol_nly(jj))
-      real :: sol_msn(sol_nly(jj))
+      real*8 :: sol_mass(sol_nly(jj))
+      real*8 :: sol_thick(sol_nly(jj)), sol_msm(sol_nly(jj))
+      real*8 :: sol_msn(sol_nly(jj))
 
 
       XX = 0.
@@ -158,6 +158,25 @@
         emix = effmix(idtill)
         dtil = deptil(idtill)
       end if
+      ! -------------------------------- Original D. Moriasi code replaced by code below        
+! Drainmod  07/2006
+!      if(itill(jj) == 1) then
+!   cumei(jj) = 0.
+!   cumeira(jj) = 0.
+!   cumrt(jj) = 0.
+!        cumrai(jj) = 0.
+!   ranrns_hru(jj) = ranrns(idtill)   
+!      end if
+!!    Drainmod 7/2006
+! --------------------------------------------------------------------
+        if (idtill.GE. 1) then ! Updated dynamic depressional storage D.Moriasi 4/8/2014
+          cumei(jj)   = 0.
+          cumeira(jj) = 0.
+          cumrt(jj)   = 0.
+          cumrai(jj)  = 0.
+          ranrns_hru(jj) = ranrns(idtill)
+        end if
+! --------------------------------------------------------------------
 
       !!by zhang DSSAT tillage
       !!=======================
@@ -185,12 +204,12 @@
         bactlpq(jj) = bactlpq(jj) * (1. - emix)
         bactlps(jj) = bactlps(jj) * (1. - emix)
       end if
-            
+       
       !! calculate max mixing to preserve target surface residue MJW rev 490
       !! Assume residue in all other layers is negligible to simplify calculation and remove depth dependency
       if (min_res(jj) > 1. .and. bmix < 0.001) then
         maxmix = 1 - min_res(jj)/sol_rsd(1,jj)
-        if (maxmix <0.05)  maxmix = 0.05      
+        if (maxmix <0.05)  maxmix = 0.05 
         if (emix > maxmix)  emix = maxmix
       end if
 
@@ -198,7 +217,7 @@
       do l=1, sol_nly(jj)
         if ( l == 1) then
           sol_thick(l) = sol_z(l,jj)
-        else      
+        else 
           sol_thick(l) = sol_z(l,jj) - sol_z(l-1,jj)
         end if
       
@@ -219,18 +238,18 @@
 
           if (sol_z(l,jj) <= dtil) then
             !! msm = mass of soil mixed for the layer
-            !! msn = mass of soil not mixed for the layer            
-            sol_msm(l) = emix * sol_mass(l)      
-            sol_msn(l) = sol_mass(l) - sol_msm(l)      
+            !! msn = mass of soil not mixed for the layer  
+            sol_msm(l) = emix * sol_mass(l) 
+            sol_msn(l) = sol_mass(l) - sol_msm(l) 
           else if (sol_z(l,jj) > dtil.AND.sol_z(l-1,jj) < dtil) then 
-            sol_msm(l) = emix * sol_mass(l) *                           &
+            sol_msm(l) = emix * sol_mass(l) *                           
      &      (dtil - sol_z(l-1,jj)) / sol_thick(l)
             sol_msn(l) =  sol_mass(l) -  sol_msm(l)
           else
             sol_msm(l) = 0.
             sol_msn(l) = sol_mass(l)
           end if
-                  
+        
           !! calculate the mass or concentration of each mixed element 
           !! mass based mixing
           WW1 = sol_msm(l)/(sol_msm(l) + sol_msn(l))
@@ -249,7 +268,7 @@
           smix(13) = smix(13) + sol_mn(l,jj) * WW1
           smix(14) = smix(14) + sol_mp(l,jj) * WW1
 
-            !! concentration based mixing
+       !! concentration based mixing
           WW2 = XX + sol_msm(l)
           smix(15) = (XX * smix(15) + sol_cbn(l,jj) * sol_msm(l)) /WW2
           smix(16) = (XX * smix(16) + sol_n(l,jj) * sol_msm(l)) /WW2
@@ -259,9 +278,9 @@
 !          smix(20) = (XX * smix(20) + sol_rock(l,jj) * sol_msm(l)) / WW2
 !          smix(21) = (XX * smix(21) + sol_ph(l,jj) * sol_msm(l)) /WW2 !! mjw rev490
 !          smix(22) = (XX * smix(22) + sol_cal(l,jj) * sol_msm(l)) /WW2 !! mjw rev490
-            !! mass based distribution
+       !! mass based distribution
           do k = 1, npmx
-                smix(20+k) = smix(20+k) + sol_pst(k,jj,l) * WW1
+           smix(20+k) = smix(20+k) + sol_pst(k,jj,l) * WW1
           end do
 
             !!by zhang
@@ -273,7 +292,7 @@
               smix(20+npmx+4) = smix(20+npmx+4) +sol_LMC(l,jj)* WW1
               smix(20+npmx+5) = smix(20+npmx+5) +sol_LM(l,jj)* WW1
               smix(20+npmx+6) = smix(20+npmx+6) +sol_LSL(l,jj)* WW1
-              smix(20+npmx+7) = smix(20+npmx+7) +sol_LS(l,jj)* WW1              
+              smix(20+npmx+7) = smix(20+npmx+7) +sol_LS(l,jj)* WW1         
               
               smix(20+npmx+8) = smix(20+npmx+8) +sol_LSN(l,jj)* WW1
               smix(20+npmx+9) = smix(20+npmx+9) +sol_LMN(l,jj)* WW1
@@ -281,14 +300,14 @@
               smix(20+npmx+11) = smix(20+npmx+11) +sol_HSN(l,jj)* WW1
               smix(20+npmx+12) = smix(20+npmx+12) +sol_HPN(l,jj)* WW1  
             end if
-            !!by zhang       
+            !!by zhang  
             !!=============
-                  
+        
           XX = XX + sol_msm(l)
         end do
 
           do l=1, sol_nly(jj)
-                  
+        
             ! reconstitute each soil layer 
             WW3 = sol_msn(l) / sol_mass(l)
             WW4 = sol_msm(l) / XX
@@ -309,24 +328,24 @@
             sol_mn(l,jj) = sol_mn(l,jj) * WW3 + smix(13) * WW4
             sol_mp(l,jj) = sol_mp(l,jj) * WW3 + smix(14) * WW4
 
-            sol_cbn(l,jj) = (sol_cbn(l,jj) * sol_msn(l) + smix(15)      &
+            sol_cbn(l,jj) = (sol_cbn(l,jj) * sol_msn(l) + smix(15)      
      &           * sol_msm(l)) / sol_mass(l)
-            sol_n(l,jj) = (sol_n(l,jj) * sol_msn(l) + smix(16)          &
+            sol_n(l,jj) = (sol_n(l,jj) * sol_msn(l) + smix(16)          
      &           * sol_msm(l)) / sol_mass(l)
-            sol_clay(l,jj) = (sol_clay(l,jj) * sol_msn(l) + smix(17)    &
+            sol_clay(l,jj) = (sol_clay(l,jj) * sol_msn(l) + smix(17)    
      &           * sol_msm(l)) / sol_mass(l)
-            sol_silt(l,jj) = (sol_silt(l,jj) * sol_msn(l) + smix(18)    &
+            sol_silt(l,jj) = (sol_silt(l,jj) * sol_msn(l) + smix(18)    
      &           * sol_msm(l)) / sol_mass(l)
-            sol_sand(l,jj) = (sol_sand(l,jj) * sol_msn(l) + smix(19)    &
+            sol_sand(l,jj) = (sol_sand(l,jj) * sol_msn(l) + smix(19)    
      &           * sol_msm(l)) / sol_mass(l)
-!            sol_rock(l,jj) = (sol_rock(l,jj) * sol_msn(l) + smix(20) * sol_msm(l)) / sol_mass(l)
+!  sol_rock(l,jj) = (sol_rock(l,jj) * sol_msn(l) + smix(20) * sol_msm(l)) / sol_mass(l)
 !            sol_ph(l,jj) = (sol_ph(l,jj) * sol_msn(l) + smix(21)        &
 !     &           * sol_msm(l)) / sol_mass(l) !! mjw rev 490 simplified, PH not linear
 !            sol_cal(l,jj) = (sol_cal(l,jj) * sol_msn(l) + smix(22)      &
 !     &           * sol_msm(l)) / sol_mass(l) !! mjw rev 490 
 
 
-                  
+        
             do k = 1, npmx
               sol_pst(k,jj,l) = sol_pst(k,jj,l) * WW3 + smix(20+k) * WW4
             end do
@@ -356,7 +375,7 @@
             call tillfactor(jj,bmix,emix,dtil,sol_thick)
         end if
 
-            !! summary calculations
+       !! summary calculations
         if (curyr > nyskip) then
             sumix(jj) = sumix(jj) + emix
         end if
