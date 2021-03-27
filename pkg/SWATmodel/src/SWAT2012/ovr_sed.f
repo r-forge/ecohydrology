@@ -18,7 +18,7 @@
 !!    laiday(:)   |m2/m2         |leaf area index
 !!    rainsub(:,:)|mm H2O        |precipitation for the time step during the
 !!                               |day in HRU
-!!    eros_spl        |none          |coefficient of splash erosion varing 0.9-3.1
+!!    eros_spl   |none          |coefficient of splash erosion varing 0.9-3.1
 !!    urblu(:)    |none          |urban land type identification number from
 !!                               |urban.dat
 !!    usle_k(:)   |              |USLE equation soil erodibility (K) factor
@@ -36,23 +36,23 @@
 !!    ~ ~ ~ LOCAL DEFINITIONS ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!        bed_shear            |N/m2               |shear stress b/w stream bed and flow      
-!!        erod_k            |g/J               |soil detachability value      
-!!    jj                  |none          |HRU number
-!!    kk                  |none          |time step of the day
-!!        ke_direct            |J/m2/mm         |rainfall kinetic energy of direct throughfall
-!!        ke_leaf            |J/m2/mm         |rainfall kinetic energy of leaf drainage
-!!        ke_total            |J/m2            |total kinetic energy of rainfall
-!!        percent_clay      |percent         |percent clay
-!!        percent_sand      |percent         |percent sand
-!!        percent_silt      |percent         |percent silt
-!!        pheff           |m                     |effective plant height
-!!        rdepth_direct      |mm                     |rainfall depth of direct throughfall
-!!        rdepth_leaf      |mm                     |rainfall depth of leaf drainage
-!!        rdepth_tot      |mm                     |total rainfall depth 
-!!    rintnsty          |mm/hr         |rainfall intensity
-!!        sedspl            |tons               |sediment yield by rainfall impact during time step
-!!        sedov             |tons               |sediment yield by overland flow during time step
+!!   bed_shear  |N/m2     |shear stress b/w stream bed and flow 
+!!   erod_k  |g/J     |soil detachability value 
+!!    jj   |none          |HRU number
+!!    kk   |none          |time step of the day
+!!   ke_direct  |J/m2/mm    |rainfall kinetic energy of direct throughfall
+!!   ke_leaf  |J/m2/mm    |rainfall kinetic energy of leaf drainage
+!!   ke_total  |J/m2       |total kinetic energy of rainfall
+!!   percent_clay |percent    |percent clay
+!!   percent_sand |percent    |percent sand
+!!   percent_silt |percent    |percent silt
+!!   pheff      |m      |effective plant height
+!!   rdepth_direct |mm      |rainfall depth of direct throughfall
+!!   rdepth_leaf |mm      |rainfall depth of leaf drainage
+!!   rdepth_tot |mm      |total rainfall depth 
+!!    rintnsty     |mm/hr         |rainfall intensity
+!!   sedspl  |tons     |sediment yield by rainfall impact during time step
+!!   sedov   |tons     |sediment yield by overland flow during time step
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
@@ -61,16 +61,16 @@
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
 !!  Splash erosion model is adopted from EUROSEM model developed by Morgan (2001).
-!!      Rill/interill erosion model is adoped from Modified ANSWERS model by Park et al.(1982)
+!! Rill/interill erosion model is adoped from Modified ANSWERS model by Park et al.(1982)
 !!  Code developed by J. Jeong and N. Kannan, BRC.
 
       use parm
 
       integer :: k, j
-      real :: percent_clay, percent_silt, percent_sand, erod_k
-      real :: ke_direct, ke_leaf, ke_total,pheff, c
-      real :: rdepth_direct, rdepth_leaf, rdepth_tot, canopy_cover
-      real :: bed_shear, sedov, sedspl, rain_d50, rintnsty
+      real*8 :: percent_clay, percent_silt, percent_sand, erod_k
+      real*8 :: ke_direct, ke_leaf, ke_total,pheff, c
+      real*8 :: rdepth_direct, rdepth_leaf, rdepth_tot, canopy_cover
+      real*8 :: bed_shear, sedov, sedspl, rain_d50, rintnsty
 
       j = ihru
       
@@ -111,8 +111,8 @@
         erod_k = 1.9 !Sand 
       end if
       
- !!      canopy cover based on leaf area index
-!!      canopy cover is assumed to be 100% if LAI>=1
+ !! canopy cover based on leaf area index
+!! canopy cover is assumed to be 100% if LAI>=1
         if(laiday(j)>=1.) then
           canopy_cover = 1.
         else
@@ -120,7 +120,7 @@
         end if
 
       do k=1,nstep
-        rintnsty = 60. * rainsub(j,k) / Real(idt) 
+        rintnsty = 60. * rainsub(j,k) / dfloat(idt) 
         rain_d50 = 0.188 * rintnsty ** 0.182
 
         if(rintnsty>0) then
@@ -140,18 +140,18 @@
         else
           ke_direct = 0.
           ke_leaf = 0.
-            rdepth_tot = 0.
+       rdepth_tot = 0.
           rdepth_leaf = 0.
           rdepth_direct = 0.
         endif
 
       !! total kinetic energy by rainfall (J/m^2)
         ke_total = 0.001 * (rdepth_direct * ke_direct + rdepth_leaf * 
-     &        ke_leaf)
+     &   ke_leaf)
 
       !! total soil detachment by raindrop impact
-        sedspl = erod_k * ke_total * exp(-eros_spl * hhqday(k)/1000.)* 
-     &        hru_km(j) ! tons
+        sedspl = erod_k * ke_total * exp(-eros_spl * hhqday(k) / 1000.) * 
+     &   hru_km(j) ! tons
 
       !! Impervious area of HRU
         if(urblu(j)>0) sedspl = sedspl * (1.- fimp(urblu(j)))
@@ -162,16 +162,24 @@
 
       !! Overland flow erosion 
     !! cover and management factor used in usle equation (ysed.f)
-        c = Exp((-.2231 - cvm(idplt(j))) *                                     & 
-     &        Exp(-.00115 * sol_cov(j)) + cvm(idplt(j)))
+        if (idplt(j) > 0) then     
+          c = Exp((-.2231 - cvm(idplt(j))) *                            
+     &       Exp(-.00115 * sol_cov(j)) + cvm(idplt(j)))              
+        else
+          if (sol_cov(j) > 1.e-4) then
+            c = Exp(-.2231 * Exp(-.00115 * sol_cov(j)))               
+          else
+            c = .8
+          end if
+        end if
       !! specific weight of water at 5 centigrate =9807N/m3
         bed_shear = 9807 * (hhqday(k) / 1000.) * hru_slp(j) ! N/m2
         sedov = 11.02 * rill_mult * usle_k(j) * c_factor * c * 
-     &        bed_shear ** eros_expo ! kg/hour/m2
-        if(ievent>=2) then
+     &   bed_shear ** eros_expo ! kg/hour/m2
+        if(ievent > 0) then
           sedov = 16.667 * sedov * hru_km(j) * idt ! tons per time step
         else
-          sedov = 24000. * sedov * hru_km(j)      ! tons per day
+          sedov = 24000. * sedov * hru_km(j) ! tons per day
         endif
 
       !! Impervious area of HRU

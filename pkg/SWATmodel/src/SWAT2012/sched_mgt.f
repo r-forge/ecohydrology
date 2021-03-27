@@ -55,9 +55,10 @@
             call plantop 
 
             if (imgt == 1) then
-              write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida,   &
-     &        cpnm(idplt(j))," PLANT", phubase(j), phuacc(j), sol_sw(j),&
-     &        bio_ms(j), sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j)
+              write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida,   
+     &        hru_km(j),cpnm(idplt(j))," PLANT", phubase(j), phuacc(j), 
+     &        sol_sw(j),bio_ms(j), sol_rsd(1,j),sol_sumno3(j),
+     &        sol_sumsolp(j)
             end if
 
  
@@ -80,12 +81,12 @@
             
             if (imgt ==1) then
               write (143, 1002) subnum(j), hruno(j), iyr, i_mo, 
-     *        iida, "        ",
+     *        iida, hru_km(j), "        ",
      *        "IRRIGATE", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j), sol_sumno3(j),sol_sumsolp(j),irramt(j),
      *        irr_sc(j), irr_no(j)
-1002  format (a5,1x,a4,3i6,2a15,7f10.2,10x,f10.2,70x,2i7)
-      
+1002  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,10x,f10.2,70x,2i7)
+             
             end if
             
           
@@ -99,11 +100,11 @@
             
             if (imgt ==1) then
               write (143, 1004) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        fertnm(ifrttyp),
+     *        hru_km(j), fertnm(ifrttyp),
      *        "   FERT", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j), sol_sumno3(j),sol_sumsolp(j),frt_kg,
      *        fertno3, fertnh3, fertorgn, fertsolp, fertorgp
-1004  format (a5,1x,a4,3i6,2a15,7f10.2,20x,f10.2,10x,5f10.2)
+1004  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,20x,f10.2,10x,5f10.2)
             endif
             
    
@@ -117,7 +118,7 @@
             
             if (imgt ==1) then
               write (143, 1004) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        pname(ipest),
+     *        hru_km(j), pname(ipest),
      *        "   PEST", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j),pst_kg
             endif
@@ -132,12 +133,14 @@
             
             if (imgt ==1) then
               write (143, 1001) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        cpnm(idplt(j)),
+     *        hru_km(j), cpnm(idplt(j)),
      *        "HARV/KILL", phubase(j), phuacc(j), sol_sw(j),biomass, 
      *        sol_rsd(1,j), sol_sumno3(j),sol_sumsolp(j),yield,
      *        strsn_sum(j), strsp_sum(j), strstmp_sum(j), strsw_sum(j),
      *        strsa_sum(j)
-1001  format (a5,1x,a4,3i6,2a15,8f10.2,30x,5f10.2) 
+!!1001  format (a5,1x,a4,3i6,2a15,8f10.2,30x,11f10.2)
+1001    format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,8f10.2,30x,5f10.2,14x,
+     *     6f10.2)
             end if 
             
             phubase(j) = 0.
@@ -147,34 +150,31 @@
             idtill = mgt1iop(nop(j),j)
             cnop = mgt4op(nop(j),j)
             
-            call newtillmix(j,0.)
+            call newtillmix(j,0.0D+00)
             
             if (imgt ==1) then
               write (143, 1003) subnum(j), hruno(j),iyr, i_mo, iida, 
-     *        tillnm(idtill),
+     *        hru_km(j), tillnm(idtill),
      *        "TILLAGE", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j), effmix(idtill)
-1003  format (a5,1x,a4,3i6,2a15,7f10.2,30x,f10.2)
+1003  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,30x,f10.2)
             end if
             
           case (7)  !! harvest only operation
-            ihv_gbm = mgt2iop(nop(j),j)
-            hi_ovr = mgt5op(nop(j),j)
+            hi_bms = mgt5op(nop(j),j)
+            hi_rsd = mgt6op(nop(j),j)
             harveff = mgt4op(nop(j),j)
-            if (harveff <= 0.) then harveff = 1.0 
-                
-            if (ihv_gbm == 0) then    
-              call harvestop
-            else
-              call harvgrainop
-            end if
-            
+            if (harveff <= 0.) harveff = 1.0 
+            call harvestop
+
             if (imgt == 1) then
               write (143, 1001) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        cpnm(idplt(j)),
+     *        hru_km(j), cpnm(idplt(j)),
      *        "HARVEST ONLY", phubase(j), phuacc(j),sol_sw(j),bio_ms(j),
-     *        sol_rsd(1,j), yield, strsn_sum(j), strsp_sum(j),
-     *        strstmp_sum(j), strsw_sum(j), strsa_sum(j)
+     *        sol_rsd(1,j), sol_sumno3(j), sol_sumsolp(j), yield, 
+     *        strsn_sum(j), strsp_sum(j), strstmp_sum(j), strsw_sum(j), 
+     *        strsa_sum(j), yieldgrn, yieldbms, yieldtbr, yieldrsd, 
+     *        yieldn, yieldp
             end if
           
           case (8)   !! kill operation
@@ -182,7 +182,7 @@
   
             if (imgt == 1) then 
               write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida,
-     *        "         ",
+     *        hru_km(j), "         ",
      *        "    KILL", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j)
             end if
@@ -206,10 +206,10 @@
 
             if (imgt == 1) then
               write (143, 1005) subnum(j), hruno(j), iyr, i_mo, iida,
-     *        "         ",
+     *        hru_km(j), "         ",
      *        "   GRAZE", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j),manure_kg(j)
-1005  format (a5,1x,a4,3i6,2a15,7f10.2,20x,f10.2)
+1005  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,20x,f10.2)
             end if
           
           case (10)   !! auto irrigation operation 
@@ -222,12 +222,20 @@
             irr_noa(j) = mgt10iop(nop(j),j)
             if (irr_noa(j) <= 0) irr_noa(j) = irrno(j)
             if (irr_noa(j) <= 0) irr_noa(j) = hru_sub(j)
-            if (wstrs_id(j) <= 0.) wstrs_id(j) = 1.     
+            if (wstrs_id(j) <= 0) wstrs_id(j) = 1     
             if (irr_eff(j) > 1.) irr_eff(j) = 0.
             if (irr_eff(j) == 0.) irr_eff(j) = 1.
             if (irr_mx(j) < 1.e-6) irr_mx(j) = 25.4
             if (irr_sca(j) <= 0) irr_sca(j) = irrsc(j)
             irra_flag(ihru) = 1
+          if (imgt ==1) then
+            write (143, 1010) subnum(j), hruno(j), iyr, i_mo, 
+     *      iida, hru_km(j), "        ",
+     *      "SCHED AUTORR", phubase(j), phuacc(j), sol_sw(j), bio_ms(j),
+     *      sol_rsd(1,j), sol_sumno3(j),sol_sumsolp(j)
+1010  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2)
+          end if
+          
             
           case (11)   !! auto fertilizer operation
             iafrttyp(j) = mgt1iop(nop(j),j)
@@ -265,8 +273,8 @@
             
             if (imgt == 1) then
               write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        "         ",
-     *        "STREET SWEEP",phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
+     *        hru_km(j), "         ",
+     *        "STREET SWEEP",phubase(j), phuacc(j), sol_sw(j),bio_ms(j),
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j)
             end if
           
@@ -275,8 +283,8 @@
           
             if (imgt == 1) then
               write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        "         ","RELEASE/IMPOUND", phubase(j),phuacc(j),
-     *        sol_sw(j),bio_ms(j),sol_rsd(1,j),sol_sumno3(j),
+     *        hru_km(j), "         ","RELEASE/IMPOUND", phubase(j),
+     *        phuacc(j),sol_sw(j),bio_ms(j),sol_rsd(1,j),sol_sumno3(j),
      *        sol_sumsolp(j)
             end if
           
@@ -303,7 +311,7 @@
             call burnop
             if (imgt == 1) then
               write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        "         ",
+     *        hru_km(j), "         ",
      *        "      BURN", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j)
             end if
@@ -321,7 +329,7 @@
         nop(j) = 1
       end if
       
-1000  format (a5,1x,a4,3i6,2a15,7f10.2)    
+1000  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,19f10.2)    
       return
 
       end

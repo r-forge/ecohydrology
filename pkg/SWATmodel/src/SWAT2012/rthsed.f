@@ -33,7 +33,7 @@
 !!    inum1       |none          |reach number
 !!    inum2       |none          |inflow hydrograph storage location number
 !!    phi(5,:)    |m^3/s         |flow rate when reach is at bankfull depth
-!!    prf         |none          |Peak rate adjustment factor for sediment routing in the channel. Allows impact of
+!!    prf(:)      |none          |Reach peak rate adjustment factor for sediment routing in the channel. Allows impact of
 !!                               |peak flow rate on sediment routing and channel reshaping to be taken into account
 !!    rhy(:)      |m H2O         |main channel hydraulic radius
 !!    rnum1       |none          |fraction of overland flow
@@ -88,13 +88,13 @@
       use parm
 
       integer :: jrch, ii
-      real :: qin, qdin, sedin, vc, cyin, cych, depnet, deg, dep
-      real :: depdeg, dot, ycoeff, Reynolds_g, visco_h2o, tmpw
-      real :: channel_d50, particle_specific_gravity, Fr_g, Fr_gc
-      real :: log10sedcon, sedcon, deg24, dep24
-      real :: vfall, coefa, coefb, coefc, coefd, coefe
+      real*8 :: qin, qdin, sedin, vc, cyin, cych, depnet, deg, dep
+      real*8 :: depdeg, dot, ycoeff, Reynolds_g, visco_h2o, tmpw
+      real*8 :: channel_d50, particle_specific_gravity, Fr_g, Fr_gc
+      real*8 :: log10sedcon, sedcon, deg24, dep24
+      real*8 :: vfall, coefa, coefb, coefc, coefd, coefe
       
-      real :: thbase,  shear_stress, vshear, deg1, deg2, d_fract, dat2
+      real*8 :: thbase,  shear_stress, vshear, deg1, deg2, d_fract, dat2
 
       jrch = 0; deg24=0.; dep24=0
       jrch = inum1
@@ -118,12 +118,13 @@
          if (ii == 1) then
            sedin = hhvaroute(3,inum2,ii) * (1. - rnum1) + sedst(jrch)
          else
-             sedin = hhvaroute(3,inum2,ii) * (1. - rnum1) + hsedst(ii-1)
+        sedin = hhvaroute(3,inum2,ii) * (1. - rnum1) + hsedst(ii-1)
          end if
 
        if (sedin < 1.e-6) sedin = 0.
        !! initialize reach peak runoff rate
-       peakr = prf * hsdti(ii)
+       !!  peakr = prf(ii) * hsdti(ii)      commented by nbs 082714
+       peakr = prf(jrch) * hsdti(ii)
 
        !! calculate flow velocity
        vc = 0.
@@ -153,83 +154,81 @@
 
          !! water viscosity (m2/s) using 3rd order polynomial interpolation
          visco_h2o = -3.e-6 * tmpw ** 3 + 0.0006 * tmpw ** 2 - 
-     &         0.0469 * tmpw + 1.7517            
+     &    0.0469 * tmpw + 1.7517  
          visco_h2o = visco_h2o * 1.e-6
    
          !! Use either Brownlie or Yang Model for bead load calculation
          select case (sed_ch)
            case (0)
-               !! Bagnold's (1977) stream power
-           cych = spcon * vc ** spexp
-             case (1)
-               !!Brownlie Model 
-               !! grain Reynolds number
-               Reynolds_g = sqrt(9.81 * channel_d50 ** 3) / visco_h2o
+          !! Bagnold's (1977) stream power
+           cych = spcon(jrch) * vc ** spexp(jrch)
+        case (1)
+          !!Brownlie Model 
+          !! grain Reynolds number
+          Reynolds_g = sqrt(9.81 * channel_d50 ** 3) / visco_h2o
  
-               !!critical shear stress for grain Froude number
-               ycoeff = (sqrt(particle_specific_gravity - 1.) * 
-     &                     Reynolds_g) ** (-0.6)
-               shear_stress = 0.22 * ycoeff + 0.06 * 10 ** (-7.7*ycoeff)
+          !!critical shear stress for grain Froude number
+          ycoeff = (sqrt(particle_specific_gravity - 1.) * 
+     &                Reynolds_g) ** (-0.6)
+          shear_stress = 0.22 * ycoeff + 0.06 * 10 ** (-7.7 * ycoeff)
 
-               !! critical grain Froude number
-               fr_gc = 4.596 * shear_stress ** 0.5293 * ch_s(2,jrch) ** 
-     &               (-0.1405) 
+          !! critical grain Froude number
+          fr_gc = 4.596 * shear_stress ** 0.5293 * ch_s(2,jrch) ** (-0.1405) 
      &               * sig_g ** (-0.1606)
 
-               !! grain Froude number
-               fr_g = vc / sqrt((particle_specific_gravity - 1.) * 
-     &                9.81 * (ch_d50 / 1000.))
+          !! grain Froude number
+          fr_g = vc / sqrt((particle_specific_gravity - 1.) * 
+     &      9.81 * (ch_d50 / 1000.))
 
-               !! sediment concentration at the channel outlet [ppm, or g/m3]
-               if(fr_g>fr_gc) then
-                 sedcon = 7115 * 1.268 * (fr_g - fr_gc) ** 1.978 * 
-     &          ch_s(2,jrch) **0.6601*(rhy(ii)/channel_d50)**(-0.3301)
-               else
-                 sedcon = 0.
-               endif
-               cych = sedcon * 1.e-6 !tons/m3             
-            
-             case (2)
-               !!Yang Model
-               !! particle fall velocity
-               vfall = 9.81 * channel_d50 ** 2 * 
-     &                (particle_specific_gravity - 1.)
-     &                / (18.* visco_h2o)
-               
-               !! shear velocity
-               vshear = sqrt(9.81 * rhy(ii) * ch_s(2,jrch))
+          !! sediment concentration at the channel outlet [ppm, or g/m3]
+          if(fr_g>fr_gc) then
+            sedcon = 7115 * 1.268 * (fr_g - fr_gc) ** 1.978 * 
+     &     ch_s(2,jrch) ** 0.6601 * (rhy(ii) / channel_d50) ** (-0.3301)
+          else
+            sedcon = 0.
+          endif
+          cych = sedcon * 1.e-6 !tons/m3   
+       
+        case (2)
+          !!Yang Model
+          !! particle fall velocity
+          vfall = 9.81 * channel_d50 ** 2 * (particle_specific_gravity - 1.)
+     &      / (18.* visco_h2o)
+          
+          !! shear velocity
+          vshear = sqrt(9.81 * rhy(ii) * ch_s(2,jrch))
 
-               coefa = vfall * channel_d50 / visco_h2o
-               coefe = vshear * channel_d50 / visco_h2o
-             
-               if(coefe<70) then
-                 if (coefe<1.2) coefe = 1.2
-                   coefb = 2.5 / (log10(coefe) - 0.06) + 0.66
-               elseif(coefe>=70) then
-                 coefb = 2.05
-               else
-                 write(*,*) 'Error in implementing Yang erosion model'
-!!                 stop
-               endif
+          coefa = vfall * channel_d50 / visco_h2o
+          coefe = vshear * channel_d50 / visco_h2o
+        
+          if(coefe<70) then
+            if (coefe<1.2) coefe = 1.2
+         coefb = 2.5 / (log10(coefe) - 0.06) + 0.66
+          elseif(coefe>=70) then
+            coefb = 2.05
+          else
+            write(*,*) 'Error in implementing Yang erosion model'
+!!       stop
+          endif
 
-               coefc = vshear / vfall
-               coefd = vc * ch_s(2,jrch) / vfall - coefb * ch_s(2,jrch)
-                if(coefd<=0) coefd = 1.e-6
-               
-               if(ch_d50<=2.0) then ! in millimeter 
-                 !! use sand equation (1973)
-                 log10sedcon = 5.435 - 0.286 * log10(coefa) - 0.457 * 
+          coefc = vshear / vfall
+          coefd = vc * ch_s(2,jrch) / vfall - coefb * ch_s(2,jrch)
+      if(coefd<=0) coefd = 1.e-6
+          
+          if(ch_d50<=2.0) then ! in millimeter 
+            !! use sand equation (1973)
+            log10sedcon = 5.435 - 0.286 * log10(coefa) - 0.457 * 
      &           log10(coefc) +(1.799 - 0.409 *log10(coefa) - 0.314 *
      &           log10(coefc)) * log10(coefd)
 
-               elseif(ch_d50>2.0) then 
-                 !! use gravel equation (1984)
-                 log10sedcon = 6.681 - 0.633 * log10(coefa) - 4.816 * 
+          elseif(ch_d50>2.0) then 
+            !! use gravel equation (1984)
+            log10sedcon = 6.681 - 0.633 * log10(coefa) - 4.816 * 
      &           log10(coefc) +(2.784 - 0.305 *log10(coefa) - 0.282 * 
      &           log10(coefc)) * log10(coefd)
-               endif
-               sedcon = 10 ** log10sedcon !ppm
-                  cych = sedcon * 1.e-6 !tons/m3             
+          endif
+          sedcon = 10 ** log10sedcon !ppm
+        cych = sedcon * 1.e-6 !tons/m3   
          end select
 
          depnet = qin * (cych - cyin)
@@ -259,7 +258,7 @@
                deg1 = 0.
                deg2 = 0.
            endif
-             hsedyld(ii) = sedin + deg1 + deg2 - dep
+        hsedyld(ii) = sedin + deg1 + deg2 - dep
            if (hsedyld(ii) < 1.e-12) hsedyld(ii) = 0.
 
 

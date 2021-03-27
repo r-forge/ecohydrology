@@ -171,7 +171,8 @@
       use parm
 
       integer :: j, l, it
-      real :: dmi, dmii, gc, gc1, swf, frt_t, xx
+      real*8 :: dmi, dmii, gc, gc1, swf, frt_t, xx
+      real*8 :: LMF, LSF
 
       j = 0
       j = ihru
@@ -269,49 +270,49 @@
      &              EXP(BLG1-BLG2*phuacc(j)))
 
                 !if (k == 1) then
-                    sf = 0.05
+               sf = 0.05
                 !else
-                    !sf = 0.1
-                !end if      
+               !sf = 0.1
+                !end if 
 
                !kg/ha  
-                sol_min_n = 0.      
+                sol_min_n = 0. 
                 sol_min_n = (sol_no3(1,j)+sol_nh3(1,j))
-                                
+                           
                 resnew = (dmii - bio_ms(j)) 
-                resnew_n = (dmii - bio_ms(j)) * pltfr_n(j)             
-                  resnew_ne = resnew_n + sf * sol_min_n
-                      !Not sure 1000 should be here or not!
-                  !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
-                  RLN = (resnew * CLG/(resnew_n+1.E-5))
-                  RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
-                  
-                  LMF = 0.85 - 0.018 * RLN
-                  if (LMF <0.01) then
-                      LMF = 0.01
-                  else
-                      if (LMF >0.7) then
-                          LMF = 0.7
-                      end if
-                  end if              
+                resnew_n = (dmii - bio_ms(j)) * pltfr_n(j)        
+             resnew_ne = resnew_n + sf * sol_min_n
+                 !Not sure 1000 should be here or not!
+             !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
+             RLN = (resnew * CLG/(resnew_n+1.E-5))
+             RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
+             
+             LMF = 0.85 - 0.018 * RLN
+             if (LMF <0.01) then
+                 LMF = 0.01
+             else
+                 if (LMF >0.7) then
+                     LMF = 0.7
+                 end if
+             end if         
                 !if ((resnew * CLG/(resnew_n+1.E-5)) < 47.22) then
-                    !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
+               !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
                 !else
-                    !    LMF = 0.
-                !end if       
+               !    LMF = 0.
+                !end if  
 
                 LSF =  1 - LMF  
-                
+           
                 sol_LM(1,j) = sol_LM(1,j) + LMF * resnew
                 sol_LS(1,j) = sol_LS(1,j) + LSF * resnew
-                
+           
 
                 
                 !here a simplified assumption of 0.5 LSL
                 !LSLF = 0.0
                 !LSLF = CLG          
                 
-                sol_LSL(1,j) = sol_LSL(1,j) + RLR*resnew                
+                sol_LSL(1,j) = sol_LSL(1,j) + RLR*resnew           
                 sol_LSC(1,j) = sol_LSC(1,j) + 0.42*LSF * resnew  
                 
                 sol_LSLC(1,j) = sol_LSLC(1,j) + RLR*0.42* resnew
@@ -320,17 +321,17 @@
                 !X3 = MIN(X6,0.42*LSF * resnew/150) 
                 
                 if (resnew_ne >= (0.42 * LSF * resnew /150)) then
-                   sol_LSN(1,j) = sol_LSN(1,j)+0.42*LSF*resnew / 150
-                   sol_LMN(1,j) = sol_LMN(1,j) + resnew_ne - 
+                sol_LSN(1,j) = sol_LSN(1,j) + 0.42 * LSF * resnew / 150
+                sol_LMN(1,j) = sol_LMN(1,j) + resnew_ne - 
      &                         (0.42 * LSF * resnew / 150) + 1.E-25
                 else
-                     sol_LSN(1,j) = sol_LSN(1,j) + resnew_ne
-                     sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
-                end if      
-              
-                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5)      
-                
-                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew      
+                sol_LSN(1,j) = sol_LSN(1,j) + resnew_ne
+                sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
+                end if 
+         
+                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5) 
+           
+                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew 
                 !LMNF = sol_LMN(1,j)/(sol_LM(1,j) + 1.E-5)           
                 
                 !update no3 and nh3 in soil
@@ -353,25 +354,25 @@
           
           if (cswat == 0) then
 
-          sol_no3(l,j) = sol_no3(l,j) + manure_kg(j)               *    &
+          sol_no3(l,j) = sol_no3(l,j) + manure_kg(j)               *    
      &                 (1. - fnh3n(it)) * fminn(it)
-          sol_fon(l,j) = sol_fon(l,j) + manure_kg(j)               *    &
+          sol_fon(l,j) = sol_fon(l,j) + manure_kg(j)               *    
      &                 forgn(it)
-          sol_nh3(l,j) = sol_nh3(l,j) + manure_kg(j)               *    &
+          sol_nh3(l,j) = sol_nh3(l,j) + manure_kg(j)               *    
      &                 fnh3n(it) * fminn(it)
-          sol_solp(l,j) = sol_solp(l,j) + manure_kg(j)             *    &
+          sol_solp(l,j) = sol_solp(l,j) + manure_kg(j)             *    
      &                 fminp(it)
-          sol_fop(l,j) = sol_fop(l,j) + manure_kg(j)               *    &
+          sol_fop(l,j) = sol_fop(l,j) + manure_kg(j)               *    
      &                 forgp(it)
           end if
           if (cswat == 1) then
-          sol_no3(l,j) = sol_no3(l,j) + manure_kg(j)               *    &
+          sol_no3(l,j) = sol_no3(l,j) + manure_kg(j)               *    
      &                 (1. - fnh3n(it)) * fminn(it)
           sol_mn(l,j) = sol_mn(l,j) + manure_kg(j)                 *
      &                 forgn(it)
-          sol_nh3(l,j) = sol_nh3(l,j) + manure_kg(j)               *    &
+          sol_nh3(l,j) = sol_nh3(l,j) + manure_kg(j)               *    
      &                 fnh3n(it) * fminn(it)
-          sol_solp(l,j) = sol_solp(l,j) + manure_kg(j)             *    &
+          sol_solp(l,j) = sol_solp(l,j) + manure_kg(j)             *    
      &                 fminp(it)
           sol_mp(l,j) = sol_mp(l,j) + manure_kg(j)               *
      &                 forgp(it)          
@@ -389,7 +390,7 @@
           orgc_f = 0.35  
           X1 = manure_kg(j)
           X8 = X1 * orgc_f          
-          RLN = .175 *(orgc_f)/(fminp(it) + forgn(it) + 1.e-5)
+          RLN = .175 *(orgc_f)/(fminn(it) + forgn(it) + 1.e-5)
           X10 = .85-.018*RLN
           if (X10<0.01) then
             X10 = 0.01
@@ -452,7 +453,7 @@
           bactps(j) = gc1 * bactpdb(it) * frt_t * 100. + bactps(j)
           bactps(j) = (1. - bactkddb(it)) * bactps(j)
 
-          bactlpq(j) = gc1 * bactlpdb(it) * frt_t * 100. + bactlpq(j)     
+          bactlpq(j) = gc1 * bactlpdb(it) * frt_t * 100. + bactlpq(j)
           bactlpq(j) = bactkddb(it) * bactlpq(j)
 
           bactlps(j) = gc1 * bactlpdb(it) * frt_t * 100. + bactlps(j)
@@ -472,27 +473,27 @@
 
         !! summary calculations
         !! I do not understand these summary calculations Armen March 2009
-        grazn = grazn + manure_kg(j)               *                    &
+        grazn = grazn + manure_kg(j)               *                    
      &               (fminn(it) + forgn(it))
-        grazp = grazp + manure_kg(j)               *                    &
+        grazp = grazp + manure_kg(j)               *                    
      &               (fminp(it) + forgp(it))
         tgrazn(j) = tgrazn(j) + grazn
         tgrazp(j) = tgrazp(j) + grazp
 
         if (curyr > nyskip) then
-          wshd_ftotn = wshd_ftotn + manure_kg(j)               *        &
+          wshd_ftotn = wshd_ftotn + manure_kg(j)               *        
      &               hru_dafr(j) * (fminn(it) + forgn(it))
-          wshd_forgn = wshd_forgn + manure_kg(j)               *        &
+          wshd_forgn = wshd_forgn + manure_kg(j)               *        
      &               hru_dafr(j) * forgn(it)
-          wshd_fno3 = wshd_fno3 + manure_kg(j)               *          &
+          wshd_fno3 = wshd_fno3 + manure_kg(j)               *          
      &               hru_dafr(j) * fminn(it) * (1. - fnh3n(it))
-          wshd_fnh3 = wshd_fnh3 + manure_kg(j)               *          &
+          wshd_fnh3 = wshd_fnh3 + manure_kg(j)               *          
      &               hru_dafr(j) * fminn(it) * fnh3n(it)
-          wshd_ftotp = wshd_ftotp + manure_kg(j)               *        &
+          wshd_ftotp = wshd_ftotp + manure_kg(j)               *        
      &               hru_dafr(j) * (fminp(it) + forgp(it))
-          wshd_fminp = wshd_fminp + manure_kg(j)               *        &
+          wshd_fminp = wshd_fminp + manure_kg(j)               *        
      &               hru_dafr(j) * fminp(it)
-          wshd_forgp = wshd_forgp + manure_kg(j)               *        &
+          wshd_forgp = wshd_forgp + manure_kg(j)               *        
      &               hru_dafr(j) * forgp(it)
   !       yldkg(nro(j),1,j) = yldkg(nro(j),1,j) + (dmi - bio_ms(j))
       yldkg(icr(j),j)=yldkg(icr(j),j) + (dmi - bio_ms(j))

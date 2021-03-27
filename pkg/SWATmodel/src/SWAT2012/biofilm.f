@@ -129,16 +129,16 @@
       use parm
 
       integer :: jrch
-      real :: wtrin, chlin, algin, orgnin, ammoin, nitratin, nitritin
-      real :: orgpin, dispin, cbodin, disoxin, tday, wtmp, fll, gra
-      real :: lambda, fnn, fpp, algi, fl_1, xx, yy, zz, ww, cinn
-      real :: uu, vv, cordo, f1, algcon, orgncon, nh3con, no2con, no3con
-      real :: orgpcon, solpcon, cbodcon, o2con, wtrtot, bc1mod, bc2mod
-      real :: thgra = 1.047, thrho = 1.047, thrs1 = 1.024
-      real :: thrs2 = 1.074, thrs3 = 1.074, thrs4 = 1.024, thrs5 = 1.024
-      real :: thbc1 = 1.083, thbc2 = 1.047, thbc3 = 1.047, thbc4 = 1.047
-      real :: thrk1 = 1.047, thrk2 = 1.024, thrk3 = 1.024, thrk4 = 1.060
-!      real :: thrk5 = 1.047, thrk6 = 1.0, thrs6 = 1.024, thrs7 = 1.0
+      real*8 :: wtrin, chlin, algin, orgnin, ammoin, nitratin, nitritin
+      real*8 :: orgpin, dispin, cbodin, disoxin, tday, wtmp, fll, gra
+      real*8 :: lambda, fnn, fpp, algi, fl_1, xx, yy, zz, ww, cinn
+      real*8 :: uu, vv, cordo, f1, algcon, orgncon, nh3con, no2con, no3con
+      real*8 :: orgpcon, solpcon, cbodcon, o2con, wtrtot, bc1mod, bc2mod
+      real*8 :: thgra = 1.047, thrho = 1.047, thrs1 = 1.024
+      real*8 :: thrs2 = 1.074, thrs3 = 1.074, thrs4 = 1.024, thrs5 = 1.024
+      real*8 :: thbc1 = 1.083, thbc2 = 1.047, thbc3 = 1.047, thbc4 = 1.047
+      real*8 :: thrk1 = 1.047, thrk2 = 1.024, thrk3 = 1.024, thrk4 = 1.060
+!      real*8 :: thrk5 = 1.047, thrk6 = 1.0, thrs6 = 1.024, thrs7 = 1.0
 
       jrch = 0
       jrch = inum1
@@ -185,7 +185,7 @@
          solpcon = 0.
          cbodcon = 0.
          o2con = 0.
-         rch_cbod(jrch) = amax1(1.e-6,rch_cbod(jrch))
+         rch_cbod(jrch) = dmax1(1.e-6,rch_cbod(jrch))
          wtrtot = wtrin + rchwtr
          algcon = (algin * wtrin + algae(jrch) * rchwtr) / wtrtot
          orgncon = (orgnin * wtrin + organicn(jrch) * rchwtr) / wtrtot
@@ -257,7 +257,7 @@
          !! calculate light extinction coefficient 
          !! (algal self shading) QUAL2E equation III-12
          if (ai0 * algcon > 1.e-6) then
-           lambda = lambda0 + (lambda1 * ai0 * algcon) + lambda2 *      &
+           lambda = lambda0 + (lambda1 * ai0 * algcon) + lambda2 *      
      &                                        (ai0 * algcon) ** (.66667)
          else
            lambda = lambda0
@@ -286,7 +286,7 @@
          !! daylight average light intensity QUAL2E equation III-7b
          fl_1 = 0.
          fll = 0.
-         fl_1 = (1. / (lambda * rchdep)) *                              &
+         fl_1 = (1. / (lambda * rchdep)) *                              
      &        Log((k_l + algi) / (k_l + algi * (Exp(-lambda * rchdep))))
          fll = 0.92 * (dayl(hru1(jrch)) / 24.) * fl_1
 
@@ -312,8 +312,8 @@
          !! (phytoplanktonic algae)
          !! QUAL2E equation III-2
          algae(jrch) = 0.
-         algae(jrch) = algcon + (Theta(gra,thgra,wtmp) * algcon -       &
-     &    Theta(rhoq,thrho,wtmp) * algcon - Theta(rs1(jrch),thrs1,wtmp) &
+         algae(jrch) = algcon + (Theta(gra,thgra,wtmp) * algcon -       
+     &    Theta(rhoq,thrho,wtmp) * algcon - Theta(rs1(jrch),thrs1,wtmp) 
      &                                         / rchdep * algcon) * tday
          if (algae(jrch) < 1.e-6) algae(jrch) = 0.
       !! JGA added to set algae limit *****
@@ -337,7 +337,7 @@
          rch_cbod(jrch) = cbodcon - (yy + zz) * tday
          if (rch_cbod(jrch) < 1.e-6) rch_cbod(jrch) = 0.
          if (rch_cbod(jrch) > dcoef * cbodcon) rch_cbod(jrch) = dcoef * 
-     &         cbodcon
+     &    cbodcon
 
          !! calculate dissolved oxygen concentration if reach at 
          !! end of day QUAL2E section 3.6 equation III-28
@@ -348,7 +348,7 @@
          yy = 0.
          zz = 0.
          uu = Theta(rk2(jrch),thrk2,wtmp) * (soxy - o2con)
-         vv = (ai3 * Theta(gra,thgra,wtmp) - ai4 *                      &
+         vv = (ai3 * Theta(gra,thgra,wtmp) - ai4 *                      
      &                                  Theta(rhoq,thrho,wtmp)) * algcon
          ww = Theta(rk1(jrch),thrk1,wtmp) * cbodcon
          xx = Theta(rk4(jrch),thrk4,wtmp) / (rchdep * 1000.)
@@ -357,7 +357,7 @@
          rch_dox(jrch) = 0.
          rch_dox(jrch) = o2con + (uu + vv - ww - xx - yy - zz) * tday
          if (rch_dox(jrch) < 1.e-6) rch_dox(jrch) = 0.
-           if (rch_dox(jrch) > dcoef * o2con) rch_dox(jrch) = dcoef * o2con
+         if (rch_dox(jrch) > dcoef * o2con) rch_dox(jrch) = dcoef * o2con
 !! end oxygen calculations
 
 !! nitrogen calculations
@@ -375,13 +375,13 @@
          organicn(jrch) = 0.
          organicn(jrch) = orgncon + (xx - yy - zz) * tday
          if (organicn(jrch) < 1.e-6) organicn(jrch) = 0.
-            if(organicn(jrch) > dcoef * orgncon) organicn(jrch) = dcoef * 
-     &       orgncon
+       if(organicn(jrch) > dcoef * orgncon) organicn(jrch) = dcoef * 
+     &  orgncon
 
         !! calculate fraction of algal nitrogen uptake from ammonia
         !! pool QUAL2E equation III-18
         f1 = 0.
-        f1 = p_n * nh3con / (p_n * nh3con + (1. - p_n) * no3con +       &
+        f1 = p_n * nh3con / (p_n * nh3con + (1. - p_n) * no3con +       
      &                                                            1.e-6)
 
         !! calculate ammonia nitrogen concentration at end of day
@@ -421,7 +421,7 @@
         nitraten(jrch) = 0.
         nitraten(jrch) = no3con + (yy - zz) * tday
         if (nitraten(jrch) > dcoef * no3con) nitraten(jrch) = dcoef * 
-     &         no3con
+     &    no3con
       
         if (nitraten(jrch) < 1.e-6) nitraten(jrch) = 0.
 !! end nitrogen calculations
@@ -439,7 +439,7 @@
         organicp(jrch) = orgpcon + (xx - yy - zz) * tday
         if (organicp(jrch) < 1.e-6) organicp(jrch) = 0.
         if (organicp(jrch) > dcoef * orgpcon) organicp(jrch) = dcoef * 
-     &      orgpcon
+     & orgpcon
 
         !! calculate dissolved phosphorus concentration at end
         !! of day QUAL2E section 3.4.2 equation III-25

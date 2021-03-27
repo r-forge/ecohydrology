@@ -75,15 +75,15 @@
 
       use parm
 
-      real, parameter :: bk = .0006
+      real*8, parameter :: bk = .0006
       integer :: j, l
-      real :: rto, rmn1, roc
+      real*8 :: rto, rmn1, roc
 
       j = 0
       j = ihru
 
       rto = 0.
-      rto = psp / (1.-psp)
+      rto = psp(j) / (1.-psp(j))
 
       do l = 1, sol_nly(j)
         rmn1 = 0.

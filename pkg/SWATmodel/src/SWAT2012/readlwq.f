@@ -84,8 +84,8 @@
 
       integer :: eof
       character (len=80) :: titldum
-      real :: orgpi, solpi, orgni, no3i, nh3i, no2i
-      real :: lkarea
+      real*8 :: orgpi, solpi, orgni, no3i, nh3i, no2i
+      real*8 :: lkarea
 
       eof = 0
       titldum = ""
@@ -154,9 +154,17 @@
         if (eof < 0) exit
         read (106,*,iostat=eof) lkspst_act(i)
         if (eof < 0) exit
+        read (106,*,iostat=eof) theta_n(i)
+        if (eof < 0) exit
+        read (106,*,iostat=eof) theta_p(i)
+        if (eof < 0) exit
+        read (106,*,iostat=eof) con_nirr(i)
+        if (eof < 0) exit
+        read (106,*,iostat=eof) con_pirr(i)
+        if (eof < 0) exit
       exit
       end do
-
+      
 !!    convert units
       psetlr(1,i) = psetlr(1,i) / 365.         !m/yr -> m/day
       psetlr(2,i) = psetlr(2,i) / 365.

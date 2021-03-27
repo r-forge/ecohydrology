@@ -42,7 +42,7 @@
       use parm
 
       integer :: j
-      real :: dirt
+      real*8 :: dirt
 
       j = 0
       j = ihru
@@ -52,7 +52,7 @@
       dirt = dirtmx(urblu(j)) * twash(j) / (thalf(urblu(j)) + twash(j))
 
 !! calculate reduced amount of solid built up on impervious areas
-      dirt = dirt *                                                     &
+      dirt = dirt *                                                     
      & (1. - fr_curb * sweepeff)
       if (dirt < 1.e-6) dirt = 0.
 
@@ -64,4 +64,3 @@
 
       return
       end
-

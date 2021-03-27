@@ -81,7 +81,7 @@
       use parm
 
       integer :: j, l
-      real :: t_ch, scmx, xx
+      real*8 :: t_ch, scmx, xx, a, b, c, rto
 
       do j = 1, nhru
 
@@ -89,8 +89,8 @@
 !!    compute time of concentration (sum of overland and channel times)
         t_ch = 0
         t_ov(j) = .0556 * (slsubbsn(j)*ov_n(j)) ** .6 / hru_slp(j) ** .3
-        t_ch = .62 * ch_l1(j) * ch_n(1,hru_sub(j)) ** .75 /             &
-     &      ((da_km * sub_fr(hru_sub(j)))**.125 *                       &
+        t_ch = .62 * ch_l1(j) * ch_n(1,hru_sub(j)) ** .75 /             
+     &      ((da_km * sub_fr(hru_sub(j)))**.125 *                       
      &                                         ch_s(1,hru_sub(j))**.375)
         sub_tc(hru_sub(j)) = t_ov(j) + t_ch
 !! end subbasin !!
@@ -101,20 +101,20 @@
         t_ch = 0
         ch_l1(j) = ch_l1(j) * hru_dafr(j) / sub_fr(hru_sub(j))
         t_ov(j) = .0556 * (slsubbsn(j)*ov_n(j)) ** .6 / hru_slp(j) ** .3
-        t_ch = .62 * ch_l1(j) * ch_n(1,hru_sub(j)) ** .75 /             &
+        t_ch = .62 * ch_l1(j) * ch_n(1,hru_sub(j)) ** .75 /             
      &              ((da_km*hru_dafr(j))**.125*ch_s(1,hru_sub(j))**.375)
         tconc(j) = t_ov(j) + t_ch
 
 !!    compute delivery ratio
       rto = tconc(j) / sub_tc(hru_sub(j))
-      dr_sub(j) = amin1(.95,rto ** .5)
+      dr_sub(j) = dmin1(.95,rto ** .5)
 
 
 !!    compute fraction of surface runoff that is reaching the main channel
-        if (ievent>1) then
-           brt(j) = 1. - Exp(-surlag / (tconc(j) / (idt / 60.)))      !! urban modeling by J.Jeong
+        if (ievent > 0) then
+           brt(j) = 1. - Exp(-surlag(j) / (tconc(j) / (idt / 60.))) !! urban modeling by J.Jeong
         else
-           brt(j) = 1. - Exp(-surlag / tconc(j))
+           brt(j) = 1. - Exp(-surlag(j) / tconc(j))
         endif
         if (isproj == 2) brt(j) = 1.
         
@@ -153,7 +153,7 @@
 
       end do
 
-      if (ievent > 1) then
+      if (ievent > 0) then
 !!    compute unit hydrograph for computing subbasin hydrograph from direct runoff
 
       do isb = 1, msub 
@@ -162,12 +162,12 @@
 
         tb = .5 + .6 * sub_tc(isb) + tb_adj  !baseflow time, hr
 
-        if (tb > 48.) tb = 48.                     !maximum 48hrs
-        tp = .375 * tb                                    ! time to peak flow
+        if (tb > 96.) tb = 96.      !maximum 48hrs
+        tp = .375 * tb      ! time to peak flow
         
         !! convert to time step (from hr), J.Jeong March 2009
-        tb = ceiling(tb * 60./ real(idt))
-        tp = int(tp * 60./ real(idt))         
+        tb = ceiling(tb * 60./ dfloat(idt))
+        tp = int(tp * 60./ dfloat(idt))         
         
         if(tp==0) tp = 1
         if(tb==tp) tb = tb + 1
@@ -177,7 +177,7 @@
         if (iuh==1) then
           do i = 1, itb(isb)
             xi = float(i)
-             if (xi < tp) then           !! rising limb of hydrograph
+        if (xi < tp) then           !! rising limb of hydrograph
               q = xi / tp
             else                        !! falling limb of hydrograph
               q = (tb - xi) / (tb - tp)
@@ -188,16 +188,16 @@
             sumq = sumq + uh(isb,i)
           end do
           
-            do i = 1, itb(isb)
+       do i = 1, itb(isb)
             uh(isb,i) = uh(isb,i) / sumq
           end do
         
         ! Gamma Function Unit Hydrograph
         elseif (iuh==2) then
           i = 1; q=1.
-            do while (q>0.0001)
+       do while (q>0.0001)
             xi = float(i)
-               q = (xi / tp) ** uhalpha * exp((1.- xi / tp) * uhalpha)
+          q = (xi / tp) ** uhalpha * exp((1.- xi / tp) * uhalpha)
             q = Max(0.,q)
             uh(isb,i) = (q + ql) / 2.
             ql = q
@@ -206,11 +206,25 @@
             if (i>3.*nstep) exit
           end do
           itb(isb) = i - 1
-              do i = 1, itb(isb)
+         do i = 1, itb(isb)
             uh(isb,i) = uh(isb,i) / sumq
           end do
         endif 
-
+        
+        !compute the number of hydrograph points for flood routing Jaehak 2017
+        do j = 1, nhru
+            a = sub_tc(hru_sub(j)) / dthy !# of timesteps
+            b = itb(isb)
+            c = phi(13,isb) / dthy
+            NHY(isb) = max(4*nstep,ceiling(a),ceiling(b),ceiling(c), 
+     &                     NHY(isb)) 
+        end do
+        RCSS(isb) = .5 * (ch_w(2,isb) - phi(6,isb)) / ch_d(isb)
+        RCHX(isb) = SQRT(ch_s(2,isb)) / ch_n(2,isb)
+        CHXA(isb) = phi(7,isb) * (phi(6,isb) + phi(7,isb) * RCSS(isb))
+        CHXP(isb) = phi(6,isb) + 2. * phi(7,isb) * 
+     &    SQRT(RCSS(isb) * RCSS(isb) + 1.)
+        QCAP(isb) = CHXA(isb)**1.66667 * RCHX(isb) / CHXP(isb)**.66667 !bankfull flow, m3/s
       end do
       end if
 

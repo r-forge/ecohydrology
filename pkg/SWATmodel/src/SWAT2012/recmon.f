@@ -31,13 +31,11 @@
 !!    curyr         |none         |year of simulation
 !!    disoxmon(:,:,:)|kg/day      |average amount of dissolved oxygen loaded to
 !!                                |stream on a given day in the month
-!!    ievent        |none         |rainfall/runoff code
-!!                                |0 daily rainfall/curve number technique
-!!                                |1 daily rainfall/Green&Ampt technique/daily
-!!                                |  routing
-!!                                |2 sub-daily rainfall/Green&Ampt technique/
-!!                                |  daily routing
-!!                                |3 sub-daily rainfall/Green&Ampt/hourly routing
+!!    ievent      |none          |rainfall/runoff code
+!!                               |0 daily rainfall/curve number technique
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
+!!                               |  routing
+!!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    ihout         |none         |hydrograph storage location number
 !!    inum1         |none         |file number
 !!    flomon(:,:,:) |m^3/day      |average amount of water loaded to stream
@@ -147,26 +145,26 @@
       varoute(27,ihout) = sedmon(inum1,curyr,i_mo) * 0.   ! lag
       varoute(28,ihout) = 0.                    ! gravel
 
-      if (ievent > 2) then
+      if (ievent > 0) then
       do ii = 1, nstep
-      hhvaroute(2,ihout,ii) = flomon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(3,ihout,ii) = sedmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(4,ihout,ii) = orgnmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(5,ihout,ii) = orgpmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(6,ihout,ii) = no3mon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(7,ihout,ii) = minpmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(11,ihout,ii) = solpstmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(12,ihout,ii) = srbpstmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(13,ihout,ii) = chlamon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(14,ihout,ii) = nh3mon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(15,ihout,ii) = no2mon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(16,ihout,ii) = cbodmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(17,ihout,ii) = disoxmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(18,ihout,ii) = bactpmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(19,ihout,ii) = bactlpmon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(20,ihout,ii) = cmtl1mon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(21,ihout,ii) = cmtl2mon(inum1,curyr,i_mo) / real(nstep)
-      hhvaroute(22,ihout,ii) = cmtl3mon(inum1,curyr,i_mo) / real(nstep)
+      hhvaroute(2,ihout,ii) = flomon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(3,ihout,ii) = sedmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(4,ihout,ii) = orgnmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(5,ihout,ii) = orgpmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(6,ihout,ii) = no3mon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(7,ihout,ii) = minpmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(11,ihout,ii) = solpstmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(12,ihout,ii) = srbpstmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(13,ihout,ii) = chlamon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(14,ihout,ii) = nh3mon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(15,ihout,ii) = no2mon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(16,ihout,ii) = cbodmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(17,ihout,ii) = disoxmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(18,ihout,ii) = bactpmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(19,ihout,ii) = bactlpmon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(20,ihout,ii) = cmtl1mon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(21,ihout,ii) = cmtl2mon(inum1,curyr,i_mo) / dfloat(nstep)
+      hhvaroute(22,ihout,ii) = cmtl3mon(inum1,curyr,i_mo) / dfloat(nstep)
       end do
       end if
 

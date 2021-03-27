@@ -14,14 +14,11 @@
 !!    hru_dafr(:)   |km2/km2       |fraction of total watershed area contained
 !!                                 |in HRU
 !!    i             |none          |HRU number
-!!    ievent        |none          |rainfall/runoff code
-!!                                 |0 daily rainfall/curve number technique
-!!                                 |1 daily rainfall/Green&Ampt technique/daily
-!!                                 |  routing
-!!                                 |2 sub-daily rainfall/Green&Ampt technique/
-!!                                 |  daily routing
-!!                                 |3 sub-daily rainfall/Green&Ampt/hourly 
-!!                                 |routing
+!!    ievent      |none          |rainfall/runoff code
+!!                               |0 daily rainfall/curve number technique
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
+!!                               |  routing
+!!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    rock(:)       |%             |percent of rock fragments in soil layer
 !!    sol_silt(:,:) |%             |percent silt content in soil material
 !!    sol_awc(:,:)  |mm H20/mm soil|available water capacity of soil layer
@@ -100,7 +97,7 @@
       use parm
 
       integer :: nly, j
-      real :: xx, sumpor, dg, pormm
+      real*8 :: xx, sumpor, dg, pormm
 
       nly = 0
     
@@ -108,7 +105,7 @@
 
 !!    calculate composite usle value
       sol_rock(1,i) = Exp(-.053 * sol_rock(1,i))
-      usle_mult(i) = sol_rock(1,i) * usle_k(i) * usle_p(i)              &
+      usle_mult(i) = sol_rock(1,i) * usle_k(i) * usle_p(i)              
      &     * usle_ls(i) * 11.8
 
 
@@ -128,7 +125,7 @@
         end if
         !! compute drainable porosity and variable water table factor - Daniel
         drpor = sol_por(j,i) - sol_up(j,i)
-        vwt(j,i) = (437.13 * drpor**2) - (95.08 * drpor) + 8.257             
+        vwt(j,i)= ((437.13 * drpor**2)-(95.08 * drpor)+8.257) 
        end do
 
       sa = sol_sand(1,i) / 100.
@@ -151,7 +148,7 @@
        det_lag(i) = 1. - det_san(i) - det_sil(i) - det_cla(i)
      & - det_sag(i)                                           !! Large Aggregate fraction
 
-!!      Error check. May happen for soils with more sand
+!! Error check. May happen for soils with more sand
 !!    Soil not typical of mid-western USA
 !!    The fraction wont add upto 1.0
       if (det_lag(i) < 0.) then
@@ -188,13 +185,22 @@
         xx = sol_z(j,i)
       end do
       !! initialize water table depth and soil water for Daniel
+!      sol_swpwt(i) = sol_sw(i)
+!      if (ffc(i) > 1.) then
+!        wat_tbl(i) = (sol_sumul(i) - ffc(i) * sol_sumfc(i)) /           
+!     &                                                      sol_z(nly,i)
+!      else
+!        wat_tbl(i) = 0.
+!      end if
+      !!Initializing water table depth and soil water revised by D. Moriasi 4/8/2014
+        do j = 1, nly
+        sol_stpwt(j,i) = sol_st(j,i)
+        end do      
       sol_swpwt(i) = sol_sw(i)
-      if (ffc(i) > 1.) then
-        wat_tbl(i) = (sol_sumul(i) - ffc(i) * sol_sumfc(i)) /           &
-     &                                                      sol_z(nly,i)
-      else
-        wat_tbl(i) = 0.
-      end if
+      wat_tbl(i) = dep_imp(i)- (shallst(i)/sol_por(nly,i))
+
+      !!Initializing water table depth and soil water revised by D. Moriasi 4/8/2014      
+   !! initialize water table depth and soil water for Daniel   
       sol_avpor(i) = sumpor / sol_z(nly,i)
       sol_avbd(i) = 2.65 * (1. - sol_avpor(i))
 
@@ -213,14 +219,14 @@
       if (ievent > 0) then
         sol_sand = 0.
         sol_sand(1,i) = 100. - sol_clay(1,i) - sol_silt(1,i)
-        wfsh(i) = 10. * Exp(6.5309 - 7.32561 * sol_por(1,i) +           &
-     &    3.809479 * sol_por(1,i) ** 2 + 0.001583 * sol_clay(1,i) ** 2 +&
-     &    0.000344 * sol_sand(1,i) * sol_clay(1,i) - 0.049837 *         &
-     &    sol_por(1,i) * sol_sand(1,i)                                  &
-     &    + 0.001608 * sol_por(1,i) ** 2 * sol_sand(1,i) ** 2 +         &
-     &    0.001602 * sol_por(1,i) ** 2 * sol_clay(1,i) ** 2 -           &
-     &    0.0000136 * sol_sand(1,i) ** 2 * sol_clay(1,i) -              &
-     &    0.003479 * sol_clay(1,i) ** 2 * sol_por(1,i) -                &
+        wfsh(i) = 10. * Exp(6.5309 - 7.32561 * sol_por(1,i) +           
+     &    3.809479 * sol_por(1,i) ** 2 + 0.001583 * sol_clay(1,i) ** 2 +
+     &    0.000344 * sol_sand(1,i) * sol_clay(1,i) - 0.049837 *         
+     &    sol_por(1,i) * sol_sand(1,i)                                  
+     &    + 0.001608 * sol_por(1,i) ** 2 * sol_sand(1,i) ** 2 +         
+     &    0.001602 * sol_por(1,i) ** 2 * sol_clay(1,i) ** 2 -           
+     &    0.0000136 * sol_sand(1,i) ** 2 * sol_clay(1,i) -              
+     &    0.003479 * sol_clay(1,i) ** 2 * sol_por(1,i) -                
      &    0.000799 * sol_sand(1,i) ** 2 * sol_por(1,i))
       end if
 

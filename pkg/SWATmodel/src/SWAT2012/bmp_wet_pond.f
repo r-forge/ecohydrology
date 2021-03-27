@@ -1,4 +1,4 @@
-      subroutine wet_pond
+      subroutine bmp_wet_pond
       
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    run wet pond processes
@@ -42,10 +42,10 @@
 
       character (len=80) :: titldum
       integer :: ii, k, sb
-      real :: qin,qout,qpnd,sedin,sedout,sedpnd,spndconc
-      real :: rf,imc,pndwdth,seep,evap,rain,seepa,surfa
-      real :: a1,b1,qdepth,hdep_ext,usettle,tmpw,mu,qhyd,dp
-      real :: alpha,beta,vol,hp,tvol,ht,decayexp,qweir,sedweir
+      real*8 :: qin,qout,qpnd,sedin,sedout,sedpnd,spndconc
+      real*8 :: rf,imc,pndwdth,seep,evap,rain,seepa,surfa
+      real*8 :: a1,b1,qdepth,hdep_ext,usettle,tmpw,mu,qhyd,dp
+      real*8 :: alpha,beta,vol,hp,tvol,ht,decayexp,qweir,sedweir,coeff_R
       
       sb = inum1
       qout=0.; sedout=0.; qdepth=0.
@@ -99,7 +99,7 @@
       qpnd = wtp_qi(sb) !m^3
       sedpnd = wtp_sedi(sb) * qpnd / 1.e6  !tons   
 
-!!         iterate for subdaily flow/sediment routing
+!!    iterate for subdaily flow/sediment routing
       do ii=1,nstep
       
          qout = 0.; spndconc = 0.
@@ -131,20 +131,20 @@
          if(hdep_ext<0) hdep_ext = 0.
 
 !!       Calculate outflow 
-         if (hdep_ext>0.1) then
+         if (hdep_ext>0.) then
 !!          Use stage-discharge relationship if available
             if (wtp_stagdis(sb)==1) then  
                select case(wtp_sdtype(sb))
                case(1) !! 1 is exponential function
                   qout = wtp_sdc1(sb) * exp(wtp_sdexp(sb) * qdepth) + 
-     &                     wtp_sdintc(sb) 
+     &                wtp_sdintc(sb) 
                case(2) !! 2 is Linear function
                   qout = wtp_sdc1(sb) * qdepth + wtp_sdintc(sb)       
                case(3) !! 3 is logarthmic function
                   qout = wtp_sdc1(sb) * log(qdepth) + wtp_sdintc(sb)  
                case(4) !! 4 is power function
                   qout = wtp_sdc1(sb) * (qdepth**3) + wtp_sdc2(sb) * 
-     &                (qdepth**2) + wtp_sdc3(sb)*qdepth+wtp_sdintc(sb)
+     &              (qdepth**2) + wtp_sdc3(sb) * qdepth + wtp_sdintc(sb)
                case(5)
                   qout = wtp_sdc1(sb) * (qdepth**wtp_sdexp(sb)) + 
      &                wtp_sdintc(sb) !m3/s
@@ -153,17 +153,15 @@
 !!                Discharge out of extended detention storage through inverted PVC pipe
                call pipe_discharge(wtp_pdia(sb),wtp_plen(sb),
      &              hdep_ext,wtp_pmann(sb),wtp_ploss(sb),qout) !m3/s
-                         
+               
             end if
             qout = qout * idt * 60. !m3/s ->m^3
          !  no outflow from the permanent pool
-               if (qout>qpnd-wtp_pvol(sb)) qout = qpnd - wtp_pvol(sb)
-            if (qout<0) qout = 0.
-        
+          if (qout>qpnd-wtp_pvol(sb)) qout = qpnd - wtp_pvol(sb)
+             if (qout<0) qout = 0.
          else
 !!          no discharge from the permanent pool
             qout = 0.
-            sedout = 0.
          end if
 
 !!       Seepage, evaporation and rainfall
@@ -171,7 +169,7 @@
          b1 = wtp_sdslope(sb) ** 2 + 1.
          seepa = a1 * pndwdth ** 2 + 2. * (a1 + 1) * pndwdth * qdepth * 
      &      b1 ** 0.5 + 5.64 * qdepth ** 2 * b1 * wtp_sdslope(sb) !m2
-         b1 = 2.* beta * ht 
+         b1 = 2.* beta * qdepth                !jeong 05/22/14
          surfa = (a1 * pndwdth + b1) * (pndwdth + b1) !m2
          
          seep = wtp_k(sb) / 1000. / 60. * idt *  seepa !m3
@@ -187,18 +185,19 @@
          tmpw = sub_hhwtmp(sb,ii)  
          ! water viscosity (g/cm-s) using 3rd order polynomial interpolation
          mu = -3.e-6 * tmpw ** 3 + 0.0006 * tmpw ** 2 - 0.0469 * 
-     &        tmpw + 1.7517            
+     &        tmpw + 1.7517  
          mu = mu * 1.e-2
          !settling velocity, cm/s
          usettle = 0.7 * 981. / 18. * 1.6 / mu * dp ** 2 !ro,s=1.6g/cm3, g=981cm/s
          b1 = 2.* beta * qdepth 
          surfa = (a1 * pndwdth + b1) * (pndwdth + b1) !m2
 
-         if(qout>0.1) then
+         if(qout>0.) then
             !WERF equation
             qhyd = qout / idt / 60. / surfa * 100.  ! m3/s / m2 * 100 = cm/s
-                spndconc = spndconc * (1. - (1.+ usettle / 
-     &                  (qhyd * wtp_hydeff(sb))) ** (-wtp_hydeff(sb)))  ! mg/l
+            coeff_R = (1.+ usettle / 
+     &        (qhyd * wtp_hydeff(sb))) ** (-wtp_hydeff(sb))
+            spndconc = spndconc * coeff_R  ! mg/l
             sedpnd = spndconc * qpnd * 1e-6 !tons, amount sediment in the pond at the end of the time step
             !sediment conc no less than the minimum value
             if(spndconc<wtp_sede(sb)) spndconc = wtp_sede(sb)
@@ -212,11 +211,13 @@
          
          !Sediment coming out of the pond
          sedout = spndconc * qout * 1e-6 !tons
-                  
-          
-            !! Store flow/sediment out of the pond at the subbasin outlet
-            hhvaroute(2,ihout,ii) = max(0.,qout)
-            hhvaroute(3,ihout,ii) = max(0.,sedout)
+
+         qout = qout + qweir
+         sedout = sedout + sedweir
+         
+       !! Store flow/sediment out of the pond at the subbasin outlet
+       hhvaroute(2,ihout,ii) = max(0.,qout)
+       hhvaroute(3,ihout,ii) = max(0.,sedout)
   
       end do
       
@@ -229,22 +230,22 @@
       endif
          if (wtp_sedi(sb)<wtp_sede(sb))  wtp_sedi(sb) = wtp_sede(sb)
          
-      end subroutine 
+      end subroutine bmp_wet_pond 
 
    !-------------------------------------------------------------------
       subroutine ext_dpth(hmax)
       use parm
       implicit none
       
-      real,dimension(40) :: cumrain=(/0.,0.006,0.012,0.019,0.026,0.034,
+      real*8,dimension(40)::cumrain=(/0.,0.006,0.012,0.019,0.026,0.034,
      & 0.043,0.053,0.064,0.077,0.092,0.11,0.134,0.166,0.212,0.287,0.384,
      & 0.542,0.802,1.262,1.462,1.587,1.688,1.746,1.784,1.811,1.832,
      & 1.849,1.863,1.875,1.885,1.894,1.902,1.91,1.917,1.924,1.93,1.93,
      & 1.93,1.93/)
-      real :: ia, ss, plen,inflow,outflow,pndvol,wdth,pndarea,vtmp,hdep
-      real :: aa,bb,pdia,hvol,alpha
-      real, dimension(40):: fa
-      real, intent(out) :: hmax
+      real*8 :: ia, ss,plen,inflow,outflow,pndvol,wdth,pndarea,vtmp,hdep
+      real*8 :: aa,bb,pdia,hvol,alpha
+      real*8, dimension(40):: fa
+      real*8, intent(out) :: hmax
       integer :: ii,sb
       
       sb = inum1
@@ -252,7 +253,7 @@
       
       ss = 1000. / sub_cn2(sb) - 10.
       plen = wtp_plen(sb) * 3.2808 !ft
-      pdia = wtp_pdia(sb) + 3.2808 !ft
+      pdia = wtp_pdia(sb) * 3.2808 !ft
       !volume of permanent pool 
       pndvol = wtp_pvol(sb) * 3.2808 ** 3 !ft^3
       !pond width at the bottom of the pond
@@ -270,7 +271,7 @@
             ia = cumrain(ii)
             fa(ii) = 0
          else 
-            fa(ii) = ss * (cumrain(ii) - ia) / (cumrain(ii) - ia + ss)   
+            fa(ii) = ss * (cumrain(ii) - ia) / (cumrain(ii) - ia + ss)
          endif
          if (ii>=2) inflow = fa(ii) - fa(ii-1) !inches
          
@@ -299,9 +300,9 @@
       subroutine wpnd_depth(hvol,width,slp,lenwdth,hdep)
       !calculate ponding depth using Newton's method
       implicit none
-      real, intent(in):: hvol,width,slp,lenwdth
-      real, intent(out):: hdep
-      real:: dfn,fn,alp,ll
+      real*8, intent(in):: hvol,width,slp,lenwdth
+      real*8, intent(out):: hdep
+      real*8 :: dfn,fn,alp,ll
      
       alp = lenwdth
       ll = width
@@ -320,14 +321,15 @@
       subroutine pipe_discharge(pdia,plen,hdep,mann,mloss,outflow)
       ! calculate discharge from extended detention through pvc pipe,m3/s      
       implicit none
-      real, intent(in):: pdia,plen,hdep,mann,mloss
-      real, intent(out):: outflow
-      real:: parea,kf,rh
+      real*8, intent(in):: pdia,plen,hdep,mann,mloss
+      real*8, intent(out):: outflow
+      real*8 :: parea,kf,rh
       
       parea = 3.14159 * (3.2808 * pdia) ** 2 / 4. !ft^2
       rh = 3.2808 * pdia / 4. !ft
       kf = 29. * plen * mann ** 2 / rh ** 1.33
-      outflow = parea * ((64.4 * hdep) / (1.+ kf + mloss)) ** 0.5 !cfs
+      outflow = parea * ((64.4 * 3.2808 * hdep) / (1.+ kf + mloss)) 
+     & ** 0.5 !cfs
       outflow = outflow / 35.31 !m3/s
       
       end subroutine

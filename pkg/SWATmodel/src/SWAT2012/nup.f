@@ -95,15 +95,21 @@
       use parm
 
       integer :: j, icrop, l, ir
-      real :: un2, unmx, uno3l, gx
+      real*8 :: un2, unmx, uno3l, gx
 
       j = 0
       j = ihru
 
-      icrop = 0
+      tno3 = 0.
+      do l = 1, sol_nly(j)
+        tno3 = tno3 + sol_no3(l,j)
+      end do
+      tno3 = tno3 / n_reduc(j)
+      up_reduc = tno3 / (tno3 + Exp(1.56 - 4.5 * tno3))
+      
       icrop = idplt(j)
-      pltfr_n(j) = (pltnfr(1,icrop) - pltnfr(3,icrop)) * (1. - phuacc(j)&
-     &         / (phuacc(j) + Exp(bio_n1(icrop) - bio_n2(icrop) *       &
+      pltfr_n(j) = (pltnfr(1,icrop) - pltnfr(3,icrop)) * (1. - phuacc(j)
+     &         / (phuacc(j) + Exp(bio_n1(icrop) - bio_n2(icrop) *       
      &         phuacc(j)))) + pltnfr(3,icrop)
 
       un2 = 0.
@@ -131,6 +137,7 @@
         uno3l = 0.
         unmx = uno3d * (1. - Exp(-n_updis * gx / sol_rd)) / uobn
         uno3l = Min(unmx - nplnt(j), sol_no3(l,j))
+        !uno3l = up_reduc * uno3l
         nplnt(j) = nplnt(j) + uno3l 
         sol_no3(l,j) = sol_no3(l,j) - uno3l
       end do
@@ -156,10 +163,9 @@
           else
             xx = 1.
           end if
-          strsn(j) = amax1(strsn(j), xx)
-          strsn(j) = amin1(strsn(j), 1.)
+          strsn(j) = dmax1(strsn(j), xx)
+          strsn(j) = dmin1(strsn(j), 1.)
       end select
 
       return
       end
-

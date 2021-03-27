@@ -47,7 +47,7 @@
 
       integer, intent (in) :: iwave
       integer :: j
-      real :: altc
+      real*8 :: altc
 
       j = 0
       j = ihru
@@ -68,4 +68,3 @@
 
       return
       end
-

@@ -18,10 +18,8 @@
 !!    hrtwtr(:)   |m^3 H2O       |water leaving reach during hour
 !!    ievent      |none          |rainfall/runoff code
 !!                               |0 daily rainfall/curve number technique
-!!                               |1 daily rainfall/Green&Ampt technique/daily
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
 !!                               |  routing
-!!                               |2 sub-daily rainfall/Green&Ampt technique/
-!!                               |  daily routing
 !!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    inum1       |none          |reach number
 !!    nitraten(:) |mg N/L        |nitrate concentration in reach
@@ -217,7 +215,7 @@
       use parm
 
       integer :: jrch, ii
-      real :: sedcon, bedvol, sedpest
+      real*8 :: sedcon, bedvol, sedpest
 
       jrch = 0
       jrch = inum1
@@ -234,7 +232,7 @@
       varoute(20,ihout) = varoute(20,inum2) * (1. - rnum1)
       varoute(21,ihout) = varoute(21,inum2) * (1. - rnum1)
       varoute(22,ihout) = varoute(22,inum2) * (1. - rnum1)
-      if (ievent < 3) then
+      if (ievent == 0) then
         varoute(4,ihout) = organicn(jrch) * rtwtr / 1000.
         varoute(5,ihout) = organicp(jrch) *  rtwtr / 1000.
         varoute(6,ihout) = nitraten(jrch) * rtwtr / 1000.
@@ -343,7 +341,8 @@
       rchdy(40,jrch) = varoute(20,ihout)                  !!cmetal #1
       rchdy(41,jrch) = varoute(21,ihout)                  !!cmetal #2
       rchdy(42,jrch) = varoute(22,ihout)                  !!cmetal #3
-
+      rchdy(60,jrch) = varoute(1,ihout)                   !!water temperature deg c
+      
 !! summarize monthly reach output
       rchmono(1,jrch) = rchmono(1,jrch) + rchdy(1,jrch)
       rchmono(2,jrch) = rchmono(2,jrch) + rchdy(2,jrch)

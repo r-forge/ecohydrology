@@ -84,7 +84,7 @@
 
       integer, intent (in) :: iwave
       integer :: j, sb
-      real :: xx, wt1, er, conc, xxo, sedp, psedd, porgg, xxa, xxs
+      real*8 :: xx, wt1, er, conc, xxo, sedp, psedd, porgg, xxa, xxs
 
       j = 0
       j = ihru
@@ -160,6 +160,11 @@
         sedminpa(j) = sedp * xxa
         sedminps(j) = sedp * xxs
       end if
+        
+      !! bmp adjustments
+      sedminpa(j) = sedminpa(j) * bmp_pp(j)
+      sedminps(j) = sedminps(j) * bmp_pp(j)
+      sedorgp(j) = sedorgp(j) * bmp_pp(j)
 
 !! modify phosphorus pools only for HRU calculations
       if (iwave <= 0) then

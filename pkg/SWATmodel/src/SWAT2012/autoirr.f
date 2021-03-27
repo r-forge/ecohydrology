@@ -78,7 +78,7 @@
       use parm
 
       integer :: j, k
-      real :: vmma, vmm, cnv, vol, vmms, vmmd
+      real*8 :: vmma, vmm, cnv, vol, vmms, vmmd
 
       j = 0
       j = ihru
@@ -88,8 +88,8 @@
       irrno(j) = irr_noa(j)
 !!!! Srin's irrigation source by each application changes
 
-      if ((wstrs_id(j) == 1 .and. strsw(j) < auto_wstr(j) .or.          &
-     & (wstrs_id(j)==2.and.sol_sumfc(j)-sol_sw(j)>auto_wstr(j)))) then  &
+      if ((wstrs_id(j) == 1 .and. strsw(j) < auto_wstr(j) .or.          
+     & (wstrs_id(j)==2.and.sol_sumfc(j)-sol_sw(j)>auto_wstr(j)))) then  
         !! determine available amount of water in source
         !! ie upper limit on water removal on day
         vmma = 0.
@@ -152,7 +152,7 @@
                     vmma = vol * (shallst(k) * cnv / vmms)
                   end if
                   vmma = vmma / cnv
-                  vmma = vmma / irr_eff(k)
+                  vmma = vmma / irr_eff(j)
                   shallst(k) = shallst(k) - vmma
                   if (shallst(k) < 0.) then
                     vmma = vmma + shallst(k)
@@ -183,7 +183,7 @@
 
           if (imgt == 1) then
             write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *       "         ",  " AUTOIRR", phubase(j), phuacc(j)
+     *       hru_km(j), "         ",  " AUTOIRR", phubase(j), phuacc(j)
      *       , sol_sw(j),bio_ms(j), sol_rsd(1,j),sol_sumno3(j)
      *         ,sol_sumsolp(j), aird(j)
      *          ,irrsc(j), irrno(j)
@@ -192,9 +192,8 @@
         endif
       end if 
         
-!! changed format below     
-!!1000  format (a5,1x,a7,3i6,2a15,7f10.2,10x,f10.2,70x,f10.2) 
-1000  format (a5,1x,a4,3i6,2a15,7f10.2,10x,f10.2,70x,i10,10x,i10) 
+1000  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,10x,f10.2,70x,i10,
+     * 10x,i10) 
 
       return
       end

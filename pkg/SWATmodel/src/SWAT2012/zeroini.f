@@ -4,6 +4,7 @@
 !!    this subroutine zeros values for single array variables
 
       use parm
+      lid_file = ""
       dpd_file = ""
       wpd_file = ""
       rib_file = ""
@@ -99,6 +100,8 @@
       nbyr = 0
       nd_30 = 0
       ndays = (/0,31,60,91,121,152,182,213,244,274,305,335,366/)
+      ndays_leap = (/0,31,60,91,121,152,182,213,244,274,305,335,366/)
+      ndays_noleap = (/0,31,59,90,120,151,181,212,243,273,304,334,365/)
       nfixmx = 0.      !CB 12/2/09
       nhru = 0
       nperco = 0.
@@ -159,6 +162,14 @@
       spcon = 0.
       spexp = 0.
       subtot = 0
+      surlag_bsn = 0.
+      cmn_bsn = 0.
+      cdn = 0.
+      cdn_bsn = 0.
+      nperco_bsn = 0.
+      pperco_bsn = 0.
+      phoskd_bsn = 0.
+      psp_bsn = 0.
       surlag = 0.
       tfact = 0.
       thbact = 0.
@@ -207,6 +218,8 @@
       wshd_pal = 0.
       wshd_pas = 0.
       wshd_plch = 0.
+      wshd_pinlet = 0.
+      wshd_ptile = 0.
       wshd_pndfr = 0.
       wshd_pndha = 0.
       wshd_pndsed = 0.
@@ -232,7 +245,6 @@
       wshd_yldp = 0.
 !     septic database file
       septdb = ""
-
 
       return
       end

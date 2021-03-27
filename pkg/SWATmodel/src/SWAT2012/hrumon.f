@@ -156,8 +156,8 @@
       use parm
 
       integer :: j, sb, ii, days, iflag
-      real :: dmt, yldt
-      real, dimension (mhruo) :: pdvas, pdvs
+      real*8 :: dmt, yldt
+      real*8, dimension (mhruo) :: pdvas, pdvs
       character (len=4) :: cropname
 
       days = 0
@@ -196,7 +196,7 @@
         pdvas(4) = hrumono(22,j)
         pdvas(5) = hrumono(25,j)
         pdvas(6) = hrumono(12,j)
-        pdvas(7) = hrumono(21,j) / Real(days)
+        pdvas(7) = hrumono(21,j) / dfloat(days)
         pdvas(8) = sol_sw(j)
         pdvas(9) = hrumono(11,j)
         pdvas(10) = hrumono(9,j)
@@ -212,12 +212,12 @@
         pdvas(20) = hrumono(5,j)
         pdvas(21) = hrumono(6,j)
         pdvas(22) = hrumono(10,j)
-        pdvas(23) = hrumono(20,j) / Real(days)
-        pdvas(24) = hrumono(57,j) / Real(days)
-        pdvas(25) = hrumono(55,j) / Real(days)
-        pdvas(26) = hrumono(56,j) / Real(days)
-        pdvas(27) = hrumono(30,j) / Real(days)
-        pdvas(28) = hrumono(58,j) / Real(days)
+        pdvas(23) = hrumono(20,j) / dfloat(days)
+        pdvas(24) = hrumono(57,j) / dfloat(days)
+        pdvas(25) = hrumono(55,j) / dfloat(days)
+        pdvas(26) = hrumono(56,j) / dfloat(days)
+        pdvas(27) = hrumono(30,j) / dfloat(days)
+        pdvas(28) = hrumono(58,j) / dfloat(days)
         pdvas(29) = hrumono(14,j)
         pdvas(30) = hrumono(61,j)
         pdvas(31) = hrumono(45,j)
@@ -259,7 +259,8 @@
         pdvas(67) = hrumono(63,j)
         pdvas(68) = hrumono(64,j)
         pdvas(69) = wtab(j)  !! based on 30 day antecedent climate(mm) (prec,et)
-        pdvas(70) = wtabelo  !! based on depth from soil surface(mm)
+!       pdvas(70) = wtabelo   !! based on depth from soil surface (mm)
+        pdvas(70) = wat_tbl(j)   !! based on depth from soil surface (mm): Dmoriasi 4/08/2014
 !!      added current snow content in the hru (not summed)
         pdvas(71) = sno_hru(j)
 
@@ -278,6 +279,8 @@
         pdvas(77) = hrumono(70,j)
 !!    lat q continuous
         pdvas(78) = hrumono(71,j)
+!!      phos due to crack flow (tvap)
+        pdvas(79) = hrumono(72,j)
 
       if (itots > 0) then 
          ix = itots
@@ -298,16 +301,16 @@
             cropname = "NOCR"
           endif
 
-          if (iscen == 1) then                                          &
+          if (iscen == 1) then                                          
             select case (isproj)
             case (0)
-            write (28,1000) cropname, j, subnum(j), hruno(j), sb,       &
+            write (28,1000) cropname, j, subnum(j), hruno(j), sb,       
      &         nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, ix)
             case (1)
-            write (21,1000) cropname, j, subnum(j), hruno(j),           &
+            write (21,1000) cropname, j, subnum(j), hruno(j),           
      &         sb, nmgt(j), mo_chk, hru_km(j), (pdvs(ii), ii = 1, ix)
             case (2)
-            write (28,2000) cropname, j, subnum(j), hruno(j), sb,       &
+            write (28,2000) cropname, j, subnum(j), hruno(j), sb,       
      &         nmgt(j), mo_chk, hru_km(j),(pdvs(ii), ii = 1, ix), iyr
             end select
           end if
@@ -331,12 +334,9 @@
 
       return
  1000 format (a4,i5,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,8e10.3,2f10.3)
+     *e10.5,1x,e10.5,8e10.3,3f10.3)
  2000 format (a4,i5,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,5e10.3,2f10.3,1x,i4)
+     *e10.5,1x,e10.5,5e10.3,6f10.3,1x,i4)
  1001 format (a4,i7,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,3e10.3,2f10.3,1x,i4)
-!1000 format (a4,i4,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,66f10.3,1x,
-!    *e10.5,1x,e10.5,2e10.3,1x,i4)
-!2000 format (a4,i5,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,70f10.3,1x,i4)
+     *e10.5,1x,e10.5,3e10.3,3f10.3,1x,i4)
       end

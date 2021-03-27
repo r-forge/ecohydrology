@@ -61,14 +61,19 @@
       use parm
 
       integer :: j, jj
-      real :: sro, ssfnlyr, percnlyr, vv, vno3, co
-      real :: cosurf, nloss
+      real*8 :: sro, ssfnlyr, percnlyr, vv, vno3, co
+      real*8 :: cosurf, nloss
 
       j = 0
       j = ihru
 
       percnlyr = 0.
 
+      tno3 = 0.
+      do jj = 1, sol_nly(j)
+        tno3 = tno3 + sol_no3(jj,j)
+      end do
+          
       do jj = 1, sol_nly(j)
 
         !! add nitrate leached from layer above
@@ -89,25 +94,42 @@
         if (ldrain(j) == jj) vv = vv + qtile
         ww = -vv / ((1. - anion_excl(j)) * sol_ul(jj,j))
         vno3 = sol_no3(jj,j) * (1. - Exp(ww))
-        co = Max(vno3 / vv, 0.)
+        if (vv > 1.e-10)  co = Max(vno3 / vv, 0.)
 
         !! calculate nitrate in surface runoff
         cosurf = 0.
-        cosurf = nperco * co
+        if (isep_opt(j)==2) then
+            cosurf = 1.0 * co ! N percolation does not apply to failing septic HRUs 
+        else
+            cosurf = nperco(j) * co
+        end if
         if (jj == 1) then
           surqno3(j) = surfq(j) * cosurf
           surqno3(j) = Min(surqno3(j), sol_no3(jj,j))
+          !! bmp adjustment
+          surqno3(j) = surqno3(j) * bmp_sn(j)
           sol_no3(jj,j) = sol_no3(jj,j) - surqno3(j)
         endif
- !Daniel 1/2012    
+        !! Daniel 1/2012    
         !! calculate nitrate in tile flow 
         if (ldrain(j) == jj) then
-    !      tileno3(j) = nperco * co * qtile     !Daniel 1/2012
-           tileno3(j) = co * qtile     !Daniel 1/2012
+          alph_e(j) = Exp(-1./(n_lag(j) + 1.e-6))
+          ww1 = -1./ ((1. - anion_excl(j)) * sol_ul(jj,j))
+          vno3_c = sol_no3(jj,j) * (1. - Exp(ww1))
+          if (tno3 > 1.001) then
+            tno3ln = n_lnco(j) * (Log(tno3)) ** n_ln(j)
+          else
+            tno3ln = 0.
+          end if
+          vno3_c = tno3ln * (1. - Exp(ww1))
+          co_p(j) = co_p(j) * (1. - alph_e(j)) + vno3_c * alph_e(j)
+          tileno3(j) = co * qtile     !Daniel 1/2012
           tileno3(j) = Min(tileno3(j), sol_no3(jj,j))
+          !! bmp adjustment
+          tileno3(j) = tileno3(j) * bmp_snt(j)
           sol_no3(jj,j) = sol_no3(jj,j) - tileno3(j)          
         end if
- !Daniel 1/2012                  
+        !Daniel 1/2012                  
 
         !! calculate nitrate in lateral flow
         ssfnlyr = 0.
@@ -118,6 +140,8 @@
         end if
         ssfnlyr = Min(ssfnlyr, sol_no3(jj,j))
         latno3(j) = latno3(j) + ssfnlyr
+        !! bmp adjustment
+        latno3(j) = latno3(j) * bmp_sns(j)
         sol_no3(jj,j) = sol_no3(jj,j) - ssfnlyr
 
         !! calculate nitrate in percolate
@@ -132,8 +156,8 @@
 
 
       nloss = (2.18 * dis_stream(j) - 8.63) / 100.
-      nloss = amax1(0.,nloss)
-      nloss = Amin1(1.,nloss)
+      nloss = dmax1(0.,nloss)
+      nloss = dmin1(1.,nloss)
       latno3(j) = (1. - nloss) * latno3(j)
 
       return

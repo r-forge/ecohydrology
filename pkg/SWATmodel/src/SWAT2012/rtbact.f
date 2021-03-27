@@ -10,14 +10,11 @@
 !!    hhvaroute(2,:,:) |m^3 H2O     |water flowing into reach on day
 !!    hhvaroute(18,:,:)|# cfu/100ml |persistent bacteria
 !!    hhvaroute(19,:,:)|# cfu/100ml |less persistent bacteria
-!!    ievent           |none        |rainfall/runoff code
-!!                                  |0 daily rainfall/curve number technique
-!!                                  |1 daily rainfall/Green&Ampt technique/daily
-!!                                  |  routing
-!!                                  |2 sub-daily rainfall/Green&Ampt technique/
-!!                                  |  daily routing
-!!                                  |3 sub-daily rainfall/Green&Ampt/hourly
-!!                                  |  routing
+!!    ievent      |none          |rainfall/runoff code
+!!                               |0 daily rainfall/curve number technique
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
+!!                               |  routing
+!!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    inum1            |none        |reach number
 !!    inum2            |none        |inflow hydrograph storage location number
 !!    rch_bactlp(:)    |# cfu/100ml |less persistent bacteria stored in reach
@@ -74,11 +71,9 @@
       use parm
       implicit none
 
-      real, external :: Theta
-
       integer :: ii, jrch
-      real :: totbactp, totbactlp, netwtr, initlp, initp
-      real :: tday, wtmp
+      real*8 :: totbactp, totbactlp, netwtr, initlp, initp
+      real*8 :: tday, wtmp
 
       jrch = 0
       jrch = inum1
@@ -92,7 +87,7 @@
       if (wtmp <= 0.) wtmp = 0.1
 
 !     skipping hourly bacteria route for now  04/16/07 nubs
-      if (ievent > 2) then                !! hourly mass balance
+      if (ievent > 0) then                !! hourly mass balance
         initlp = 0.
         initp = 0.
         initlp = rch_bactlp(jrch)
@@ -101,9 +96,9 @@
           !! total bacteria mass in reach
           totbactp = 0.
           totbactlp = 0.
-          totbactp = hhvaroute(18,inum2,ii) * hhvaroute(2,inum2,ii) *   &
+          totbactp = hhvaroute(18,inum2,ii) * hhvaroute(2,inum2,ii) *   
      &                                (1. - rnum1) + initp * hrchwtr(ii)
-          totbactlp = hhvaroute(19,inum2,ii) * hhvaroute(2,inum2,ii) *  &
+          totbactlp = hhvaroute(19,inum2,ii) * hhvaroute(2,inum2,ii) *  
      &                               (1. - rnum1) + initlp * hrchwtr(ii)
 
           !! compute bacteria die-off
@@ -124,16 +119,26 @@
           initp = hbactp(ii)
           initlp = hbactlp(ii)
         end do
-      end if
+        if (totbactp < 1.e-6) totbactp = 0.0 
+        if (totbactlp < 1.e-6) totbactlp = 0.0
+        if (netwtr >= 1.) then
+          rch_bactp(jrch) = hbactp(nstep)
+          rch_bactlp(jrch) = hbactlp(nstep)
+        else
+          rch_bactp(jrch) = 0.
+          rch_bactlp(jrch) = 0.
+        end if
+
+      else
 
 !! daily mass balance
       !! total bacteria mass in reach
 
       totbactp = 0.
       totbactlp = 0.
-      totbactp = varoute(18,inum2) * varoute(2,inum2) * (1. - rnum1)    &
+      totbactp = varoute(18,inum2) * varoute(2,inum2) * (1. - rnum1)    
      &                                        + rch_bactp(jrch) * rchwtr
-      totbactlp = varoute(19,inum2) * varoute(2,inum2) *                &
+      totbactlp = varoute(19,inum2) * varoute(2,inum2) *                
      &                          (1. - rnum1) + rch_bactlp(jrch) * rchwtr
 
       !! compute bacteria die-off
@@ -150,7 +155,7 @@
       netwtr = 0.
       netwtr = varoute(2,inum2) * (1. - rnum1) + rchwtr
       
-!!      !! change made by CS while running region 4; date 2 jan 2006      
+!! !! change made by CS while running region 4; date 2 jan 2006 
        if (totbactp < 1.e-6) totbactp = 0.0 
        if (totbactlp < 1.e-6) totbactlp = 0.0
       if (netwtr >= 1.) then
@@ -159,6 +164,7 @@
       else
         rch_bactp(jrch) = 0.
         rch_bactlp(jrch) = 0.
+      end if
       end if
 
       return

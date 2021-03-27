@@ -1,9 +1,7 @@
+      include 'modparm.f'
       program main
 !!    this is the main program that reads input, calls the main simulation
 !!    model, and writes output.
-!!    comment changes to test merging with trunk and c:\branch_test code
-!!    two lines added to c:\branch_test code
-
 !!    ~ ~ ~ INCOMING VARIABLES ~ ~ ~
 !!    name        |units         |definition
 !!         ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
@@ -30,41 +28,35 @@
 !!    zone        |NA            |time difference with respect to Coordinated
 !!                               |Universal Time (ie Greenwich Mean Time)
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
 !!    ~ ~ ~ OUTGOING VARIABLES ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 !!    prog        |NA            |program name and version
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
 !!    ~ ~ ~ LOCAL DEFINITIONS ~ ~ ~
 !!    name        |units         |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
 !!    i           |none          |counter
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
-
-
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
 !!    Intrinsic: date_and_time
 !!    SWAT: getallo, allocate_parms, readfile, readfig
 !!    SWAT: readbsn, std1, readwwq, readinpt, std2, storeinitial
 !!    SWAT: openwth, headout, simulate, finalbal, writeaa, pestw 
-
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
       use parm
       implicit none
-      prog = "SWAT Jan 28 2013    VER 2012/Rev 585"
-
+      prog = "SWAT May 26   VER 2020/Rev 681"
       write (*,1000)
- 1000 format(1x,"               SWAT2012               ",/,             &
-     &          "               Rev. 585               ",/,             &
-     &          "      Soil & Water Assessment Tool    ",/,             &
-     &          "               PC Version             ",/,             &
+ 1000 format(1x,"               SWAT2020               ",/,             
+     &          "               Rev. 681               ",/,             
+     &          "      Soil & Water Assessment Tool    ",/,             
+     &          "               PC Version             ",/,             
      &          " Program reading from file.cio . . . executing",/)
 
 !! process input
-            
+       
       call getallo
       call allocate_parms
       call readfile
@@ -76,7 +68,7 @@
       call readpest              !! read in the pesticide database
       call readfert              !! read in the fertilizer/nutrient database
       call readurban             !! read in the urban land types database
-      call readseptwq            !! read in the septic types database     
+      call readseptwq            !! read in the septic types database
       call readlup
       call readfig
       call readatmodep
@@ -85,6 +77,8 @@
       call std2
       call openwth
       call headout
+      
+      !call sw_init
 
       !! convert integer to string for output.mgt file
       subnum = ""
@@ -110,8 +104,7 @@
       endif
         if (iclb /= 4) then
       do iscen = 1, scenario
-
-     
+    
         !! simulate watershed processes
         call simulate
 
@@ -124,14 +117,18 @@
         if (scenario > iscen) call rewind_init
       end do
          end if
-      do i = 101, 109       !Claire 12/2/09: change 1, 9  to 101, 109.
+      do i = 101, 109 
         close (i)
       end do
       close(124)
       write (*,1001)
  1001 format (/," Execution successfully completed ")
       
-
         iscen=1
+!! file for Mike White to review to ensure simulation executed normally
+      open (9999,file='fin.fin')
+      write (9999,*) 'Execution successful'
+      close (9999)
+      
       stop
       end

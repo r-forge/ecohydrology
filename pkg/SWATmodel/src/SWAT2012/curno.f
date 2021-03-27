@@ -58,8 +58,8 @@
       use parm
 
       integer, intent (in) :: h
-      real, intent (in) :: cnn
-      real :: c2, s3, rto3, rtos
+      real*8, intent (in) :: cnn
+      real*8 :: c2, s3, rto3, rtos, sumfc_ul
    
       cn2(h) = cnn
       if (cn1(h) > 1.e-6) smxold = 254.* (100. / cn1(h) - 1.)
@@ -85,8 +85,10 @@
       rtos = 0.
       rto3 = 1. - s3 / smx(h)
       rtos = 1. - 2.54 / smx(h)
+      
+      sumfc_ul = sol_sumfc(h) !+ r2adj(h) * (sol_sumul(h) - sol_sumfc(h))
 !! calculate shape parameters
-      call ascrv(rto3,rtos,sol_sumfc(h),sol_sumul(h),wrt(1,h),wrt(2,h))
+      call ascrv(rto3,rtos,sumfc_ul,sol_sumul(h),wrt(1,h),wrt(2,h))
 
       if (curyr == 0) then
         sci(h) = 0.9 * smx(h)

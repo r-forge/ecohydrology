@@ -152,7 +152,7 @@
       use parm
 
       integer :: j, sb, ii, iflag
-      real, dimension (mhruo) :: pdvas, pdvs
+      real*8, dimension (mhruo) :: pdvas, pdvs
       character (len=4) :: cropname
 
       do j = 1, nhru
@@ -174,7 +174,7 @@
         pdvas(4) = hruyro(22,j)
         pdvas(5) = hruyro(25,j)
         pdvas(6) = hruyro(12,j)
-        pdvas(7) = hruyro(21,j) / Real(366 - leapyr)
+        pdvas(7) = hruyro(21,j) / dfloat(366 - leapyr)
         pdvas(8) = sol_sw(j)
         pdvas(9) = hruyro(11,j)
         pdvas(10) = hruyro(9,j)
@@ -190,12 +190,12 @@
         pdvas(20) = hruyro(5,j)
         pdvas(21) = hruyro(6,j)
         pdvas(22) = hruyro(10,j)
-        pdvas(23) = hruyro(20,j) / Real(366 - leapyr)
-        pdvas(24) = hruyro(57,j) / Real(366 - leapyr)
-        pdvas(25) = hruyro(55,j) / Real(366 - leapyr)
-        pdvas(26) = hruyro(56,j) / Real(366 - leapyr)
-        pdvas(27) = hruyro(30,j) / Real(366 - leapyr)
-        pdvas(28) = hruyro(58,j) / Real(366 - leapyr)
+        pdvas(23) = hruyro(20,j) / dfloat(366 - leapyr)
+        pdvas(24) = hruyro(57,j) / dfloat(366 - leapyr)
+        pdvas(25) = hruyro(55,j) / dfloat(366 - leapyr)
+        pdvas(26) = hruyro(56,j) / dfloat(366 - leapyr)
+        pdvas(27) = hruyro(30,j) / dfloat(366 - leapyr)
+        pdvas(28) = hruyro(58,j) / dfloat(366 - leapyr)
         pdvas(29) = hruyro(14,j)
         pdvas(30) = hruyro(61,j)
         pdvas(31) = hruyro(45,j)
@@ -237,7 +237,8 @@
         pdvas(67) = hruyro(63,j)
         pdvas(68) = hruyro(64,j)
         pdvas(69) = wtab(j)  !! based on 30 day antecedent climate(mm) (prec,et)
-        pdvas(70) = wtabelo  !! based on depth from soil surface(mm)
+!       pdvas(70) = wtabelo   !! based on depth from soil surface (mm)
+        pdvas(70) = wat_tbl(j)   !! based on depth from soil surface (mm): Dmoriasi 4/08/2014
 !!      added current snow content in the hru (not summed)
         pdvas(71) = sno_hru(j)
 
@@ -256,6 +257,8 @@
         pdvas(77) = hruyro(70,j)
 !!    latq contribution
         pdvas(78) = hruyro(71,j)
+!!      phos due to crack flow (tvap)
+        pdvas(79) = hruyro(72,j)
 
         if (ipdvas(1) > 0) then
           do ii = 1, itots
@@ -270,24 +273,24 @@
         endif
 
           if (iscen == 1 .and. isproj == 0) then
-          write (28,1000) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,1000) cropname, j, subnum(j), hruno(j), sb,         
      &             nmgt(j), iyr, hru_km(j), (pdvs(ii), ii = 1, itots)
           else if (isproj == 1) then
-          write (21,1000) cropname, j, subnum(j), hruno(j),             &
+          write (21,1000) cropname, j, subnum(j), hruno(j),             
      &            sb, nmgt(j), iyr, hru_km(j), (pdvs(ii), ii = 1, itots)
           else if (iscen == 1 .and. isproj == 2) then
-          write (28,2000) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,2000) cropname, j, subnum(j), hruno(j), sb,         
      &    nmgt(j), iyr, hru_km(j), (pdvs(ii), ii = 1, itots), iyr
           endif
         else
           if (iscen == 1 .and. isproj == 0) then
-          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         
      &            nmgt(j), iyr, hru_km(j), (pdvas(ii), ii = 1, mhruo)
           else if (isproj == 1) then
-          write (21,1001) cropname, j, subnum(j), hruno(j),             &
+          write (21,1001) cropname, j, subnum(j), hruno(j),             
      &           sb, nmgt(j), iyr, hru_km(j), (pdvas(ii), ii = 1, mhruo)
           else if (iscen == 1 .and. isproj == 2) then
-          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         
      &    nmgt(j), iyr, hru_km(j), (pdvas(ii), ii = 1, mhruo), iyr
           endif
         end if
@@ -297,22 +300,9 @@
       return
 
  1000 format (a4,i5,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,8e10.3,2f10.3)
+     *e10.5,1x,e10.5,8e10.3,6f10.3)
  2000 format (a4,i5,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,5e10.3,2f10.3,1x,i4)
+     *e10.5,1x,e10.5,5e10.3,6f10.3,1x,i4)
  1001 format (a4,i7,1x,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,3e10.3,2f10.3,1x,i4)
-
-
- !!1000 format (a4,i4,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
- !!   *e10.5,1x,e10.5,5e10.3)
- !!2000 format (a4,i4,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
- !!    *e10.5,1x,e10.5,4e10.3,1x,i4)
- !!1001 format (a4,i7,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
- !!    *e10.5,1x,e10.5,3e10.3,1x,i4)
- !!1000 format (a4,i4,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
- !!     *e10.5,1x,e10.5,5e10.3,1x,i4)
- !!2000 format (a4,i4,a5,a4,i5,1x,i4,1x,i4,e10.5,66f10.3,1x,
- !!   *e10.5,1x,e10.5,4e10.3,1x,i4)
- !!2000 format (a4,i5,1x,i8,1x,i4,1x,i4,1x,i4,e10.5,73f10.3,1x,i4)
+     *e10.5,1x,e10.5,3e10.3,6f10.3,1x,i4)      
       end

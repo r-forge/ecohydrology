@@ -59,18 +59,19 @@
       use parm
 
       integer :: j
-      real :: xx, vap
+      real*8 :: xx, vap
 
       j = 0
       j = ihru
+      vap_tile = 0
 
 !! compute soluble P lost in surface runoff
       xx = 0.
-      xx = sol_bd(1,j) * sol_z(1,j) * phoskd
+      xx = sol_bd(1,j) * sol_z(1,j) * phoskd(j)
       surqsolp(j) = sol_solp(1,j) * surfq(j) / xx 
         !!units ==> surqsolp = [kg/ha * mm] / [t/m^3 * mm * m^3/t] = kg/ha
 !     if (surfq(j) > 0.001) then
-!     write (17,77) i, iyr, sol_bd(1,j), sol_z(1,j), phoskd, surfq(j),  &
+!     write (17,77) i, iyr, sol_bd(1,j), sol_z(1,j), phoskd(j), surfq(j),  &
 !    &              sol_solp(1,j), surqsolp(j)
 !     end if
 ! 77  format(2i6,6f10.3)
@@ -78,38 +79,55 @@
       surqsolp(j) = Max(surqsolp(j), 0.)
       sol_solp(1,j) = sol_solp(1,j) - surqsolp(j)
 
+      !! bmp adjustment
+      surqsolp(j) = surqsolp(j) * bmp_sp(j)
 
 !! compute soluble P leaching
       vap = 0.
-      vap = sol_solp(1,j) * sol_prk(1,j) / ((conv_wt(1,j) / 1000.)      &
-     &                                                         * pperco)
+      vap = sol_solp(1,j) * sol_prk(1,j) / ((conv_wt(1,j) / 1000.)      
+     &                                            * pperco_sub(1,j))
       vap = Min(vap, .5 * sol_solp(1,j))
       sol_solp(1,j) = sol_solp(1,j) - vap
+      
+      !! estimate soluble p in tiles due to crack flow
+      if (ldrain(j) > 0) then
+        xx = Min(1., sol_crk(j) / 3.0)
+        vap_tile = xx * vap
+        !! bmp adjustment
+        vap_tile = vap_tile * bmp_spt(j)
+        vap = vap - vap_tile
+      end if
+
+      if (qtile < 1.e-6) vap_tile = 0.
+      
       if (sol_nly(j) >= 2) then
         sol_solp(2,j) = sol_solp(2,j) + vap
       end if
    
-      do ii=2,sol_nly(j)-1
+      do ii = 2, sol_nly(j)
         vap = 0.
-       if (ii/=i_sep(j)) then
+       if (ii /= i_sep(j)) then
          vap = sol_solp(ii,j) * sol_prk(ii,j) / ((conv_wt(ii,j) 
-     &         / 1000.) * pperco_sub(ii,j))
+     &    / 1000.) * pperco_sub(ii,j))
          vap = Min(vap, .2 * sol_solp(ii,j))
          sol_solp(ii,j) = sol_solp(ii,j) - vap
-         sol_solp(ii+1,j) = sol_solp(ii+1,j) + vap
-           if (ii == ldrain(j)) then
-             vap = sol_solp(ii,j) * qtile / (conv_wt(ii,j) / 1000.
-     *           * pperco_sub(ii,j))
-             sol_solp(ii,j) = sol_solp(ii,j) - vap
-             tilep = vap
-           endif
+         if (ii == sol_nly(j)) then
+           sol_solp(ii+1,j) = sol_solp(ii+1,j) + vap
+         end if
+!         if (ii == ldrain(j)) then
+!           vap = sol_solp(ii,j) * qtile / (conv_wt(ii,j) / 1000.
+!     *                                         * pperco_sub(ii,j))
+!           sol_solp(ii,j) = sol_solp(ii,j) - vap
+!           tilep = vap
+!         endif
        endif
       end do
       percp(j) = vap
       
-     !! summary calculation
+      !! summary calculation
       if (curyr > nyskip) then
         wshd_plch = wshd_plch + vap * hru_dafr(j)
+        wshd_ptile = wshd_ptile + vap_tile * hru_dafr(j)
       end if
 
       return

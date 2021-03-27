@@ -37,6 +37,7 @@
 !!                             |array location is pesticide ID number
 !!                             |0: pesticide not used
 !!                             |1: pesticide used
+!!    dthy         |hr        |time interval for subdaily routing
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ LOCAL VARIABLES ~ ~ ~
@@ -94,7 +95,7 @@
 
       use parm
 
-      character (len=13) :: urbandb, plantdb, tilldb, pestdb, figfile,  &
+      character (len=13) :: urbandb, plantdb, tilldb, pestdb, figfile,  
      &                      fertdb, subfile, fcstfile, bsnfile
       character (len=1) ::  a
       character (len=80) ::  titldum
@@ -139,7 +140,8 @@
       read (23,6000) titldum
       read (23,6000) titldum
       read (23,6000) titldum
-      read (23,*) nstep
+      read (23,*) dthy !Jaehak 2017 flood routing
+      !read (23,*) nstep
       read (23,6000) titldum
       read (23,6000) titldum
       read (23,*) nrgage
@@ -198,10 +200,11 @@
       close (23)
 !! calculate max number of years simulated, daily time increment
       myr = myr + 2
-      if (nstep <= 0) then
+      dthy = dthy / 60. ! time interval, hr, Jaehak 2017 flood routing
+      if (dthy <= 0) then
         nstep = 1
       else
-        nstep = 1440 / nstep
+        nstep = 24 / dthy
       end if
       nstep = nstep + 1
       
@@ -222,7 +225,7 @@
         if (eof < 0) exit
       end do
         read (103,*,iostat=eof) ievent
-      if (ievent == 1) nstep = 24
+      !if (ievent == 1) nstep = 24
       close (103)
 
 
@@ -445,6 +448,9 @@
       if (ils_nofig == 1) then
         mru = Max(mru,2*msub)
       end if
+      
+!      mhyd = mhyd + mrecc + mrecd + mrech + mrecm + mrecy + nsave
+!     &                                                       + mtran + 1
       if (mhru <= 0) mhru = 1
       if (msub <= 0) msub = 1
       if (mch <= 0) mch = 1
@@ -456,6 +462,7 @@
       if (mres <= 0) mres = 1
 
       mhyd = mhyd + nsave + mtran + 1
+      
       if (ils_nofig == 1) then
         mhyd = mhyd + 6 * msub
       end if
@@ -512,4 +519,3 @@
  6300 format (i4)
  6400 format (i6)
       end
-

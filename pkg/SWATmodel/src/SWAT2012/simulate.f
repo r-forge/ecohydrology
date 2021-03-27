@@ -87,7 +87,7 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Mod, Real
+!!    Intrinsic: Mod, real*8
 !!    SWAT: sim_inityr, std3, xmon, sim_initday, clicon, command
 !!    SWAT: writed, writem, tillmix
 
@@ -96,8 +96,10 @@
       use parm
 
       integer :: idlst, j, iix, iiz, ic, mon, ii
-      real :: xx
-
+      real*8 :: xx
+      integer :: eof
+      
+      eof = 0
 
       do curyr = 1, nbyr
         write (*,1234) curyr
@@ -112,8 +114,10 @@
         !!determine beginning and ending dates of simulation in current year
         if (Mod(iyr,4) == 0) then 
           leapyr = 0   !!leap year
+          ndays = ndays_leap
         else 
           leapyr = 1   !!regular year
+          ndays = ndays_noleap
         end if
 
         !! set beginning day of simulation for year
@@ -158,6 +162,11 @@
        
         do i = id1, idlst                            !! begin daily loop
 
+          !screen print days of the year for subdaily runs 
+          if (ievent>0) then
+            write(*,'(3x,I5,a6,i4)') iyr,'  day:', iida
+          endif
+         
           !!if last day of month 
           if (i_mo /= mo_chk) then
             immo = immo + 1
@@ -220,6 +229,11 @@
           if (curyr > nyskip) ndmo(i_mo) = ndmo(i_mo) + 1
 
           if (pcpsim < 3) call clicon      !! read in/generate weather
+          if (iatmodep == 2) then
+            read (127,*,iostat=eof) iyp, idap, (rammo_d(l), rcn_d(l),
+     &       drydep_nh4_d(l), drydep_no3_d(l),l=1, matmo)
+             if (eof < 0) exit
+          end if
 
            !! call resetlu
            if (ida_lup(no_lup) == i .and. iyr_lup(no_lup) == iyr) then
@@ -238,7 +252,7 @@
                   call operatn
                   dorm_flag = 0
                endif
-  !              nop(ihru) = nop(ihru) + 1
+               nop(ihru) = nop(ihru) + 1
           
                 if (nop(ihru) > nopmx(ihru)) then
                   nop(ihru) = 1
@@ -265,12 +279,27 @@
             iida = i + 1
             call xmon
           endif
+          
+           IF(ievent>0)THEN
+              QHY(:,:,IHX(1))=0. 
+              II=IHX(1)
+              DO K=2,4
+                  IHX(K-1)=IHX(K)
+              END DO
+              IHX(4)=II
+          END IF
+         
 
         end do                                        !! end daily loop
 
         !! perform end-of-year processes
+        do isb = 1, msub
+          !! Srin co2 (EPA)
+          !! increment co2 concentrations 
+          co2(isb) = co2_x2 * curyr **2 + co2_x * curyr + co2(isb)
+        end do
+        
         do j = 1, nhru
-
           !! compute biological mixing at the end of every year
 
 !          if (biomix(j) > .001) call tillmix (j,biomix(j))
@@ -290,7 +319,7 @@
           !! year just simulated
           do ic = 1, mcr
             xx = 0.
-            xx = Real(curyr)
+            xx = dfloat(curyr)
             tnylda(j) = (tnylda(j) * xx + tnyld(j)) / (xx + 1.)
           end do
 
@@ -301,7 +330,7 @@
               call operatn
               dorm_flag = 0
             end if
-   !         nop(j) = nop(j) + 1
+            nop(j) = nop(j) + 1
           
             if (nop(j) > nopmx(j)) then
               nop(j) = 1

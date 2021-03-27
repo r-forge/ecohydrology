@@ -41,7 +41,7 @@
 !!                               |1 no vegetative cover on channel
 !!    ch_d(:)       |m           |average depth of main channel
 !!    ch_di(:)      |m           |initial depth of main channel
-!!    ch_eqn        |            |sediment routine methods: 
+!!    ch_eqn        |            |sediment routine methods (DAILY): 
 !!                               | 0 = original SWAT method
 !!                               | 1 = Bagnold's
 !!                               | 2 = Kodatie
@@ -61,6 +61,10 @@
 !!    ch_si(:)      |m/m         |initial slope of main channel
 !!    ch_w(2,:)     |m           |average width of main channel
 !!    ch_wdr(:)     |m/m         |channel width to depth ratio
+!!    prf(:)      |none          |Reach peak rate adjustment factor for sediment 
+!!                               |routing in the channel. Allows impact of 
+!!                               |peak flow rate on sediment routing and 
+!!                               |channel reshaping to be taken into account.
 !!    tc_bed        |N/m2        |critical shear stress of channel bed 
 !!    tc_bnk        |N/m2        |critical shear stress of channel bank
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -82,7 +86,7 @@
 
       character (len=80) :: titldum
       integer :: eof
-        real :: bnksize, bedsize
+        real*8 :: bnksize, bedsize
   
       eof = 0
       do
@@ -106,27 +110,34 @@
       if (eof < 0) exit
       read (103,*,iostat=eof) ch_opco(irch)
       if (eof < 0) exit
-        read (103,*,iostat=eof) chside(irch)
-        if (eof < 0) exit
+      read (103,*,iostat=eof) chside(irch)
+      if (eof < 0) exit
       read (103,*,iostat=eof) ch_bnk_bd(irch)
-        if (eof < 0) exit
-        read (103,*,iostat=eof) ch_bed_bd(irch)
-        if (eof < 0) exit
+      if (eof < 0) exit
+      read (103,*,iostat=eof) ch_bed_bd(irch)
+      if (eof < 0) exit
       read (103,*,iostat=eof) ch_bnk_kd(irch)
-        if (eof < 0) exit
+      if (eof < 0) exit
       read (103,*,iostat=eof) ch_bed_kd(irch)
-        if (eof < 0) exit
+      if (eof < 0) exit
       read (103,*,iostat=eof) ch_bnk_d50(irch)
-        if (eof < 0) exit
+      if (eof < 0) exit
       read (103,*,iostat=eof) ch_bed_d50(irch)
-        if (eof < 0) exit
-        read (103,5000,iostat=eof) tc_bnk(irch)
-        if (eof < 0) exit
-        read (103,5000,iostat=eof) tc_bed(irch)
-        if (eof < 0) exit
+      if (eof < 0) exit
+      read (103,5000,iostat=eof) tc_bnk(irch)
+      if (eof < 0) exit
+      read (103,5000,iostat=eof) tc_bed(irch)
+      if (eof < 0) exit
       read (103,5100,iostat=eof) (ch_erodmo(irch,mo), mo = 1,12)
-        if (eof < 0) exit
-        read (103,*,iostat=eof) ch_eqn(irch)
+      if (eof < 0) exit
+      read (103,*,iostat=eof) ch_eqn(irch)
+      if (eof < 0) exit
+      read (103,*,iostat=eof) prf(irch)
+      if (eof < 0) exit
+      read (103,*,iostat=eof) spcon(irch)
+      if (eof < 0) exit
+      read (103,*,iostat=eof) spexp(irch)
+      if (eof < 0) exit
       exit
       end do
 
@@ -141,6 +152,9 @@
       if (chside(irch) <= 1.e-6) chside(irch) = 2.0
       if (tc_bnk(irch) <= 0.) tc_bnk(irch)=0. !! Critical shear stress (N.m^2)
       if (tc_bed(irch) <= 0.) tc_bed(irch)=0. !! Critical shear stress (N.m^2)
+      if (prf(irch) <= 0.) prf(irch) = prf_bsn
+      if (spcon(irch) <= 0.) spcon(irch) = spcon_bsn
+      if (spexp(irch) <= 0.) spexp(irch) = spexp_bsn
 
       if (ch_eqn(irch) <= 0) then
         ch_eqn(irch)=0 !! SWAT Default sediment routing routine
@@ -241,41 +255,41 @@
 
 
 !!    An estimate of Critical shear stress if it is not given (N/m^2)
-!!      Critical shear stress based on silt and clay %
-!!      Critical Shear Stress based on Julian and Torres (2005)
+!! Critical shear stress based on silt and clay %
+!! Critical Shear Stress based on Julian and Torres (2005)
 !!    Units of critical shear stress (N/m^2)
       SC = 0.
       if  (tc_bnk(irch) <= 1.e-6) then
         SC = (ch_bnk_sil(irch) + ch_bnk_cla(irch)) * 100.
-        tc_bnk(irch) = (0.1 + (0.1779*SC) + (0.0028*(SC)**2)               &
+        tc_bnk(irch) = (0.1 + (0.1779*SC) + (0.0028*(SC)**2)          
      &                           - ((2.34E-05)*(SC)**3)) * ch_cov1(irch)
       end if
 
       if  (tc_bed(irch) <= 1.e-6) then
         SC = (ch_bed_sil(irch) + ch_bed_cla(irch)) * 100.
-        tc_bed(irch) = (0.1 + (0.1779*SC) + (0.0028*(SC)**2)               &
+        tc_bed(irch) = (0.1 + (0.1779*SC) + (0.0028*(SC)**2)          
      &                           - ((2.34E-05)*(SC)**3)) * ch_cov2(irch)
       end if
 
 !!  An estimate of channel bank erodibility coefficient from jet test if it is not available
 !!  Units of kd is (cm^3/N/s)
 !!  Base on Hanson and Simon, 2001
-      if (ch_bnk_kd(i) <= 1.e-6) then
-        if (tc_bnk(i) <= 1.e-6) then
-          ch_bnk_kd(i) = 0.2
+      if (ch_bnk_kd(irch) <= 1.e-6) then
+        if (tc_bnk(irch) <= 1.e-6) then
+          ch_bnk_kd(irch) = 0.2
         else 
-          ch_bnk_kd(i) = 0.2 / sqrt(tc_bnk(i))
+          ch_bnk_kd(irch) = 0.2 / sqrt(tc_bnk(irch))
         end if
       end if
 
 !!  An estimate of channel bed erodibility coefficient from jet test if it is not available
 !!  Units of kd is (cm^3/N/s)
 !!  Base on Hanson and Simon, 2001
-      if (ch_bed_kd(i) <= 1.e-6) then
-        if (tc_bed(i) <= 1.e-6) then
-          ch_bed_kd(i) = 0.2
+      if (ch_bed_kd(irch) <= 1.e-6) then
+        if (tc_bed(irch) <= 1.e-6) then
+          ch_bed_kd(irch) = 0.2
         else 
-          ch_bed_kd(i) = 0.2 / sqrt(tc_bed(i))
+          ch_bed_kd(irch) = 0.2 / sqrt(tc_bed(irch))
         end if
       end if
      

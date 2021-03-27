@@ -139,11 +139,11 @@
 
 !!    CEAP project
         if (isproj == 2) then
-          read (102,5003) a, icodes(idum), ihouts(idum), inum1s(idum),  &
+          read (102,5003) a, icodes(idum), ihouts(idum), inum1s(idum),  
      &    inum2s(idum), inum3s(idum), rnum1s(idum), inum4s(idum)
         else
-          read (102,5000) a, icodes(idum), ihouts(idum), inum1s(idum),  &
-     &    inum2s(idum), inum3s(idum), rnum1s(idum), inum4s(idum),       &
+          read (102,5000) a, icodes(idum), ihouts(idum), inum1s(idum),  
+     &    inum2s(idum), inum3s(idum), rnum1s(idum), inum4s(idum),       
  !!    &    inum5s(idum), inum6s(idum), inum7s(idum), inum8s(idum)
      &    inum5s(idum), char6(idum), char7(idum), char8(idum)
         end if
@@ -238,8 +238,8 @@
               call lwqdef
  
             case (4)  !! icode = 4  TRANSFER command: read in beg/end month
-              read (102,5004) mo_transb(inum5s(idum)),                     
-     &                mo_transe(inum5s(idum)), ih_tran(inum5s(idum))
+              read (102,5004) mo_transb(inum5s(idum)),    
+     &      mo_transe(inum5s(idum)), ih_tran(inum5s(idum))
 
 
             case (6)  !! icode = 6  RECHOUR command: read in hourly values
@@ -267,6 +267,7 @@
                       !! read in average daily loadings for each year
             year_in = ""
             read (102,5100) year_in
+            
             call caps(year_in)
             i = 0
             i = inum1s(idum)
@@ -290,7 +291,7 @@
                   iida = 0
                   iida = idaf
                   call xmon
-                  write (40+inum1s(idum),5501) iyr, i_mo,               &
+                  write (40+inum1s(idum),5501) iyr, i_mo,               
      &                                              (iida - ndays(i_mo))
                 end if
               end if
@@ -324,9 +325,9 @@
             call caps(apex_in)
       !      i = 0
       !      i = inum1s(idum)
-            open (112+inum1s(idum),file=apex_in,recl=350)
+            open (400+inum1s(idum),file=apex_in,recl=350)
             do ii = 1, 9 
-              read (112+inum1s(idum),5200) titldum
+              read (400+inum1s(idum),5200) titldum
             end do
 !! code to read from apex output file
          
@@ -350,7 +351,7 @@
               call caps(rufile)
               iru = inum1s(idum)
               isub = inum2s(idum)
-!!              daru_km(isub,iru) = rnum1s(idum)
+              daru_km(isub,iru) = rnum1s(idum)
               open (113,file=rufile)
               call readru
               close(113)
@@ -383,8 +384,8 @@
             endif
           elseif (icodes(idum)==18) then  !routels
             subdr_km(ihouts(idum)) = subdr_km(inum2s(idum)) 
-            ru_a(inum3s(idum),inum1s(idum)) = subdr_km(ihouts(idum)) *  &
-!     &                        daru_km(inum3s(idum),inum1s(idum))) /     &
+            ru_a(inum3s(idum),inum1s(idum)) = subdr_km(ihouts(idum)) *  
+!     &                        daru_km(inum3s(idum),inum1s(idum))) /     
      &                     100. / ru_ovsl(inum3s(idum),inum1s(idum))
           end if
 
@@ -408,17 +409,17 @@
  5200 format (a80)
  5300 format (2i6)
  5400 format (20a4)
- 5500 format (//," DAY YEAR HR ","  WATER m^3 ","   SED tons ",         &
-     &         "    ORGN kg ","    ORGP kg ","   NO3-N kg ",            &
-     &         "   NH3-N kg ","   NO2-N kg ","    MINP kg ",            &
-     &         "    CBOD kg ","   DISOX kg ","    CHLA kg ",            &
-     &         "  SOLPST mg ","  SORPST mg ","    BACTP # ",            &
-     &         "   BACTLP # ","CMETAL#1 kg ","CMETAL#2 kg ",            &
+ 5500 format (//," DAY YEAR HR ","  WATER m^3 ","   SED tons ",         
+     &         "    ORGN kg ","    ORGP kg ","   NO3-N kg ",            
+     &         "   NH3-N kg ","   NO2-N kg ","    MINP kg ",            
+     &         "    CBOD kg ","   DISOX kg ","    CHLA kg ",            
+     &         "  SOLPST mg ","  SORPST mg ","    BACTP # ",            
+     &         "   BACTLP # ","CMETAL#1 kg ","CMETAL#2 kg ",            
      &         "CMETAL#3 kg ","  TEMP degC ")
  5501 format (i4,2i2,", Point Discharge File created with Save Comand")
- 5600 format (//," Year  Day Step  FLOWm^3/s    SEDmg/L   ORGNmg/L",    &
-     &         "   ORGPmg/L    NO3mg/L    NH3mg/L    NO2mg/L",          &
-     &         "   MINPmg/L   CBODmg/L  DISOXmg/L   CHLAug/L",          &
-     &         " SOLPSTmg/L SORPSTmg/L  BACTPct/L BACTLPct/L",          &
+ 5600 format (//," Year  Day Step  FLOWm^3/s    SEDmg/L   ORGNmg/L",    
+     &         "   ORGPmg/L    NO3mg/L    NH3mg/L    NO2mg/L",          
+     &         "   MINPmg/L   CBODmg/L  DISOXmg/L   CHLAug/L",          
+     &         " SOLPSTmg/L SORPSTmg/L  BACTPct/L BACTLPct/L",          
      &         "CMETAL1mg/LCMETAL2mg/LCMETAL3mg/L   TEMPdegC")
       end

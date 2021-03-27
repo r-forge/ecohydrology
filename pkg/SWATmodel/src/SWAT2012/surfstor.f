@@ -143,13 +143,13 @@
       j = 0
       j = ihru
 
-      if (ievent<3) then
+      if (ievent == 0) then
          surf_bs(2,j) = Max(1.e-9, surf_bs(2,j) + sedyld(j))
          sedyld(j) = surf_bs(2,j) * brt(j)
          surf_bs(2,j) = surf_bs(2,j) - sedyld(j)
 
       else !subdaily time steps, Jaehak Jeong 2011
-            sedprev = hhsurf_bs(2,j,nstep)
+       sedprev = hhsurf_bs(2,j,nstep)
 
          do k=1,nstep
 
@@ -158,7 +158,7 @@
       
       !! new estimation of sediment reaching the main channel
           hhsedy(j,k) = hhsurf_bs(2,j,k) * brt(j)! tons
-           hhsurf_bs(2,j,k) = hhsurf_bs(2,j,k) - hhsedy(j,k)
+      hhsurf_bs(2,j,k) = hhsurf_bs(2,j,k) - hhsedy(j,k)
         
       !! lagged at the end of time step  
           sedprev = hhsurf_bs(2,j,k)
@@ -190,11 +190,11 @@
         do k = 1, npmx
           !MFW, 3/15/12: Modified to account for decay during lag
           !pst_lag(k,1,j) = pst_lag(k,1,j) + pst_surq(k,j)
-          pst_lag(k,1,j) = (pst_lag(k,1,j) * EXP(-1. *                  &
+          pst_lag(k,1,j) = (pst_lag(k,1,j) * EXP(-1. *                  
      &                      chpst_rea(inum1))) + pst_surq(k,j)
           if (pst_lag(k,1,j) < 1.e-10) pst_lag(k,1,j) = 0.0
           !pst_lag(k,2,j) = pst_lag(k,2,j) + pst_sed(k,j)
-          pst_lag(k,2,j) = (pst_lag(k,2,j) * EXP(-1. *                  &
+          pst_lag(k,2,j) = (pst_lag(k,2,j) * EXP(-1. *                  
      &                      sedpst_rea(inum1))) + pst_sed(k,j)
           if (pst_lag(k,2,j) < 1.e-10) pst_lag(k,2,j) = 0.0
         end do

@@ -133,9 +133,9 @@
       use parm
 
       integer :: j, sb, ii, iflag
-      real :: orgn_ppm, orgp_ppm, ano3_ppm, minp_ppm, chla_ppm
-      real :: orgn_ppw, orgp_ppw, ano3_ppw, solp_ppw, chla_ppw, cnv
-      real, dimension (40) :: pdvas
+      real*8 :: orgn_ppm, orgp_ppm, ano3_ppm, minp_ppm, chla_ppm
+      real*8 :: orgn_ppw, orgp_ppw, ano3_ppw, solp_ppw, chla_ppw, cnv 
+      real*8, dimension (40) :: pdvas
       character*4 cropname
 
       j = 0
@@ -167,18 +167,18 @@
       if (pnd_vol(j) > 1.) then
         orgn_ppm = 1000. * pnd_orgn(j) / pnd_vol(j)
         orgp_ppm = 1000. * pnd_orgp(j) / pnd_vol(j)
-        ano3_ppm = 1000. * (pnd_no3(j) + pnd_no3s(j) + pnd_no3g(j)) /   &
+        ano3_ppm = 1000. * (pnd_no3(j) + pnd_no3s(j) + pnd_no3g(j)) /   
      &                                                        pnd_vol(j)
-        minp_ppm = 1000. * (pnd_solp(j) + pnd_psed(j) + pnd_solpg(j)) / &
+        minp_ppm = 1000. * (pnd_solp(j) + pnd_psed(j) + pnd_solpg(j)) / 
      &                                                        pnd_vol(j)
         chla_ppm = 1000. * pnd_chla(j) / pnd_vol(j)
       endif
       if (wet_vol(j) > 1.) then
         orgn_ppw = 1000. * wet_orgn(j) / wet_vol(j)
         orgp_ppw = 1000. * wet_orgp(j) / wet_vol(j)
-        ano3_ppw = 1000. * (wet_no3(j) + wet_no3s(j) + wet_no3g(j)) /   &
+        ano3_ppw = 1000. * (wet_no3(j) + wet_no3s(j) + wet_no3g(j)) /   
      &                                                        wet_vol(j)
-        solp_ppw = 1000. * (wet_solp(j) + wet_solpg(j) + wet_psed(j)) / &
+        solp_ppw = 1000. * (wet_solp(j) + wet_solpg(j) + wet_psed(j)) / 
      &                                                        wet_vol(j)
         chla_ppw = 1000. * wet_chla(j) / wet_vol(j)
       end if
@@ -233,12 +233,12 @@
       end if
 
         if (iwtr == 1) then
-          write (29,1000) cropname, j, subnum(j), hruno(j), sb,         &
-     &               nmgt(j), iida, hru_km(j), (pdvas(ii), ii = 1, 40)
+          write (29,1000) cropname, j, subnum(j), hruno(j), sb,         
+     &     nmgt(j), iida, hru_km(j), (pdvas(ii), ii = 1, 40)
         end if
       end if
 
       return
- 1000 format (a4,i5,1x,a5,a4,1x,i4,1x,i4,1x,i4,8f10.3,1e10.4,13f10.3,   &
+ 1000 format (a4,i5,1x,a5,a4,1x,i4,1x,i4,1x,i4,8f10.3,1e10.4,13f10.3,   
      & 1e10.4,13f10.3,1e10.4,5f10.3)
       end

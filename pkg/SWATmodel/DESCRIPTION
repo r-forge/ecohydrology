@@ -1,8 +1,8 @@
 Package: SWATmodel
-Version: 0.5.13
+Version: 0.6.01
 Title: A multi-OS implementation of the TAMU SWAT model
 Author: Fuka, DR, Walter, MT, Steenhuis, TS, and Easton, ZM
-Maintainer: Daniel Fuka <drf28@cornell.edu>
+Maintainer: Daniel Fuka <drfuka@vt.edu>
 Depends: R (>= 2.10), EcoHydRology, data.table
 Description: The Soil and Water Assessment Tool is a river basin or
   watershed scale model developed by Dr. Jeff Arnold for the USDA-ARS.

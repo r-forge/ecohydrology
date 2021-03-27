@@ -89,15 +89,15 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Abs
+!!    Intrinsic: abs
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
       use parm
 
       integer :: jrch, ii
-      real :: solpstin, sorpstin, pstin, depth, chpstmass, frsol, frsrb
-      real :: sedpstmass, bedvol, fd2, wtrin, solmax, sedcon, tday
+      real*8 :: solpstin, sorpstin, pstin, depth, chpstmass, frsol, frsrb
+      real*8 :: sedpstmass, bedvol, fd2, wtrin, solmax, sedcon, tday
 
       jrch = 0
       jrch = inum1
@@ -188,7 +188,7 @@
         chpstmass = chpstmass - reactw
 
         !! calculate amount of pesticide that volatilizes from reach
-        volatpst = chpst_vol(jrch) * frsol * chpstmass * thour          &
+        volatpst = chpst_vol(jrch) * frsol * chpstmass * thour          
      &                                                   / (depth * 24.)
         if (volatpst > chpstmass) then
           volatpst = chpstmass
@@ -199,7 +199,7 @@
 
         !! calculate amount of pesticide removed from reach by
         !! settling
-        setlpst = chpst_stl(jrch) * frsrb * chpstmass * thour           &
+        setlpst = chpst_stl(jrch) * frsrb * chpstmass * thour           
      &                                                   / (depth * 24.)
         if (setlpst > chpstmass) then
           setlpst = chpstmass
@@ -220,24 +220,24 @@
         chpstmass = chpstmass + resuspst
 
         !! calculate diffusion of pesticide between reach and sediment
-        difus = chpst_mix(jrch) * (fd2 * sedpstmass - frsol *           &
+        difus = chpst_mix(jrch) * (fd2 * sedpstmass - frsol *           
      &                                chpstmass) * thour / (depth * 24.)
         if (difus > 0.) then
           if (difus > sedpstmass) then
             difus = sedpstmass
             sedpstmass = 0.
           else
-            sedpstmass = sedpstmass - Abs(difus)
+            sedpstmass = sedpstmass - abs(difus)
           end if
-          chpstmass = chpstmass + Abs(difus)
+          chpstmass = chpstmass + abs(difus)
         else
-          if (Abs(difus) > chpstmass) then
+          if (abs(difus) > chpstmass) then
             difus = -chpstmass
             chpstmass = 0.
           else
-            chpstmass = chpstmass - Abs(difus)
+            chpstmass = chpstmass - abs(difus)
           end if
-          sedpstmass = sedpstmass + Abs(difus)
+          sedpstmass = sedpstmass + abs(difus)
         end if
 
         !! calculate removal of pesticide from active sediment layer

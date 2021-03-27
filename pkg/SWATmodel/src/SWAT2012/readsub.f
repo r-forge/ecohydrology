@@ -138,7 +138,7 @@
       character (len=13) :: opsfile, wgnfile, pndfile, wusfile, septfile
         character (len=13) :: sdrfile, ltcfile
       integer :: eof, mon, j, jj, ip, if, ir
-      real :: ssnoeb(10), sno_sub, ch_ls, sumebfr
+      real*8 :: ssnoeb(10), sno_sub, ch_ls, sumebfr
 
       wgnfile = ""
       pndfile = ""
@@ -154,7 +154,7 @@
 
       read (101,5100) titldum
       read (101,*) sub_km(i)
-      if (isproj == 2) then
+      if (isproj == 3) then
        read (101,5101) harg_petco(i), cncoef_sub(i), sub_smfmx(1,i),
      &  sub_smfmn(1,i), sub_sftmp(1,i), sub_smtmp(1,i), sub_timp(1,i)
         do ib = 2, 10
@@ -274,6 +274,15 @@
             call caps(sdrfile)
             open (112,file=sdrfile)
             call readsdr
+            if (sdrain(ihru) <= 0.) sdrain(ihru) = sdrain_bsn   !! todd campbell 06/07/18
+          else
+            if (re(ihru) <= 0.) re(ihru) = re_bsn
+            if (sdrain(ihru) <= 0.) sdrain(ihru) = sdrain_bsn
+            if (drain_co(ihru) <= 0.) drain_co(ihru) = drain_co_bsn
+            if (pc(ihru) <= 0.) pc(ihru) = pc_bsn
+            if (latksatf(ihru) <= 0.) latksatf(ihru) = latksatf_bsn 
+            if (sstmaxd(ihru) <= 0.) sstmaxd(ihru) = sstmaxd_bsn
+ !           sdrain(ihru) = 0.      !!!! nbs 11/25/15
           end if
           
           open (106,file=chmfile)
@@ -316,8 +325,8 @@
               if (kk>30) exit
             end do
             if(bmpdrain(ihru)==1) then
-              sub_ha_imp(i) = sub_ha_imp(i) + hru_ha(ihru)              & 
-     &            * fimp(urblu(ihru))               !!!!   nubz
+              sub_ha_imp(i) = sub_ha_imp(i) + hru_ha(ihru)            
+     &            * fimp(urblu(ihru))               
               sub_ha_urb(i) = sub_ha_urb(i) + hru_ha(ihru) 
            end if
           end if
@@ -368,23 +377,19 @@
           hru_rufr(ils,ihru) = hru_fr(ihru) * sub_km(i) / daru_km(i,ils)
           end do
         end if
-      
-!!  routing changes gsm per jga 5/3/2010
-!!      irunits = 0
-!!      read (101,*,iostat=eof) titldum
-!!      read (101,*,iostat=eof) irunits
-!!     if (irunits = = 1) then
-!!        call readfig_sub
-!!      endif
-      
+
+!! commented the following statements and moved above in the 'else'
+!! where it reads the sdrfile.  Jeff should check. 
 !!    set default values
-!!    set default values
-      if (re(ihru) <= 0.) re(ihru) = re_bsn
-      if (sdrain(ihru) <= 0.) sdrain(ihru) = sdrain_bsn
-      if (drain_co(ihru) <= 0.) drain_co(ihru) = drain_co_bsn
-      if (pc(ihru) <= 0.) pc(ihru) = pc_bsn
-      if (latksatf(ihru) <= 0.) latksatf(ihru) = latksatf_bsn      
-      if (sstmaxd(ihru) <= 0.) sstmaxd(ihru) = sstmaxd_bsn      
+!      do ihru = jj, hrutot(i)
+!        if (re(ihru) <= 0.) re(ihru) = re_bsn
+!   if (sdrain(ihru) <= 0.) sdrain(ihru) = sdrain_bsn
+!   if (drain_co(ihru) <= 0.) drain_co(ihru) = drain_co_bsn
+!   if (pc(ihru) <= 0.) pc(ihru) = pc_bsn
+!        if (latksatf(ihru) <= 0.) latksatf(ihru) = latksatf_bsn 
+!   if (sstmaxd(ihru) <= 0.) sstmaxd(ihru) = sstmaxd_bsn
+!     end do
+
       !     estimate drainage area for urban on-line bmps in square km
       !subdr_km(i) = subdr_km(i) + sub_km(i)
 
@@ -424,7 +429,7 @@
 
 !!    This equation given to us by EPA, in the process of getting reference
       sdrift = 0.
-      sdrift = .01 * (10.**(-.00738 * (7.62 * ch_w(1,i)) - 2.5889) +    &
+      sdrift = .01 * (10.**(-.00738 * (7.62 * ch_w(1,i)) - 2.5889) +    
      &                                                       .2267) / 2.
 
 !! assign subbasin values to HRUs where needed
@@ -455,12 +460,12 @@
       call readwus
 
 !! sediment delivery ration for the subbasin..... urban modeling by J.Jeong
-      dratio(i) = 0.42 * sub_km(i) **(-0.125)
+      dratio(i) = 0.42 * sub_km(i) ** -0.125
       if(dratio(i)>0.9) dratio(i) = 0.9
 
       close (101)
       return
- 1000 format ('ERROR: Elevation Band Fractions in Subbasin ',i4,        &
+ 1000 format ('ERROR: Elevation Band Fractions in Subbasin ',i4,        
      &        ' do not add up to 100% of subbasin area!')
  5100 format (a)
  5101 format (f8.4,f4.2,5f8.3)

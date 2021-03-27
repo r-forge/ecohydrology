@@ -123,7 +123,10 @@
       use parm
 
       integer :: k, ii
-      real :: volum, tranmx, ratio
+      real :: volum, tranmx, ratio,vtot
+
+      nhyd_tr = ih_tran(inum5)
+      vartran(:,inum3) = 0.
 
 !! check beg/end months summer or winter
       if (mo_transb(inum5) < mo_transe(inum5)) then
@@ -134,40 +137,63 @@
 !! compute volume of water in source
       volum = 0.
       if (ihout == 2) then
-        volum = res_vol(inum1)
+        volum = res_vol(inum1) + varoute(2,nhyd_tr) 
       else
         volum = rchdy(2,inum1) * 86400.
       end if
       if (volum <= 0.) return
 
+      
 !! compute maximum amount of water allowed to be transferred
       tranmx = 0.
       select case (inum4)
         case (1)     !! transfer fraction of water in source
           tranmx = volum * rnum1
         case (2)     !! leave minimum volume or flow
-          tranmx = volum - rnum1
+          tranmx = volum - rnum1 * 86400.
           if (tranmx < 0.) tranmx = 0.
         case (3)     !! transfer volume specified
-          tranmx = rnum1
+          tranmx = rnum1 * 86400.
           if (tranmx > volum) tranmx = volum
       end select
  
       if (tranmx > 0.) then
 
-        !! TRANSFER WATER TO DESTINATION
-!        select case (inum2)
-!          case (1)          !! TRANSFER WATER TO A CHANNEL
-!            rchstor(inum3) = rchstor(inum3) + tranmx
-!
-!          case (2)          !! TRANSFER WATER TO A RESERVOIR
-!            res_vol(inum3) = res_vol(inum3) + tranmx
-!        end select
- 
-        !! SUBTRACT AMOUNT TRANSFERED FROM SOURCE
+        !! Source is a reservoir 
         if (ihout == 2) then
-          res_vol(inum1) = res_vol(inum1) - tranmx
+          ratio = 1. - tranmx / volum
+          ratio1 = 1.- ratio
+          res_vol(inum1) = res_vol(inum1) * ratio          !!|m^3 H2O      |water
+          res_nh3(inum1) = res_nh3(inum1) * ratio          !!|kg N          |amount of ammonia in reservoir
+          res_no2(inum1) = res_no2(inum1) * ratio          !!|kg N          |amount of nitrite in reservoir
+          res_no3(inum1) = res_no3(inum1) * ratio          !!|kg N          |amount of nitrate in reservoir
+          res_orgn(inum1)= res_orgn(inum1)* ratio          !!|kg N          |amount of organic N in reservoir
+          res_orgp(inum1)= res_orgp(inum1)* ratio          !!|kg P          |amount of organic P in reservoir
+          res_solp(inum1)= res_solp(inum1)* ratio          !!|kg P          |amount of soluble P in reservior
+          res_chla(inum1)= res_chla(inum1)* ratio          !!|kg chl-a      |amount of chlorophyll-a leaving reaservoir
+          do ii = 2, mvaro
+              varoute(ii,nhyd_tr) = varoute(ii,nhyd_tr) * ratio
+          end do
+
+          !!save vartran to add in rchinit/resinit 
+          vartran(2,inum3) = tranmx
+          vartran(3,inum3) = res_sed(inum1) * tranmx 
+          vartran(4,inum3) = (res_orgn(inum1) + varoute(4,nhyd_tr)) 
+     &                        / ratio * ratio1 
+          vartran(5,inum3) = (res_orgp(inum1) + varoute(5,nhyd_tr)) 
+     &                        / ratio * ratio1 
+          vartran(6,inum3) = (res_no3(inum1) + varoute(6,nhyd_tr)) 
+     &                        / ratio * ratio1 
+          vartran(7,inum3) = (res_solp(inum1) + varoute(7,nhyd_tr)) 
+     &                        / ratio * ratio1 
+
+          vartran(11,inum3) = lkpst_conc(inum1) * tranmx  !mg pesticide 
+          vartran(13,inum3) = (res_chla(inum1) + varoute(13,nhyd_tr)) 
+     &                        / ratio * ratio1 
+
+         
         else
+        !! Source is a reach    
           xx = tranmx
 !          if (xx > rchstor(inum1)) then
 !            xx = tranmx - rchstor(inum1)
@@ -177,8 +203,6 @@
 !            xx = 0.
 !          end if
 
-           nhyd_tr = ih_tran(inum5)
-      
           if (xx > varoute(2,nhyd_tr)) then
             xx = tranmx - varoute(2,nhyd_tr)
             varoute(2,nhyd_tr) = 0.
@@ -194,53 +218,52 @@
           end if
           
           ratio1 = 1. - ratio
-          rchmono(2,inum1) = rchmono(2,inum1) - rchdy(2,inum1) * ratio1
-          rchmono(6,inum1) = rchmono(6,inum1) - rchdy(6,inum1) * ratio1
-          rchmono(9,inum1) = rchmono(9,inum1) - rchdy(9,inum1) * ratio1
-          rchmono(11,inum1)=rchmono(11,inum1) - rchdy(11,inum1) * ratio1
-          rchmono(13,inum1)=rchmono(13,inum1) - rchdy(13,inum1) * ratio1
-          rchmono(15,inum1)=rchmono(15,inum1) - rchdy(15,inum1) * ratio1
-          rchmono(17,inum1)=rchmono(17,inum1) - rchdy(17,inum1) * ratio1
-          rchmono(19,inum1)=rchmono(19,inum1) - rchdy(19,inum1) * ratio1
-          rchmono(21,inum1)=rchmono(21,inum1) - rchdy(21,inum1) * ratio1
-          rchmono(23,inum1)=rchmono(23,inum1) - rchdy(23,inum1) * ratio1
-          rchmono(25,inum1)=rchmono(25,inum1) - rchdy(25,inum1) * ratio1
-          rchmono(27,inum1)=rchmono(27,inum1) - rchdy(27,inum1) * ratio1
-          rchmono(29,inum1)=rchmono(29,inum1) - rchdy(29,inum1) * ratio1
-          rchmono(38,inum1)=rchmono(38,inum1) - rchdy(38,inum1) * ratio1
-          rchmono(39,inum1)=rchmono(39,inum1) - rchdy(39,inum1) * ratio1
-          rchmono(40,inum1)=rchmono(40,inum1) - rchdy(40,inum1) * ratio1
-          rchmono(41,inum1)=rchmono(41,inum1) - rchdy(41,inum1) * ratio1
+          rchmono(2,inum1) = rchmono(2,inum1) - rchdy(2,inum1) * ratio1  !!flow out
+          rchmono(6,inum1) = rchmono(6,inum1) - rchdy(8,inum1) * ratio1  !!org N out
+          rchmono(9,inum1) = rchmono(9,inum1) - rchdy(11,inum1) * ratio1 !!org P out
+          rchmono(11,inum1)=rchmono(11,inum1) - rchdy(4,inum1) * ratio1  !!transmission losses from reach
+          rchmono(13,inum1)=rchmono(13,inum1) - rchdy(41,inum1) * ratio1 !!conservative metal #2 out
+          rchmono(15,inum1)=rchmono(15,inum1) - rchdy(12,inum1) * ratio1 !!nitrate transported into reach
+          rchmono(17,inum1)=rchmono(17,inum1) - rchdy(18,inum1) * ratio1 !!soluble P transported into reach
+          rchmono(19,inum1)=rchmono(19,inum1) - rchdy(26,inum1) * ratio1 !!soluble pesticide transported into reach
+          rchmono(21,inum1)=rchmono(21,inum1) - rchdy(28,inum1) * ratio1 !!sorbed pesticide transported into reach
+          rchmono(23,inum1)=rchmono(23,inum1) - rchdy(30,inum1) * ratio1 !!amount of pesticide lost through reactions
+          rchmono(25,inum1)=rchmono(25,inum1) - rchdy(32,inum1) * ratio1 !!amount of pesticide settling out of reach
+          rchmono(27,inum1)=rchmono(27,inum1) - rchdy(34,inum1) * ratio1 !!amount of pesticide diffusing from reach
+          rchmono(29,inum1)=rchmono(29,inum1) - rchdy(36,inum1) * ratio1 !!amount of pesticide in sediment layer
+          rchmono(38,inum1)=rchmono(38,inum1) - rchdy(24,inum1) * ratio1 !!dissolved oxygen transported into reach
+          rchmono(39,inum1)=rchmono(39,inum1) - rchdy(25,inum1) * ratio1 !!dissolved osygen transported out of reach
+          rchmono(40,inum1)=rchmono(40,inum1) - rchdy(38,inum1) * ratio1 !!persistent bacteria transported out of reach
+          rchmono(41,inum1)=rchmono(41,inum1) - rchdy(39,inum1) * ratio1 !!less persistent bacteria transported out of reach
           
           rchdy(2,inum1) = rchdy(2,inum1) * ratio
-          rchdy(6,inum1) = rchdy(6,inum1) * ratio
-          rchdy(9,inum1) = rchdy(9,inum1) * ratio
+          rchdy(8,inum1) = rchdy(8,inum1) * ratio
           rchdy(11,inum1) = rchdy(11,inum1) * ratio
-          rchdy(13,inum1) = rchdy(13,inum1) * ratio
-          rchdy(15,inum1) = rchdy(15,inum1) * ratio
-          rchdy(17,inum1) = rchdy(17,inum1) * ratio
-          rchdy(19,inum1) = rchdy(19,inum1) * ratio
-          rchdy(21,inum1) = rchdy(21,inum1) * ratio
-          rchdy(23,inum1) = rchdy(23,inum1) * ratio
+          rchdy(4,inum1) = rchdy(4,inum1) * ratio
+          rchdy(41,inum1) = rchdy(41,inum1) * ratio
+          rchdy(12,inum1) = rchdy(12,inum1) * ratio
+          rchdy(18,inum1) = rchdy(18,inum1) * ratio
+          rchdy(26,inum1) = rchdy(26,inum1) * ratio
+          rchdy(28,inum1) = rchdy(28,inum1) * ratio
+          rchdy(30,inum1) = rchdy(30,inum1) * ratio
+          rchdy(32,inum1) = rchdy(32,inum1) * ratio
+          rchdy(34,inum1) = rchdy(34,inum1) * ratio
+          rchdy(36,inum1) = rchdy(36,inum1) * ratio
+          rchdy(24,inum1) = rchdy(24,inum1) * ratio
           rchdy(25,inum1) = rchdy(25,inum1) * ratio
-          rchdy(27,inum1) = rchdy(27,inum1) * ratio
-          rchdy(29,inum1) = rchdy(29,inum1) * ratio
           rchdy(38,inum1) = rchdy(38,inum1) * ratio
           rchdy(39,inum1) = rchdy(39,inum1) * ratio
-          rchdy(40,inum1) = rchdy(40,inum1) * ratio
-          rchdy(41,inum1) = rchdy(41,inum1) * ratio
-          rchdy(42,inum1) = rchdy(42,inum1) * ratio
-        end if
         
-        !!subratct from source
-        do ii = 3, mvaro
-          varoute(ii,nhyd_tr) = varoute(ii,nhyd_tr) * ratio
-        end do
-        !!save vartran to add in rchinit and resinit
-        vartran(2,inum3) = varoute(2,nhyd_tr) / ratio * ratio1
-        do ii = 3, mvaro
-          vartran(ii,inum3) = varoute(ii,nhyd_tr) * ratio1
-        end do
+          !!subratct from source
+          do ii = 3, mvaro
+            varoute(ii,nhyd_tr) = varoute(ii,nhyd_tr) * ratio
+          end do
+          !!save vartran to add in rchinit 
+          vartran(2,inum3) = varoute(2,nhyd_tr) / ratio * ratio1
+          do ii = 3, mvaro
+            vartran(ii,inum3) = varoute(ii,nhyd_tr) * ratio1
+          end do
+        end if
         
       end if
 

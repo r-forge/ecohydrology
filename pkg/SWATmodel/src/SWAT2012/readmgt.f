@@ -55,7 +55,7 @@
 !!                                 |number of the month) The dates are for
 !!                                 |leap years
 !! drainmod tile equations   06/2006
-!!        ranrns(:)  |mm                     |random roughness of operation
+!!   ranrns(:)  |mm      |random roughness of operation
 !! drainmod tile equations   06/2006
 !!    urbcn2(:)  |none             |Moisture condition II curve number for 
 !!                                 |impervious areas 
@@ -300,8 +300,8 @@
       integer :: ncrp, iro, npl, mon, day, mgt_op, mgt2i, mgt1i, lcr
       integer :: nir, ifn, npst, j, nhv, inop, nhvo, nkill, newpest
       integer :: igr, nairr, nafer, nsw, nrel, icf, mgt3i
-      real :: husc, mgt6, mgt9, mgt4, mgt5, mgt7, mgt8
-      real :: disc
+      real*8 :: husc, mgt6, mgt9, mgt4, mgt5, mgt7, mgt8
+      real*8 :: disc
       
       eof = 0
       iop = 0
@@ -337,9 +337,10 @@
       read (109,*) tdrain(ihru)
       read (109,*) gdrain(ihru)
       read (109,5000) titldum
-!!      read (109,*) nrot(ihru)
+ !!     read (109,*) nrot(ihru)
+      read (109,5000) titldum 
       read (109,5000) titldum
-      read (109,5000) titldum
+
 
 !!    set pothole trigger
 !    if (ipot(ihru) == ihru) then
@@ -389,11 +390,11 @@
         disc = 0.
         disc = fimp(urblu(ihru)) - fcimp(urblu(ihru))
         if (fimp(urblu(ihru)) < 0.30) then
-          cn2(ihru) = cn2(ihru) + fimp(urblu(ihru)) *                   &
-     &                      (urbcn2(urblu(ihru)) - cn2(ihru)) *         &
+          cn2(ihru) = cn2(ihru) + fimp(urblu(ihru)) *                   
+     &                      (urbcn2(urblu(ihru)) - cn2(ihru)) *         
      &                               (1. - disc/(2.* fimp(urblu(ihru))))
         else
-          cn2(ihru) = cn2(ihru) + fimp(urblu(ihru)) *                   &
+          cn2(ihru) = cn2(ihru) + fimp(urblu(ihru)) *                   
      &                                 (urbcn2(urblu(ihru)) - cn2(ihru))
         endif
       endif
@@ -431,7 +432,7 @@
           mgt7 = 0.
           mgt8 = 0.
           mgt9 = 0.
-          read (109,5200,iostat=eof) mon, day, husc, mgt_op, mgt1i,     &
+          read (109,5200,iostat=eof) mon, day, husc, mgt_op, mgt1i,     
      &          mgt2i, mgt3i, mgt4, mgt5, mgt6, mgt7, mgt8, mgt9, mgt10i
           if (eof < 0) then
             if (mgt_opprev /= 17 .and. mgt_opprev /= 0) then
@@ -516,7 +517,7 @@
             endif
           endif
         end if                                            !! mgt_op if        
-            nopmx(ihru) = nopmx(ihru) + 1
+       nopmx(ihru) = nopmx(ihru) + 1
         end do                                  !! operation loop
 !!    add a skip command to the end of every rotation
 !!        iop = iop + 1
@@ -528,6 +529,7 @@
      
       return
  5000 format (a)
- 5200 format (1x,i2,1x,i2,1x,f8.3,1x,i2,1x,i4,1x,i3,1x,i2,1x,f12.5,1x,  &
+ 5200 format (1x,i2,1x,i2,1x,f8.3,1x,i2,1x,i4,1x,i3,1x,i2,1x,f12.5,1x,  
      &        f6.2,1x,f11.5,1x,f4.2,1x,f6.2,1x,f5.2,i12)
+
       end

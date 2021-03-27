@@ -53,11 +53,9 @@
       use parm
       implicit none
 
-      real, external :: Theta
-
       integer :: jres
-      real :: totbactp, totbactlp, netwtr
-      real :: wtmp
+      real*8 :: totbactp, totbactlp, netwtr
+      real*8 :: wtmp
 
       jres = 0
       jres = inum1
@@ -75,9 +73,9 @@
       !! total bacteria mass in reservoir
       totbactp = 0.
       totbactlp = 0.
-      totbactp = varoute(18,inum2) * varoute(2,inum2)                   &
+      totbactp = varoute(18,inum2) * varoute(2,inum2)                   
      &                                        + res_bactp(jres) * reswtr
-      totbactlp = varoute(19,inum2) * varoute(2,inum2)                  &
+      totbactlp = varoute(19,inum2) * varoute(2,inum2)                  
      &                                       + res_bactlp(jres) * reswtr
 
       !! compute bacteria die-off

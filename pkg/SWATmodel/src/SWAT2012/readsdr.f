@@ -14,12 +14,12 @@
 !!    ~ ~ ~ OUTGOING VARIABLES ~ ~ ~
 !!    name      |units          |definition
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
-!!                                             |daily 
-!!      drain_co(:)|mm/day               |drainage coefficient                    
-!!      latksatf(:)      |none               |multiplication factor to determine conk(j1,j) from sol_k(j1,j) for HRU
-!!      pc(:)            |mm/hr               |pump capacity (default pump capacity = 1.042mm/hr or 25mm/day)
-!!      re(:)            |mm                     |effective radius of drains
-!!      sdrain(:)      |mm                     |distance between two drain tubes or tiles
+!!          |daily 
+!! drain_co(:)|mm/day     |drainage coefficient     
+!! latksatf(:) |none     |multiplication factor to determine conk(j1,j) from sol_k(j1,j) for HRU
+!! pc(:)  |mm/hr     |pump capacity (default pump capacity = 1.042mm/hr or 25mm/day)
+!! re(:)  |mm      |effective radius of drains
+!! sdrain(:) |mm      |distance between two drain tubes or tiles
 !!    sstmaxd(:)|mm            |static maximum depressional storage; read from .sdr
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
@@ -71,7 +71,7 @@
       character (len=80) :: titldum
       integer :: eof
       integer :: mon, day, mgt_op, mgt2i, mgt1i
-      real :: mgt6, mgt9, mgt4, mgt5, mgt7, mgt8
+      real*8 :: mgt6, mgt9, mgt4, mgt5, mgt7, mgt8
 
       do
         read (112,5000,iostat=eof) titldum

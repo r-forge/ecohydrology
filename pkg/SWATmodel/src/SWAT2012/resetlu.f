@@ -32,10 +32,10 @@
       use parm
       character(len=80) :: titldum
 
-      open (123,file=fname(no_lup))
-      read (123, 5101) titldum
+      open (9123,file=fname(no_lup))
+      read (9123, 5101) titldum
       do j = 1, mhru
-         read (123,*,end=99) hru, hru_fr(j)
+         read (9123,*,end=99) hru, hru_fr(j)
       end do
 
 !!    reset all hru_fr variables
@@ -60,7 +60,7 @@
         wet_mxvol(j) = wet_mxvol(j) * hru_fr(j)
         wet_vol(j) = wet_vol(j) * hru_fr(j)
         hru_ha(j) = hru_km(j) * 100.
-!        pot_vol(j) = 10. * pot_volmm(j) * hru_ha(j)   !! mm => m^3     NUBZ
+!   pot_vol(j) = 10. * pot_volmm(j) * hru_ha(j)   !! mm => m^3     NUBZ
         pot_volx(j) = pot_volxmm(j)
         pot_tile(j) = pot_tilemm(j) 
       end do

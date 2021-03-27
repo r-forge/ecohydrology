@@ -39,13 +39,11 @@
 !!    hsorpst(:)    |mg pst/m^3 |sorbed pesticide concentration in outflow
 !!                              |on day
 !!    hrtwtr(:)     |m^3 H2O    |water leaving reach during hour
-!!    ievent        |none       |rainfall/runoff code
-!!                              |0 daily rainfall/curve number technique
-!!                              |1 daily rainfall/Green&Ampt technique/daily
-!!                              |  routing
-!!                              |2 sub-daily rainfall/Green&Ampt technique/
-!!                              |  daily routing
-!!                              |3 sub-daily rainfall/Green&Ampt/hourly routing
+!!    ievent      |none          |rainfall/runoff code
+!!                               |0 daily rainfall/curve number technique
+!!                               |1 sub-daily rainfall/Green&Ampt/hourly
+!!                               |  routing
+!!                               |3 sub-daily rainfall/Green&Ampt/hourly routing
 !!    ihout         |none       |outflow hydrograph location
 !!    inum1         |none       |reach number
 !!    inum2         |none       |inflow hydrograph location
@@ -276,7 +274,7 @@
       implicit none
 
       integer :: jrch, ii
-      real :: sedcon, bedvol, sedpest, wtmp
+      real*8 :: sedcon, bedvol, sedpest, wtmp
 
       jrch = 0
       jrch = inum1
@@ -302,7 +300,7 @@
       varoute(26,ihout) = rch_sag
       varoute(27,ihout) = rch_lag
       varoute(28,ihout) = rch_gra
-      if (ievent < 3) then
+      if (ievent == 0) then
        varoute(4,ihout) = organicn(jrch) * rtwtr / 1000. + ch_orgn(jrch)
        varoute(5,ihout) = organicp(jrch) * rtwtr / 1000. + ch_orgp(jrch)
        varoute(6,ihout) = nitraten(jrch) * rtwtr / 1000.
@@ -358,7 +356,7 @@
       end if
 
 !! set subdaily reach output    - by jaehak jeong for urban project, subdaily output in output.rch file
-      if (ievent==3.and.iprint==3) then
+      if (ievent==1.and.iprint==3) then
         do ii=1,nstep
 !! determine sediment concentration in outflow
           sedcon = 0.
@@ -368,13 +366,13 @@
             sedcon = 0.
           end if
           rchhr(1,jrch,ii) = hhvaroute(2,inum2,ii) * (1. - rnum1)!!flow in (m^3/s)
-     &      / (idt * 60.)                   
+     &      / (idt * 60.)         
           rchhr(2,jrch,ii) = hrtwtr(ii) / (idt * 60.)            !!flow out (m^3/s)
           rchhr(3,jrch,ii) = hrtevp(ii) / (idt * 60.)            !!evap (m^3/s)
           rchhr(4,jrch,ii) = hrttlc(ii) / (idt * 60.)            !!tloss (m^3/s)
           rchhr(5,jrch,ii) = hhvaroute(3,inum2,ii) * (1. - rnum1)   !!sed in (tons)
           rchhr(6,jrch,ii) = hsedyld(ii)                         !!sed out (tons)
-          rchhr(7,jrch,ii) = sedcon                                           !!sed conc (mg/L)
+          rchhr(7,jrch,ii) = sedcon             !!sed conc (mg/L)
         end do
       endif
 
@@ -437,6 +435,7 @@
       rchdy(40,jrch) = varoute(20,ihout)                 !!cmetal #1
       rchdy(41,jrch) = varoute(21,ihout)                 !!cmetal #2
       rchdy(42,jrch) = varoute(22,ihout)                 !!cmetal #3
+      rchdy(60,jrch) = varoute(1,ihout)                  !!water temp deg c
 !!    sediment routing 
 !!    Assumed all silt for default sediment routine
 !!    For other sediment routing models particle size are tracked
@@ -529,6 +528,5 @@
        rchmono(57,jrch) = rchmono(57,jrch) + rchdy(58,jrch)
          rchmono(58,jrch) = rchmono(58,jrch) + rchdy(59,jrch)
       
-
       return
       end

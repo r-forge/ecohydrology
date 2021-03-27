@@ -441,7 +441,7 @@
       use parm
 
       integer :: j, k
-      real :: cnv
+      real*8 :: cnv
 
       j = 0
       j = ihru
@@ -521,6 +521,7 @@
         hrumono(69,j) = hrumono(69,j) + latno3(j)
         hrumono(70,j) = hrumono(70,j) + gw_qdeep(j)
         hrumono(71,j) = hrumono(71,j) + latq(j) - lpndloss - lwetloss
+        hrumono(72,j) = hrumono(72,j) + vap_tile
 
         wtrmon(1,j) = wtrmon(1,j) + pndev / cnv
         wtrmon(2,j) = wtrmon(2,j) + pndsep / cnv
@@ -629,9 +630,9 @@
             hrupstd(k,3,j) = (pst_surq(k,j) + pst_sed(k,j)) * 1.e6
             hrupstd(k,4,j) = lat_pst(k) * 1.e6 * hru_ha(j)
             !! watershed summary
-            wpstdayo(k,1) = wpstdayo(k,1) + pst_surq(k,j) * hru_dafr(j) &
+            wpstdayo(k,1) = wpstdayo(k,1) + pst_surq(k,j) * hru_dafr(j) 
      &                                                            * 1.e6
-            wpstdayo(k,2) = wpstdayo(k,2) + pst_sed(k,j) * hru_dafr(j) *&
+            wpstdayo(k,2) = wpstdayo(k,2) + pst_sed(k,j) * hru_dafr(j) *
      &                                                              1.e6
             wpstdayo(k,3) = wpstdayo(k,3) + pstsol(k) * hru_dafr(j)
             wpstdayo(k,4) = wpstdayo(k,4) + lat_pst(k) * hru_dafr(j)

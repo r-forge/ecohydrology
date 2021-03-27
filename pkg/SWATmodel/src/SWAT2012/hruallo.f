@@ -72,7 +72,7 @@
       integer :: grz, cut, mgt1i, pstnum, ii, ap_r, ap_s, kll, hkll
       integer :: ap_ai, ap_af, mgt_op, ap_cf, ap_cc, ap_ci, jj
       integer :: iopera_sub
-      real :: depth(25)
+      real*8 :: depth(25)
 
       do j= mhru1, mhru
       mgtfile = ""
@@ -158,4 +158,3 @@
  6200 format (1x,i3)
  6300 format (16x,i2,1x,i4)
       end
-

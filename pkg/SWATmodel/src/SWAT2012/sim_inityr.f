@@ -98,7 +98,7 @@
           sedc_m = 0.
           surfqc_m =0.
           latc_m = 0.
-           percc_m = 0.
+      percc_m = 0.
           foc_m = 0.
           NPPC_m = 0.
           rsdc_m = 0. 
@@ -108,10 +108,10 @@
           soc_m = 0.
           rspc_m = 0.        
           
-           sedc_a = 0.
+      sedc_a = 0.
           surfqc_a =0.
           latc_a = 0.
-           percc_a = 0.
+      percc_a = 0.
           foc_a = 0.
           NPPC_a = 0.
           rsdc_a = 0. 

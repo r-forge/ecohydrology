@@ -27,9 +27,9 @@
 !!                                 |current year
 !!    nyskip        |none          |number of years to skip output printing/
 !!                                 |summarization
-!        Drainmod  07/2006
-!!        ranrns(:)     |mm            |random roughness of a given tillage operation 
-!        Drainmod  07/2006
+!   Drainmod  07/2006
+!!   ranrns(:)     |mm            |random roughness of a given tillage operation 
+!   Drainmod  07/2006
 !!    sol_actp(:,:) |kg P/ha       |amount of phosphorus stored in the
 !!                                 |active mineral phosphorus pool
 !!    sol_aorgn(:,:)|kg N/ha       |amount of nitrogen stored in the active
@@ -68,9 +68,9 @@
 !!                                 |particles
 !!    ntil(:)       |none          |sequence number of tillage operation within
 !!                                 |current year
-!        Drainmod  08/2006
+!   Drainmod  08/2006
 !!    ranrns_hru(:) |mm            |random roughness for a given HRU
-!        Drainmod  08/2006
+!   Drainmod  08/2006
 !!    sol_actp(:,:) |kg P/ha       |amount of phosphorus stored in the
 !!                                 |active mineral phosphorus pool
 !!    sol_aorgn(:,:)|kg N/ha       |amount of nitrogen stored in the active
@@ -108,9 +108,9 @@
 !!    k           |none          |counter
 !!    l           |none          |counter
 !!    nl          |none          |number of layers being mixed
-!        Drainmod  07/2006
-!!        ranrns_hru(:)|mm           |random roughness at time of a given tillage operation in HRU
-!        Drainmod  07/2006
+!   Drainmod  07/2006
+!!   ranrns_hru(:)|mm           |random roughness at time of a given tillage operation in HRU
+!   Drainmod  07/2006
 !!    smix(:)     |varies        |amount of substance in soil profile
 !!                               |that is being redistributed between 
 !!                               |mixed layers
@@ -126,14 +126,14 @@
       use parm
 
       integer, intent (in) :: jj
-      real, intent (in) :: bmix
+      real*8, intent (in) :: bmix
       integer :: l, k, nl
-      real :: emix, dtil, rrns 
-      real :: thtill(mlyr), smix(11+npmx)
+      real*8 :: emix, dtil, rrns 
+      real*8 :: thtill(mlyr), smix(11+npmx)
 
       emix = 0.
       dtil = 0.
-!      Drainmod  08/2006 
+! Drainmod  08/2006 
       rrns = 0.
       if (bmix > 1.e-6) then
         !! biological mixing
@@ -143,7 +143,7 @@
         !! tillage operation
         emix = effmix(idtill)
         dtil = deptil(idtill)
-!      Drainmod  07/2006
+! Drainmod  07/2006
       if(itill(jj) == 1) then
           cumei(jj) = 0.
           cumeira(jj) = 0.
@@ -171,7 +171,7 @@
           if (l /= 1) then
             if (sol_z(l,jj) > dtil) then
               if (sol_z(l-1,jj) < dtil) then
-                thtill(l) = (dtil - sol_z(l-1,jj)) /                    &
+                thtill(l) = (dtil - sol_z(l-1,jj)) /                    
      &                                     (sol_z(l,jj) - sol_z(l-1,jj))
                 nl = l
               endif
@@ -212,55 +212,55 @@
 
           !! calculate new amount of each substance in each layer
           !! undergoing mixing
-          sol_no3(l,jj) = sol_no3(l,jj) * (1. - thtill(l)) +            &
-     &                    sol_no3(l,jj) * thtill(l) * (1. - emix) +     &
+          sol_no3(l,jj) = sol_no3(l,jj) * (1. - thtill(l)) +            
+     &                    sol_no3(l,jj) * thtill(l) * (1. - emix) +     
      &                    smix(1) * thtill(l) * dg / dtil
 
-          sol_orgn(l,jj) = sol_orgn(l,jj) * (1. - thtill(l)) +          &
-     &                    sol_orgn(l,jj) * thtill(l) * (1. - emix) +    &
+          sol_orgn(l,jj) = sol_orgn(l,jj) * (1. - thtill(l)) +          
+     &                    sol_orgn(l,jj) * thtill(l) * (1. - emix) +    
      &                    smix(2) * thtill(l) * dg / dtil
 
-          sol_nh3(l,jj) = sol_nh3(l,jj) * (1. - thtill(l)) +            &
-     &                    sol_nh3(l,jj) * thtill(l) * (1. - emix) +     &
+          sol_nh3(l,jj) = sol_nh3(l,jj) * (1. - thtill(l)) +            
+     &                    sol_nh3(l,jj) * thtill(l) * (1. - emix) +     
      &                    smix(3) * thtill(l) * dg / dtil
 
-          sol_solp(l,jj) = sol_solp(l,jj) * (1. - thtill(l)) +          &
-     &                    sol_solp(l,jj) * thtill(l) * (1. - emix) +    &
+          sol_solp(l,jj) = sol_solp(l,jj) * (1. - thtill(l)) +          
+     &                    sol_solp(l,jj) * thtill(l) * (1. - emix) +    
      &                    smix(4) * thtill(l) * dg / dtil
 
-          sol_orgp(l,jj) = sol_orgp(l,jj) * (1. - thtill(l)) +          &
-     &                    sol_orgp(l,jj) * thtill(l) * (1. - emix) +    &
+          sol_orgp(l,jj) = sol_orgp(l,jj) * (1. - thtill(l)) +          
+     &                    sol_orgp(l,jj) * thtill(l) * (1. - emix) +    
      &                    smix(5) * thtill(l) * dg / dtil
 
-          sol_aorgn(l,jj) = sol_aorgn(l,jj) * (1. - thtill(l)) +        &
-     &                    sol_aorgn(l,jj) * thtill(l) * (1. - emix) +   &
+          sol_aorgn(l,jj) = sol_aorgn(l,jj) * (1. - thtill(l)) +        
+     &                    sol_aorgn(l,jj) * thtill(l) * (1. - emix) +   
      &                    smix(6) * thtill(l) * dg / dtil
 
-          sol_actp(l,jj) = sol_actp(l,jj) * (1. - thtill(l)) +          &
-     &                    sol_actp(l,jj) * thtill(l) * (1. - emix) +    &
+          sol_actp(l,jj) = sol_actp(l,jj) * (1. - thtill(l)) +          
+     &                    sol_actp(l,jj) * thtill(l) * (1. - emix) +    
      &                    smix(7) * thtill(l) * dg / dtil
 
-          sol_fon(l,jj) = sol_fon(l,jj) * (1. - thtill(l)) +            &
-     &                    sol_fon(l,jj) * thtill(l) * (1. - emix) +     &
+          sol_fon(l,jj) = sol_fon(l,jj) * (1. - thtill(l)) +            
+     &                    sol_fon(l,jj) * thtill(l) * (1. - emix) +     
      &                    smix(8) * thtill(l) * dg / dtil
 
-          sol_fop(l,jj) = sol_fop(l,jj) * (1. - thtill(l)) +            &
-     &                    sol_fop(l,jj) * thtill(l) * (1. - emix) +     &
+          sol_fop(l,jj) = sol_fop(l,jj) * (1. - thtill(l)) +            
+     &                    sol_fop(l,jj) * thtill(l) * (1. - emix) +     
      &                    smix(9) * thtill(l) * dg / dtil
 
-          sol_stap(l,jj) = sol_stap(l,jj) * (1. - thtill(l)) +          &
-     &                    sol_stap(l,jj) * thtill(l) * (1. - emix) +    &
+          sol_stap(l,jj) = sol_stap(l,jj) * (1. - thtill(l)) +          
+     &                    sol_stap(l,jj) * thtill(l) * (1. - emix) +    
      &                    smix(10) * thtill(l) * dg / dtil
 
-          sol_rsd(l,jj) = sol_rsd(l,jj) * (1. - thtill(l)) +            &
-     &                    sol_rsd(l,jj) * thtill(l) * (1. - emix) +     &
+          sol_rsd(l,jj) = sol_rsd(l,jj) * (1. - thtill(l)) +            
+     &                    sol_rsd(l,jj) * thtill(l) * (1. - emix) +     
      &                    smix(11) * thtill(l) * dg / dtil
           sol_rsd(l,jj) = Max(sol_rsd(l,jj),0.)
 
           if (hrupest(jj) > 0) then
           do k = 1, npmx
-            sol_pst(k,jj,l) = sol_pst(k,jj,l) * (1. - thtill(l)) +      &
-     &                    sol_pst(k,jj,l) * thtill(l) * (1. - emix) +   &
+            sol_pst(k,jj,l) = sol_pst(k,jj,l) * (1. - thtill(l)) +      
+     &                    sol_pst(k,jj,l) * thtill(l) * (1. - emix) +   
      &                    smix(11+k) * thtill(l) * dg / dtil
           end do
           end if

@@ -97,9 +97,9 @@
       use parm
 
       integer :: j
-      real :: tk, pb, gma, xl, ea, ed, dlt, ramm, ralb1, ralb, xx
-      real :: rbo, rto, rn, uzz, zz, zom, zov, rv, rn_pet, fvpd
-      real :: rc, rho, rout, d, chz, gsi_adj, pet_alpha
+      real*8 :: tk, pb, gma, xl, ea, ed, dlt, ramm, ralb1, ralb, xx
+      real*8 :: rbo, rto, rn, uzz, zz, zom, zov, rv, rn_pet, fvpd
+      real*8 :: rc, rho, rout, d, chz, gsi_adj, pet_alpha
 
       !! initialize local variables
       j = 0
@@ -110,7 +110,7 @@
 
       !! calculate mean barometric pressure
       pb = 0.
-      pb = 101.3 - sub_elev(hru_sub(j)) *                               &
+      pb = 101.3 - sub_elev(hru_sub(j)) *                               
      &                       (0.01152 - 0.544e-6 * sub_elev(hru_sub(j)))
 
       !! calculate latent heat of vaporization
@@ -160,7 +160,7 @@
           !! cloud cover factor equation 2.2.19
           rto = 0.
             if (hru_rmx(j) < 1.e-4) then
-                rto = 0.
+           rto = 0.
             else
               rto = 0.9 * (hru_ra(j) / hru_rmx(j)) + 0.1
             end if
@@ -201,7 +201,7 @@
           !! cloud cover factor equation 2.2.19
           rto = 0.
             if (hru_rmx(j) < 1.e-4) then
-                rto = 0.
+           rto = 0.
             else
               rto = 0.9 * (hru_ra(j) / hru_rmx(j)) + 0.1
             end if
@@ -227,7 +227,7 @@
            rc = 0.
            rv = 114. / (u10(j) * (170./1000.)**0.2)
            rc = 49. / (1.4 - 0.4 * co2(hru_sub(j)) / 330.)
-           pet_day = (dlt * rn_pet + gma * rho * vpd / rv) /            &
+           pet_day = (dlt * rn_pet + gma * rho * vpd / rv) /            
      &                               (xl * (dlt + gma * (1. + rc / rv)))
 
            pet_day = Max(0., pet_day)
@@ -286,20 +286,22 @@
             else
               fvpd = 1.0
             end if
-            gsi_adj = 0.
             gsi_adj = gsi(idplt(j)) * fvpd
             
+            if (gsi_adj > 1.e-6) then
             !! calculate canopy resistance
-            rc = 0.
             rc = 1. / gsi_adj                    !single leaf resistance
-            rc = rc / (0.5 * (laiday(j) + 0.01)                         &
+            rc = rc / (0.5 * (laiday(j) + 0.01)                         
      &                           * (1.4 - 0.4 * co2(hru_sub(j)) / 330.))
 
             !! calculate maximum plant ET
-            ep_max = (dlt * rn + gma * rho * vpd / rv) /                &
+            ep_max = (dlt * rn + gma * rho * vpd / rv) /                
      &                               (xl * (dlt + gma * (1. + rc / rv)))
             if (ep_max < 0.) ep_max = 0.
             ep_max = Min(ep_max, pet_day)
+            else
+              ep_max = 0.
+            end if
           end if
        
        case (2)   !! HARGREAVES POTENTIAL EVAPOTRANSPIRATION METHOD
@@ -311,7 +313,7 @@
         ramm = hru_rmx(j) * 37.59 / 30. 
 
         if (tmx(j) > tmn(j)) then
-         pet_day = harg_petco(hru_sub(j))*(ramm / xl)*(tmpav(j) + 17.8)*&
+         pet_day = harg_petco(hru_sub(j))*(ramm / xl)*(tmpav(j) + 17.8)*
      &                                            (tmx(j) - tmn(j))**0.5
          pet_day = Max(0., pet_day)
         else

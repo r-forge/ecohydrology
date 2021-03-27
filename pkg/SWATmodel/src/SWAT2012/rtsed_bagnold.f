@@ -30,7 +30,7 @@
 !!    inum1       |none          |reach number
 !!    inum2       |none          |inflow hydrograph storage location number
 !!    phi(5,:)    |m^3/s         |flow rate when reach is at bankfull depth
-!!    prf         |none          |Peak rate adjustment factor for sediment
+!!    prf(:)      |none          |Reach peak rate adjustment factor for sediment
 !!                               |routing in the channel. Allows impact of
 !!                               |peak flow rate on sediment routing and
 !!                               |channel reshaping to be taken into account
@@ -77,21 +77,21 @@
 !!    SWAT: ttcoef
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
-!!      Modification to the original SWAT sediment routine
-!!      By Balaji Narasimhan and Peter Allen
+!! Modification to the original SWAT sediment routine
+!! By Balaji Narasimhan and Peter Allen
 !!    Bagnolds strempower approach combined with Einsteins deposition equation
 !!    Plus particle size tracking.
 
       use parm
 
       integer :: jrch, ch_d50type
-      real :: qdin, sedin, vc, cyin, cych, depnet, deg, dep, tbase
-      real :: depdeg, dot, vs, x, SC, Tcbnk, Tcbed,Tbank,Tbed,asinea,Tou
-      real :: sanin, silin, clain, sagin, lagin, grain, outfract
-      real :: depsan, depsil, depcla, depsag, deplag, depgra
-      real :: degsan, degsil, degcla, deggra, degrte
-      real :: bnksan, bnksil, bnkcla, bnkgra, pdep, pdepbed, bedsize
-      real :: USpower,bnkrte,adddep,fpratio,watdep,bnkrt,bedrt,effbnkbed
+      real*8 :: qdin, sedin, vc, cyin, cych, depnet, deg, dep, tbase
+      real*8 :: depdeg, dot, vs, x, SC, Tcbnk, Tcbed,Tbank,Tbed,asinea,Tou
+      real*8 :: sanin, silin, clain, sagin, lagin, grain, outfract
+      real*8 :: depsan, depsil, depcla, depsag, deplag, depgra
+      real*8 :: degsan, degsil, degcla, deggra, degrte
+      real*8 :: bnksan, bnksil, bnkcla, bnkgra, pdep, pdepbed, bedsize
+      real*8 :: USpower,bnkrte,adddep,fpratio,watdep,bnkrt,bedrt,effbnkbed
 
       jrch = 0
       jrch = inum1
@@ -122,7 +122,7 @@
       if (qdin > 0.01) then
 
 !! initialize reach peak runoff rate
-      peakr = prf * sdti
+      peakr = prf(jrch) * sdti
 
 !! calculate peak flow velocity
       vc = 0.
@@ -194,7 +194,7 @@
         watdep = ch_d(jrch)
       end if
 
-!!      Applied Bank Shear Stress
+!! Applied Bank Shear Stress
 !!    Equations from Eaton and Millar (2004)
       SFbank = 10**(-1.4026 * log10((pbed/pbank) + 1.5) + 2.247)
 
@@ -210,13 +210,13 @@
 !!    Assumed on an average Only one bank eroding due to meandering of channel
       bnkrte = ch_bnk_kd(jrch) * (Tbank - tc_bnk(jrch)) * 1e-06
       if (bnkrte < 0.) bnkrte = 0.
-      bnkrte = bnkrte * ch_l2(jrch) * 1000.* (watdep * Sqrt(1. + c * c))&
+      bnkrte = bnkrte * ch_l2(jrch) * 1000.* (watdep * Sqrt(1. + c * c))
      &                                        * ch_bnk_bd(jrch) * 86400.
 
 !!    Potential Bed degradation rate in metric tons per day
       degrte = ch_bed_kd(jrch) * (Tbed - tc_bed(jrch)) * 1e-06
       if (degrte < 0.) degrte = 0.
-      degrte = degrte * ch_l2(jrch) * 1000.* phi(6,jrch)                &
+      degrte = degrte * ch_l2(jrch) * 1000.* phi(6,jrch)                
      &                                        * ch_bed_bd(jrch) * 86400.
 
 !!    Relative potential for bank/bed erosion
@@ -233,7 +233,7 @@
       cyin = sedin/qdin
 
 !!    Streampower for sediment calculated based on Bagnold (1977) concept
-      cych = spcon * vc ** spexp
+      cych = spcon(jrch) * vc ** spexp(jrch)
 
 !!    Potential sediment Transport capacity
       depnet = qdin * (cych - cyin)
@@ -293,7 +293,7 @@
           depch(jrch) = depch(jrch) - depnet
           deg1 = depnet
 
-            if (depclach(jrch) >= depnet) then
+       if (depclach(jrch) >= depnet) then
             depclach(jrch) = depclach(jrch) - depnet
             deg1cla = depnet
             degremain = 0.
@@ -336,7 +336,7 @@
                     if (depgrach(jrch) >= degremain) then
                       depgrach(jrch) = depgrach(jrch) - degremain
                       deg1gra = degremain
-                              degremain = 0.
+          degremain = 0.
                     else
                       degremain = degremain - depgrach(jrch)
                       deg1gra = depgrach(jrch)
@@ -345,7 +345,7 @@
                   endif
                 endif
               endif
-             endif
+        endif
           endif
 
         endif
@@ -362,7 +362,7 @@
         depgrach(jrch) = 0.
       end if
 
-!!      Fall velocity Based on equation 1.36 from SWRRB manual
+!! Fall velocity Based on equation 1.36 from SWRRB manual
         vgra = 411.0 * ((2.00)**2.) / (3600.)
         vsan = 411.0 * ((0.20)**2.) / (3600.)
         vsil = 411.0 * ((0.01)**2.) / (3600.)
@@ -370,43 +370,43 @@
         vsag = 411.0 * ((0.03)**2.) / (3600.)
         vlag = 411.0 * ((0.50)**2.) / (3600.)
 
-!!      Deposition calculated based on Einstein Equation
+!! Deposition calculated based on Einstein Equation
         x = 0.
 
-!!      Gravel deposition
+!! Gravel deposition
         x = 1.055 * 1000. * ch_l2(jrch) * vgra / (vc * rchdep)
         if (x > 20.) x = 20.
         pdep = min((1. - exp(-x)), 1.)
         depgra = grain * pdep
 
-!!      sand deposition
+!! sand deposition
         x = 1.055 * 1000. * ch_l2(jrch) * vsan / (vc * rchdep)
         if (x > 20.) x = 20.
         pdep = min((1. - exp(-x)), 1.)
         depsan = sanin * pdep
 
-!!      Silt deposition
+!! Silt deposition
         x = 1.055 * 1000. * ch_l2(jrch) * vsil / (vc * rchdep)
         if (x > 20.) x = 20.
         pdep = min((1. - exp(-x)), 1.)
 
         depsil = silin * pdep
 
-!!      Clay deposition
+!! Clay deposition
         x = 1.055 * 1000. * ch_l2(jrch) * vcla / (vc * rchdep)
         if (x > 20.) x = 20.
         pdep = min((1. - exp(-x)), 1.)
 
         depcla = clain * pdep
 
-!!      Small aggregates deposition
+!! Small aggregates deposition
         x = 1.055 * 1000. * ch_l2(jrch) * vsag / (vc * rchdep)
         if (x > 20.) x = 20.
         pdep = min((1. - exp(-x)), 1.)
 
         depsag = sagin * pdep
 
-!!      Large aggregates deposition
+!! Large aggregates deposition
         x = 1.055 * 1000. * ch_l2(jrch) * vlag / (vc * rchdep)
         if (x > 20.) x = 20.
         pdep = min((1. - exp(-x)), 1.)

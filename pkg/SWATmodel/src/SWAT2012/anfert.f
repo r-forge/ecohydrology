@@ -167,9 +167,9 @@
 
       use parm
 
-      real, parameter :: rtoaf = 0.50
+      real*8, parameter :: rtoaf = 0.50
       integer :: j, ly, ifrt
-      real :: tsno3, tpno3, dwfert, xx, targn, tfp
+      real*8 :: tsno3, tpno3, dwfert, xx, targn, tfp
 
       j = 0
       j = ihru
@@ -217,16 +217,20 @@
         if (fminn(ifrt) > 0.0001) then
           dwfert = targn / fminn(ifrt)
         else
-          dwfert = 0.
+!! Naresh (npai@stone-env.com) commented this line on 4/12/2016 
+!! for cases where fmin(ifrt) = 0 (e.g. for elemental P fertilizer)
+!! setting this to targn, further edits made around line 317
+!!          dwfert = 0.
+          dwfert = targn
         endif
  
         !! add bacteria to surface layer
         bactpq(j) = bactpq(j) + bactkddb(ifrt) * bactpdb(ifrt) * dwfert
-        bactlpq(j) = bactlpq(j) + bactkddb(ifrt) * bactlpdb(ifrt) *     &
+        bactlpq(j) = bactlpq(j) + bactkddb(ifrt) * bactlpdb(ifrt) *     
      &                                                            dwfert
-        bactps(j) = bactps(j) + (1. - bactkddb(ifrt)) * bactpdb(ifrt)*  &
+        bactps(j) = bactps(j) + (1. - bactkddb(ifrt)) * bactpdb(ifrt)*  
      &                                                           dwfert
-        bactlps(j) = bactlps(j) + (1. - bactkddb(ifrt)) *bactlpdb(ifrt) &
+        bactlps(j) = bactlps(j) + (1. - bactkddb(ifrt)) *bactlpdb(ifrt) 
      &                                                        * dwfert
 
         do ly = 1, 2
@@ -237,19 +241,19 @@
             xx = 1. - afrt_surface(j)
           endif
   
-          sol_no3(ly,j) = sol_no3(ly,j) + xx * dwfert * fminn(ifrt) *   &
+          sol_no3(ly,j) = sol_no3(ly,j) + xx * dwfert * fminn(ifrt) *   
      &                    (1. - fnh3n(ifrt))
-          sol_nh3(ly,j) = sol_nh3(ly,j) + xx * dwfert * fminn(ifrt) *   &
+          sol_nh3(ly,j) = sol_nh3(ly,j) + xx * dwfert * fminn(ifrt) *   
      &                    fnh3n(ifrt)
 
           if (cswat == 0) then
-            sol_fon(ly,j) = sol_fon(ly,j) + rtoaf * xx * dwfert
+       sol_fon(ly,j) = sol_fon(ly,j) + rtoaf * xx * dwfert
      &                    * forgn(ifrt)
-            sol_aorgn(ly,j) = sol_aorgn(ly,j) + (1. - rtoaf) * xx       &
+            sol_aorgn(ly,j) = sol_aorgn(ly,j) + (1. - rtoaf) * xx       
      &                    * dwfert * forgn(ifrt)
-            sol_fop(ly,j) = sol_fop(ly,j) + rtoaf * xx * dwfert         &
+            sol_fop(ly,j) = sol_fop(ly,j) + rtoaf * xx * dwfert         
      &                    * forgp(ifrt)
-            sol_orgp(ly,j) = sol_orgp(ly,j) + (1. - rtoaf) * xx *       &
+            sol_orgp(ly,j) = sol_orgp(ly,j) + (1. - rtoaf) * xx *       
      &                    dwfert* forgp(ifrt)
           end if
           if (cswat == 1) then
@@ -261,12 +265,12 @@
           !! add by zhang
           !!=================
           if (cswat == 2) then
-            sol_fop(ly,j) = sol_fop(ly,j) + rtoaf * xx * dwfert         &
+            sol_fop(ly,j) = sol_fop(ly,j) + rtoaf * xx * dwfert         
      &                    * forgp(ifrt)
-            sol_orgp(ly,j) = sol_orgp(ly,j) + (1. - rtoaf) * xx *       &
-     &                    dwfert* forgp(ifrt)          
+            sol_orgp(ly,j) = sol_orgp(ly,j) + (1. - rtoaf) * xx *       
+     &                    dwfert* forgp(ifrt)     
             !!Allocate organic fertilizer to Slow (SWAT_active) N pool;
-            sol_HSN(ly,j) = sol_HSN(ly,j) + (1. - rtoaf) * xx           &
+            sol_HSN(ly,j) = sol_HSN(ly,j) + (1. - rtoaf) * xx           
      &                    * dwfert * forgn(ifrt)
             sol_aorgn(ly,j) = sol_HSN(ly,j)
 
@@ -313,10 +317,23 @@
 
           !! check for P stress
           tfp = 0.
-          if (strsp(j) <= 0.75) then
-            tfp = fminn(ifrt) / 7.
+!!       Naresh (npai@stone-env.com) edited on 4/12/2016 
+!!       to handle fertilizers which have fminn(ifrt) = 0 (e.g. elemental P)
+!!        if (strsp(j) <= 0.75) then
+!!           tfp = fminn(ifrt) / 7.
+!!        else
+!!           tfp = fminp(ifrt)
+!!        end if
+
+          if (strsp(j) <= 0.75 .and. fminn(ifrt) > 0.0001) then
+            tfp = fminn(ifrt) / 7. !! all other fertilizers
+            autop = autop + dwfert *(tfp + forgp(ifrt))
+          else if (strsp(j) <= 0.75 .and. fminn(ifrt) == 0) then
+            tfp = 1/7. !! elemental P cases
+            autop = autop + dwfert *(tfp + forgp(ifrt))
           else
-            tfp = fminp(ifrt)
+            tfp = 0 !! no P stress, plant doesn't need any P
+            autop=0
           end if
           sol_solp(ly,j) = sol_solp(ly,j) + xx * dwfert * tfp
         end do
@@ -324,16 +341,18 @@
 
 !! summary calculations
           auton = auton + dwfert * (fminn(ifrt) + forgn(ifrt))
-          autop = autop + dwfert * (tfp + forgp(ifrt))
+!! Naresh (npai@stone-env.com) commented this code on 4/12/2016 
+!! and moved it above to handle elemental P auto-fertilization
+!!        autop = autop + dwfert *(tfp + forgp(ifrt))
           tauton(j) = tauton(j) + auton
           tautop(j) = tautop(j) + autop
         if (curyr > nyskip) then
-         wshd_ftotn = wshd_ftotn + dwfert * (fminn(ifrt) +              &
+         wshd_ftotn = wshd_ftotn + dwfert * (fminn(ifrt) +              
      &               forgn(ifrt))* hru_dafr(j)
          wshd_forgn = wshd_forgn + dwfert * forgn(ifrt) * hru_dafr(j)   
-         wshd_fno3 = wshd_fno3 + dwfert * fminn(ifrt) *                 &
+         wshd_fno3 = wshd_fno3 + dwfert * fminn(ifrt) *                 
      &               (1. - fnh3n(ifrt)) * hru_dafr(j)
-         wshd_fnh3 = wshd_fnh3 + dwfert * fminn(ifrt) * fnh3n(ifrt) *   &
+         wshd_fnh3 = wshd_fnh3 + dwfert * fminn(ifrt) * fnh3n(ifrt) *   
      &               hru_dafr(j)
          wshd_fminp = wshd_fminp + dwfert * tfp * hru_dafr(j)
          wshd_forgp = wshd_forgp + dwfert * forgp(ifrt) * hru_dafr(j)
@@ -341,7 +360,7 @@
         
         if (imgt == 1) then
               write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida, 
-     *        "         ",
+     *        hru_km(j), "         ",
      *        "AUTOFERT", phubase(j), phuacc(j), sol_sw(j),bio_ms(j), 
      *        sol_rsd(1,j),sol_sumno3(j),sol_sumsolp(j), dwfert,
      *        fertno3, fertnh3, fertorgn, fertsolp, fertorgp            
@@ -350,7 +369,7 @@
       endif
       
 
-1000  format (a5,1x,a4,3i6,2a15,7f10.2,20x,f10.2,10x,5f10.2) 
+1000  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,20x,f10.2,10x,5f10.2)
       
       return
       end subroutine

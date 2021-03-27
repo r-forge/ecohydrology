@@ -65,22 +65,24 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Sum, Exp, Real, Mod
+!!    Intrinsic: Sum, Exp, real*8, Mod
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
 
 
       use parm
 
-      integer :: j, k, kk,sb
-      real :: adj_hc, dthet, soilw, psidt, tst, f1
-      real, dimension (nstep+1) :: cumr, cuminf, excum, exinc, rateinf
-      real, dimension (nstep+1) :: rintns
+      integer :: j, k, kk, sb, ii,ida
+      real*8 :: adj_hc, dthet, soilw, psidt, tst, f1
+      real*8 :: lid_prec, lid_cumr, urban_prec
+      real*8, dimension (nstep+1) :: cumr, cuminf, excum, exinc, rateinf
+      real*8, dimension (nstep+1) :: rintns
         !! array location #1 is for last time step of prev day
 
        j = 0
        j = ihru
        sb = hru_sub(j)     
+       ida=iida
       
        !! reset values for day
        cumr = 0.
@@ -117,18 +119,18 @@
        psidt = dthet * wfsh(j)
 
        k = 1
-       rintns(1) = 60. * precipdt(2) / Real(idt)  !! urban 60./idt  NK Feb 4,08
+       rintns(1) = 60. * precipdt(2) / dfloat(idt)  !! urban 60./idt  NK Feb 4,08
 
        do k = 2, nstep+1
          !! calculate total amount of rainfall during day for time step
          cumr(k) = cumr(k-1) + precipdt(k)
          !! and rainfall intensity for time step
-         rintns(k) = 60. * precipdt(k+1) / Real(idt) !!urban 60./idt NK Feb 4,08 
+         rintns(k) = 60. * precipdt(k+1) / dfloat(idt) !!urban 60./idt NK Feb 4,08 
 
          !! if rainfall intensity is less than infiltration rate
          !! everything will infiltrate
          if (rateinf(k-1) >= rintns(k-1)) then
-           cuminf(k) = cuminf(k-1) + rintns(k-1) * Real(idt) / 60. !!urban 60./idt NK Feb 4,08
+           cuminf(k) = cuminf(k-1) + rintns(k-1) * dfloat(idt) / 60. !!urban 60./idt NK Feb 4,08
            if (excum(k-1) > 0.) then
              excum(k) = excum(k-1)
              exinc(k) = 0.
@@ -141,12 +143,12 @@
           !! find cumulative infiltration for time step by successive
           !! substitution
            tst = 0.
-           tst = adj_hc * Real(idt) / 60.  !!urban 60./idt NK Feb 4,08
+           tst = adj_hc * dfloat(idt) / 60.  !!urban 60./idt NK Feb 4,08
            do
              f1 = 0.
-             f1 = cuminf(k-1) + adj_hc * Real(idt) / 60. +             
+             f1 = cuminf(k-1) + adj_hc * dfloat(idt) / 60. +             
      &             psidt * Log((tst + psidt)/(cuminf(k-1) + psidt))
-             if (Abs(f1 - tst) <= 0.001) then
+             if (abs(f1 - tst) <= 0.001) then
                cuminf(k) = f1
                excum(k) = cumr(k) - cuminf(k)
                exinc(k) = excum(k) - excum(k-1)
@@ -162,17 +164,50 @@
 
          !! Urban Impervious cover 
          if (iurban(j)>0) then
-            !runoff from pervious area
-            hhqday(k-1) = hhqday(k-1) * (1.- fcimp(urblu(j))) 
-           
-           !runoff from impervious area with initial abstraction
-            ubnrunoff(k-1) = (precipdt(k) - abstinit) * 
-     &                       fcimp(urblu(j))
-            if ( ubnrunoff(k-1)<0)  ubnrunoff(k-1) = 0.
+           !runoff from pervious area
+           hhqday(k-1) = hhqday(k-1) * (1.- fcimp(urblu(j))) 
+
+
+           ! runoff from a LID and its upstream drainage areas (green roof, rain garden, cistern, and porous pavement)
+           if (lid_onoff(sb,urblu(j))==1) then
+             !lid_prec = dfloat(precipdt(k) - abstinit)   commented by Todd - double precision chgs
+             if (lid_prec < 0.) lid_prec = 0.
+             call lids(sb,j,k,lid_prec)
+             lid_qsurf_total = 0.
+             lid_farea_sum = 0.
+             do ii = 1, 4
+               if (lid_farea(j,ii) > 0) then
+                 lid_qsurf_total = lid_qsurf_total + fcimp(urblu(j)) * 
+     &           lid_farea(j,ii) * lid_qsurf(j,ii)
+                 if (ii==1) then
+                   if (cs_grcon(sb,urblu(j))==0) then
+                     lid_farea_sum = lid_farea_sum + lid_farea(j,ii)
+                   end if
+                 else
+                   lid_farea_sum = lid_farea_sum + lid_farea(j,ii)
+                 end if
+               end if
+             end do
+!             if (lid_farea_sum > 1.0) ! error massage
+!             ubnrunoff(k-1) = (precipdt(k) - abstinit) * fcimp(urblu(j))
+
+
+             ubnrunoff(k-1) = lid_prec * fcimp(urblu(j))
+     &       * (1 - lid_farea_sum) + lid_qsurf_total
+           else
+             urban_prec = precipdt(k) - abstinit
+             if (urban_prec < 0.) urban_prec = 0.
+!             ubnrunoff(k-1) = (precipdt(k) - abstinit) * fcimp(urblu(j))
+             ubnrunoff(k-1) = urban_prec * fcimp(urblu(j))
+           end if
+         else
+           ubnrunoff(k-1) = 0.
          end if
 
+         if (ubnrunoff(k-1)<0)  ubnrunoff(k-1) = 0.
+         
          !! daily total runoff
-         surfq(j) = surfq(j) + hhqday(k-1) + ubnrunoff(k-1) 
+         surfq(j) = surfq(j) + hhqday(k-1) + ubnrunoff(k-1)
 
          !! calculate new rate of infiltration
          rateinf(k) = adj_hc * (psidt / (cuminf(k) + 1.e-6) + 1.)
@@ -187,12 +222,12 @@
       return
  5000 format(//,'Excess rainfall calculation for day ',i3,' of year ',  
      &        i4,' for sub-basin',i4,'.',/)
- 5001 format(t2,'Time',t9,'Incremental',t22,'Cumulative',t35,'Rainfall',&
-     &       t45,'Infiltration',t59,'Cumulative',t71,'Cumulative',t82,  &
-     &       'Incremental',/,t2,'Step',t10,'Rainfall',t23,'Rainfall',   &
-     &       t35,'Intensity',t49,'Rate',t58,'Infiltration',t73,'Runoff',&
-     &       t84,'Runoff',/,t12,'(mm)',t25,'(mm)',t36,'(mm/h)',t48,     &
+ 5001 format(t2,'Time',t9,'Incremental',t22,'Cumulative',t35,'Rainfall',
+     &       t45,'Infiltration',t59,'Cumulative',t71,'Cumulative',t82,  
+     &       'Incremental',/,t2,'Step',t10,'Rainfall',t23,'Rainfall',   
+     &       t35,'Intensity',t49,'Rate',t58,'Infiltration',t73,'Runoff',
+     &       t84,'Runoff',/,t12,'(mm)',t25,'(mm)',t36,'(mm/h)',t48,     
      &       '(mm/h)',t62,'(mm)',t74,'(mm)',t85,'(mm)',/)
- 5002 format(i5,t12,f5.2,t24,f6.2,t36,f6.2,t47,f7.2,t61,f6.2,t73,f6.2,  &
+ 5002 format(i5,t12,f5.2,t24,f6.2,t36,f6.2,t47,f7.2,t61,f6.2,t73,f6.2,  
      &       t84,f6.2)
       end

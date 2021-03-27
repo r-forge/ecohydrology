@@ -47,7 +47,7 @@
 
       integer :: ip, ipnum, eof
       character (len=17) :: pstnm
-      real :: skocp, wofp, hlff, hlfs, apefp, pwsol
+      real*8 :: skocp, wofp, hlff, hlfs, apefp, pwsol
       eof = 0
 
 
@@ -61,7 +61,7 @@
         skocp = 0.0
         wofp = 0.0
 
-        read (106,5000,iostat=eof) ip, pstnm, skocp, wofp, hlff, hlfs,  &
+        read (106,5000,iostat=eof) ip, pstnm, skocp, wofp, hlff, hlfs,  
      &       apefp, pwsol
         if (eof < 0) exit
         

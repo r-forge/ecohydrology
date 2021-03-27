@@ -103,7 +103,7 @@
 
       use parm
 
-      real :: cod, sus_sol, tn, tp, urbk, dirto, qdt
+      real*8 :: cod, sus_sol, tn, tp, urbk, dirto, qdt
       real*8 :: dirt
       integer :: j, k 
 
@@ -118,21 +118,21 @@
           case (1,2)       !! build-up/wash-off algorithm
 
           !! rainy day: no build-up, street cleaning allowed
-              
-               qdt = ubnrunoff(k) * 60./ real(idt) !urban runoff in mm/hr
+         
+          qdt = ubnrunoff(k) * 60./ dfloat(idt) !urban runoff in mm/hr
             if (qdt > 0.025 .and. surfq(j) > 0.1) then   ! SWMM : 0.001 in/hr (=0.0254mm/hr)
        
           !! calculate amount of dirt on streets prior to wash-off
               dirt = 0.
               dirto = 0.
-              dirto = dirtmx(urblu(j)) * twash(j) /                          
+              dirto = dirtmx(urblu(j)) * twash(j) /               
      &                                 (thalf(urblu(j)) + twash(j))
 
           !! calculate wash-off of solids
-              urbk = 0.                        ! peakr -> hhqday for subdaily time steps 6/19/09 JJ
+              urbk = 0.    ! peakr -> hhqday for subdaily time steps 6/19/09 JJ
               urbk = urbcoef(urblu(j)) * qdt  
                                      
-              dirt = dirto * Exp (- urbk * real(idt) / 60.)
+              dirt = dirto * Exp (- urbk * dfloat(idt) / 60.)
               if (dirt < 1.e-6) dirt = 0.0
 
           !! set time to correspond to lower amount of dirt
@@ -150,13 +150,13 @@
               tno3 = tno3conc(urblu(j)) * sus_sol / 1.e6
 
               ubntss(k) = (.001 * sus_sol * hru_ha(j)) * fimp(urblu(j)) 
-              surqno3(j) = tno3 * fimp(urblu(j)) + surqno3(j) *             &
+              surqno3(j) = tno3 * fimp(urblu(j)) + surqno3(j) *       
      &                                             (1. - fimp(urblu(j)))
-              sedorgn(j) = (tn - tno3) * fimp(urblu(j)) + sedorgn(j) *      &
+              sedorgn(j) = (tn - tno3) * fimp(urblu(j)) + sedorgn(j) *
      &                                            (1. - fimp(urblu(j)))
-              sedorgp(j) = .75 * tp * fimp(urblu(j)) + sedorgp(j) *         &
+              sedorgp(j) = .75 * tp * fimp(urblu(j)) + sedorgp(j) *   
      &                                            (1. - fimp(urblu(j)))
-              surqsolp(j) = .25 * tp * fimp(urblu(j)) + surqsolp(j) *       &
+              surqsolp(j) = .25 * tp * fimp(urblu(j)) + surqsolp(j) * 
      &                                            (1. - fimp(urblu(j)))
             else
           !! no surface runoff
@@ -176,7 +176,7 @@
         end select
         sus_sol=0
         
-        ! Compute evaporation of water (initial abstraction) from impervious cover
+        ! Compute evaporation of water (initial dabstraction) from impervious cover
         init_abstrc(j) = init_abstrc(j) - etday / nstep
         init_abstrc(j) = max(0.,init_abstrc(j))
       end do
@@ -188,11 +188,11 @@
         else if (phusw(j) > 0.0001) then
           if (igro(j) == 0) then
             if (phubase(j) > phusw(j)) then
-                call sweep
+           call sweep
             endif
           else 
             if (phuacc(j) > phusw(j)) then
-                call sweep
+           call sweep
             endif
           end if
         end if
@@ -200,5 +200,3 @@
 
       return
       end
-
-

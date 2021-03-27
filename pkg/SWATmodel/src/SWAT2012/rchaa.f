@@ -123,10 +123,10 @@
 
       use parm
 
-      real, intent (in) :: years
+      real*8, intent (in) :: years
       integer :: j
-      real, dimension (mrcho) :: pdvar, pdvr
-      real, dimension (2) :: srch_av
+      real*8, dimension (mrcho) :: pdvar, pdvr
+      real*8, dimension (2) :: srch_av
 
       do j = 1, subtot
 
@@ -207,31 +207,31 @@
             pdvr(ii) = pdvar(ipdvar(ii))
           end do
           if (iscen == 1 .and. isproj == 0) then
-          write (7,5000) j, subgis(j), years, rch_dakm(j),              &
-     &                                         (pdvr(ii), ii = 1, itotr)
+          write (7,5000) j, subgis(j), years, rch_dakm(j),              
+     &                                    (pdvr(ii), ii = 1, itotr)
           else if (isproj == 1) then
-          write (20,5000) j, subgis(j), years, rch_dakm(j),             &
-     &                                         (pdvr(ii), ii = 1, itotr)
+          write (20,5000) j, subgis(j), years, rch_dakm(j),             
+     &                                    (pdvr(ii), ii = 1, itotr)
           else if (iscen == 1 .and. isproj == 2) then
-          write (7,6000) j, subgis(j), years, rch_dakm(j),              &
+          write (7,6000) j, subgis(j), years, rch_dakm(j),              
      &                             (pdvr(ii), ii = 1, itotr), iyr  
           endif
         else
 !!  increase to 44 in loops below from 42 gsm 10/17/2011
           if (iscen == 1 .and. isproj == 0) then
-          write (7,5000) j, subgis(j), years, rch_dakm(j),              &
-     &                                        (pdvar(ii), ii = 1, 44)    
+          write (7,5000) j, subgis(j), years, rch_dakm(j),              
+     &                                (pdvar(ii), ii = 1, 44)    
           else if (isproj == 1) then
-          write (20,5000) j, subgis(j), years, rch_dakm(j),             &
-     &                                        (pdvar(ii), ii = 1, 44)    
+          write (20,5000) j, subgis(j), years, rch_dakm(j),             
+     &                                (pdvar(ii), ii = 1, 44)    
           else if (iscen == 1 .and. isproj == 2) then
-          write (7,6000) j, subgis(j), years, rch_dakm(j),              &
+          write (7,6000) j, subgis(j), years, rch_dakm(j),              
      &                             (pdvar(ii), ii = 1, 44), iyr      
           endif
         end if
       end do
 
       return
- 5000 format ('REACH ',i4,1x,i8,1x,f5.1,46e12.4)
- 6000 format ('REACH ',i4,1x,i8,1x,f5.1,46e12.4,1x,i4)
+ 5000 format ('REACH ',i5,1x,i8,1x,f5.1,47e12.4)
+ 6000 format ('REACH ',i5,1x,i8,1x,f5.1,47e12.4,1x,i4)
       end

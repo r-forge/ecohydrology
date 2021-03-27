@@ -77,7 +77,7 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 !!    nirr(:)     |none          |sequence number of irrigation application
 !!                               |within the year
-!!    pot_vol(:)  |m**3 H2O      |current volume of water stored in the
+!!    pot_vol(:)  |mm            |current volume of water stored in the
 !!                               |depression/impounded area
 !!    rtwtr       |m^3 H2O       |water leaving reach on day
 !!    sedrch      |metric tons   |sediment transported out of reach on day
@@ -105,7 +105,7 @@
 !!    ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
 
 !!    ~ ~ ~ SUBROUTINES/FUNCTIONS CALLED ~ ~ ~
-!!    Intrinsic: Abs, Min
+!!    Intrinsic: abs, Min
 !!    SWAT: irrigate
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
@@ -113,7 +113,7 @@
       use parm
 
       integer :: jrch, k, flag, ii
-      real :: cnv, vmm, vminmm, vol, wtrin
+      real*8 :: cnv, vmm, vminmm, vol, wtrin
 
       jrch = 0
       jrch = inum1
@@ -127,23 +127,23 @@
           flag = irr_flag(k)
           if (auto_wstr(k) > 0.) then
             if (wstrs_id(k) == 1 .and. strsw(k) < auto_wstr(k)) flag = 2
-            if (wstrs_id(k) == 2 .and. sol_sumfc(k) - sol_sw(k) >       &
+            if (wstrs_id(k) == 2 .and. sol_sumfc(k) - sol_sw(k) >       
      &             auto_wstr(k)) flag = 2
           end if
 
             !! Set parameters based on manual or auto irrigation
-                  if (flag == 1) then
-                    sq_rto = irrsq(k)
-                    irrsc(k) = irr_sc(k)                                  !!NUBZ
-                    irrno(k) = irr_no(k)
-                  else
-                    sq_rto = irr_asq(k)
-                    irrsc(k) = irr_sca(k)
-                    irrno(k) = irr_noa(k)                   
-                  endif
+        if (flag == 1) then
+          sq_rto = irrsq(k)
+          irrsc(k) = irr_sc(k)                              
+          irrno(k) = irr_no(k)
+        else
+          sq_rto = irr_asq(k)
+          irrsc(k) = irr_sca(k)
+          irrno(k) = irr_noa(k)                   
+        endif
 
         if (irrsc(k) == 1 .and. irrno(k) == jrch) then
-          aird(k) = 0.                                            !!NUBZ
+          aird(k) = 0.                                          
 
           if (flag > 0) then
             !!irrigate only if flow is greater than minimum flow
@@ -156,7 +156,7 @@
               !! compute maximum amount of water allowed in HRU
               if (divmax(k) < 0.) then
                 !!divmax units are 10^4 m^3
-                vmm = Abs(divmax(k)) * 10000. / cnv
+                vmm = abs(divmax(k)) * 10000. / cnv
               else
                 !! divmax units are mm H2O
                 vmm = divmax(k)
@@ -185,11 +185,11 @@
                 vol = vmm * cnv
 
        !!         if (ipot(k) == k) then
-                if (pot_fr(k) > 1.e-6) then
-                  pot_vol(k) = pot_vol(k) + vol
-                else
+                !if (pot_fr(k) > 1.e-6) then
+                !  pot_vol(k) = pot_vol(k) + vol / (10. * potsa(k))
+                !else
                   call irrigate(k,vmm)
-                end if
+                !end if
 
                 !! subtract irrigation from reach outflow
            !!     if (ipot(k) /= k) then
@@ -197,16 +197,16 @@
                   vol = 0.
                   vol = aird(k) * cnv
                 end if
-                if (ievent > 2) then
+                if (ievent > 0) then
                   do ii = 1, nstep
                     hrtwtr(ii) = hrtwtr(ii) - vol * hrtwtr(ii) / rtwtr
                     if (hrtwtr(ii) < 0.) hrtwtr(ii) = 0.
                   end do
                 end if
-!!                xx = vol                                                                          !! BN: replaced "wtrin" with "vol"
+!!                xx = vol                                       !! BN: replaced "wtrin" with "vol"
                 vol = vol / irr_eff(k)   !! BN: inserted to account for irr. efficiency                                             
                 xx = (wtr_avail - flowmin(k) * 86400.) * flowfr(k)                 !! BN: inserted: xx = available/allowed amount in m3/s
-                xx = Min(xx, vol)                                                  !! BN: inserted abstracted water cannot be more than allowed/available amount
+                xx = Min(xx, vol)                                                  !! BN: inserted dabstracted water cannot be more than allowed/available amount
                 if (xx > rchstor(jrch)) then
                   xx = vol - rchstor(jrch)                                         !! BN: replaced "wtrin" with "vol"
                   rchstor(jrch) = 0.
@@ -216,7 +216,7 @@
                 end if
                 if (xx > 0.) then
                   rtwtr = rtwtr - xx
-                  rtwtr = amax1(0., rtwtr)
+                  rtwtr = dmax1(0., rtwtr)
                 end if
 
                 !! advance irrigation operation number
@@ -224,10 +224,20 @@
                   nirr(k) = nirr(k) + 1
                 end if
             
-              end if
+            end if
+            
+            if (imgt == 1) then
+             write (143, 1000) subnum(k), hruno(k), iyr, i_mo, iida, 
+     *       hru_km(k), "         ",  " AUTOIRR", phubase(k), phuacc(k),
+     *      sol_sw(k), bio_ms(k), sol_rsd(1,k),sol_sumno3(k),
+     *      sol_sumsolp(k), aird(k), irrsc(k), irrno(k)
+1000        format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2,10x,f10.2,70x,
+     *      i10,10x,i10) 
+            end if
             end if
           end if
-        end if
+          end if
+          
       end do
 
       if (wtrin /= rtwtr .and. wtrin > 0.01) then
@@ -250,7 +260,7 @@
           rch_gra = 0.
         end if
 
-        if (ievent > 2) then
+        if (ievent > 0) then
           do ii = 1, nstep
             hsedyld(ii) = hsedyld(ii) * rtwtr / wtrin
           end do

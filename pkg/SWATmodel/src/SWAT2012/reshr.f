@@ -97,36 +97,41 @@
       use parm
 
       integer :: jres, inhyd
-      real :: vol, sed, vvr, targ, xx, flw
+      real*8 :: vol, sed, vvr, targ, xx, flw
  
       jres = 0
       jres = inum1
-        inhyd = inum2
+      inhyd = inum2
 
 !! store initial values
+      flw = 0.
       vol = 0.
       sed = 0.
       vol = res_vol(jres)
       sed = res_sed(jres)
+      hhresflwi = 0.
+      hhresflwo = 0.
+      hhressedi = 0.
+      hhressedo = 0.
 
 !! start sub-daily simulation
-        do k=1,nstep
+      do k=1,nstep
 
 !! update inflow to reservoir
-          resflwi = hhvaroute(2,inhyd,k)
-            ressedi = hhvaroute(3,inhyd,k)
+        hhresflwi(k) = hhvaroute(2,inhyd,k)
+        hhressedi(k) = hhvaroute(3,inhyd,k)
 
 !! calculate surface area for day (ha)
         ressa = br1(jres) * res_vol(jres) ** br2(jres)
 
 !! calculate water balance for day
-        resev = 6. * pet_day * ressa / nstep            !! urban modeling by J.Jeong
-        ressep = res_k(jres) * ressa * 240./ nstep      !! urban modeling by J.Jeong
-        respcp = sub_subp_dt(res_sub(jres),k) * ressa * 10.      !! urban modeling by J.Jeong
+        resev = 6. * pet_day * ressa / nstep  !! urban modeling by J.Jeong
+        ressep = res_k(jres) * ressa * 240./ nstep !! urban modeling by J.Jeong
+        respcp = sub_subp_dt(res_sub(jres),k) * ressa * 10. !! urban modeling by J.Jeong
 
 !! new water volume for day
-        res_vol(jres) = res_vol(jres) + respcp + resflwi - 
-     &      resev - ressep
+        res_vol(jres) = res_vol(jres) + respcp + hhresflwi(k) - 
+     &                   resev - ressep
 
 !! if reservoir volume is zero
         if (res_vol(jres) < 0.001) then
@@ -146,7 +151,7 @@
 !! if reservoir volume is greater than zero
 
         !! compute new sediment concentration in reservoir
-          res_sed(jres) = (ressedi + sed * vol) / res_vol(jres)
+          res_sed(jres) = (hhressedi(k) + sed * vol) / res_vol(jres)
           res_sed(jres) = Max(0.,res_sed(jres))
 
         !! determine reservoir outflow
@@ -156,18 +161,18 @@
               if (res_vol(jres) > res_pvol(jres)) then
                 vvr = res_vol(jres) - res_pvol(jres)
                 if (res_vol(jres) > res_evol(jres)) then
-                  resflwo = res_vol(jres) - res_evol(jres)
+                  hhresflwo(k) = (res_vol(jres) - res_evol(jres)) 
                   vvr = res_evol(jres) - res_pvol(jres)
                 endif
                 if (res_rr(jres) > vvr) then
-                  resflwo = resflwo + vvr
+                  hhresflwo(k) = (hhresflwo(k) + vvr) / nstep !m3
                 else
-                  resflwo = resflwo + res_rr(jres)
+                  hhresflwo(k) = (hhresflwo(k) + res_rr(jres)) / nstep !m3
                 endif
               endif
 
             case (1)                   !! use measured monthly outflow
-              resflwo = res_out(jres,i_mo,curyr)
+              hhresflwo(k) = res_out(jres,i_mo,curyr) * 86400. / nstep !m3/s -> m3
 
             case (2)                   !! controlled outflow-target release
               targ = 0.
@@ -198,40 +203,43 @@
                 end if
               endif
               if (res_vol(jres) > targ) then
-                resflwo = (res_vol(jres) - targ) / ndtargr(jres)
+                hhresflwo(k) = (res_vol(jres) - targ) / ndtargr(jres) /
+     &                         nstep
               else
-                resflwo = 0.
+                hhresflwo(k) = 0.
               end if
 
             case (3)                   !! use measured daily outflow
-              flw = 0.
-              read (350+jres,5000) flw
-                    resflwo = 86400. * flw / nstep            !! urban modeling by J.Jeong
+              if (k==1) read (350+jres,5000) flw
+          hhresflwo(k) = 86400. * flw / nstep  !! m3, urban modeling by J.Jeong
           end select
 
         !! check calculated outflow against specified max and min values
-          if (resflwo<oflowmn(i_mo,jres)) resflwo = oflowmn(i_mo,jres)
-          if (resflwo>oflowmx(i_mo,jres).and.oflowmx(i_mo,jres)>0.) then
-            resflwo = oflowmx(i_mo,jres)
+          if (hhresflwo(k)<oflowmn(i_mo,jres)*86400./nstep) then
+            resflwo = oflowmn(i_mo,jres) * 86400. / nstep
+          end if
+          if (hhresflwo(k)>oflowmx(i_mo,jres)*86400./nstep.and. 
+     &         oflowmx(i_mo,jres)>0.) then
+             hhresflwo(k) = oflowmx(i_mo,jres) * 86400. / nstep
           endif
            
         !! subtract outflow from reservoir storage
-          res_vol(jres) = res_vol(jres) - resflwo
+          res_vol(jres) = res_vol(jres) - hhresflwo(k)
           if (res_vol(jres) < 0.) then
-            resflwo = resflwo + res_vol(jres)
+            hhresflwo(k) = hhresflwo(k) + res_vol(jres)
             res_vol(jres) = 0.
           end if
 
         !! subtract consumptive water use from reservoir storage
           xx = 0.
-          xx = wuresn(i_mo,jres) / nstep            !! urban modeling by J.Jeong
+          xx = wuresn(i_mo,jres) / nstep  !! urban modeling by J.Jeong
           res_vol(jres) = res_vol(jres) - xx
           if (res_vol(jres) < 0.) then
             xx = xx + res_vol(jres)
             res_vol(jres) = 0.
           end if
         !! add spillage from consumptive water use to reservoir outflow
-          resflwo = resflwo + xx * wurtnf(jres)
+          hhresflwo(k) = hhresflwo(k) + xx * wurtnf(jres)
 
         !! compute change in sediment concentration due to settling
           if (res_sed(jres) > res_nsed(jres)) then
@@ -240,17 +248,21 @@
           end if
 
         !! compute sediment leaving reservoir
-          ressedo = res_sed(jres) * resflwo
+          hhressedo(k) = res_sed(jres) * hhresflwo(k)
 
         !! net change in amount of sediment in reservoir for day
-          ressedc = vol * sed + ressedi - ressedo - res_sed(jres) * 
-     &    res_vol(jres)
+          ressedc = vol * sed + hhressedi(k) - hhressedo(k) 
+     &     - res_sed(jres) * res_vol(jres)
 
         end if
       end do
 !!    update surface area for day
       ressa = br1(jres) * res_vol(jres) ** br2(jres)
-
+!!    daily total amount
+      resflwi = sum(hhresflwi)
+      resflwo = sum(hhresflwo)
+      ressedi = sum(hhressedi)
+      ressedo = sum(hhressedo)
       return
  5000 format (f8.2)
       end

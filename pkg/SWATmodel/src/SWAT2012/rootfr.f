@@ -1,12 +1,12 @@
-      subroutine rootfr      
+      subroutine rootfr 
       !! This subroutine distributes dead root mass through the soil profile
       !! code developed by Armen R. Kemanian in 2008 
       !! March, 2009 further adjustments expected
-            
+       
       use parm
 
-      real :: sol_thick(sol_nly(ihru))
-      real :: cum_rd, cum_d, cum_rf, x1, x2
+      real*8 :: sol_thick(sol_nly(ihru))
+      real*8 :: cum_rd, cum_d, cum_rf, x1, x2
       integer :: k, l, jj
       
       jj = ihru
@@ -22,7 +22,7 @@
       b = 11.7
       c = 0.022
       d = 0.12029 ! Integral of Normalized Root Distribution Function 
-                        ! from 0 to 1 (normalized depth) = 0.12029
+         ! from 0 to 1 (normalized depth) = 0.12029
 
       l = 0
       k = 0
@@ -34,10 +34,10 @@
       do l=1, sol_nly(jj)
         if (l == 1) then
           sol_thick(l) = sol_z(l,jj)
-        else      
+        else 
           sol_thick(l) = sol_z(l,jj) - sol_z(l-1,jj)
         end if
-            
+       
         cum_d = cum_d + sol_thick(l)
         if (cum_d >= stsol_rd(jj)) cum_rd = stsol_rd(jj)
         if (cum_d < stsol_rd(jj)) cum_rd = cum_d
@@ -56,15 +56,13 @@
            end if
         k = l
         if (cum_rd >= stsol_rd(jj)) Exit
-             
+        
       end do
 
-      !!       ensures that cumulative fractional root distribution = 1
+      !!  ensures that cumulative fractional root distribution = 1
       do l=1, sol_nly(jj)
-            rtfr(l) = rtfr(l) / cum_rf
-            If (l == k) Exit ! exits loop on the same layer as the previous loop
+       rtfr(l) = rtfr(l) / cum_rf
+       If (l == k) Exit ! exits loop on the same layer as the previous loop
       end do
    
       end subroutine
-
-

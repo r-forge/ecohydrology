@@ -47,8 +47,8 @@
       use parm
    
       integer :: it, ifnum, eof
-      real :: ffminn, ffminp, fforgn, fforgp, ffnh3n, bctpdb, bctlpdb
-      real :: bctkddb
+      real*8 :: ffminn, ffminp, fforgn, fforgp, ffnh3n, bctpdb, bctlpdb
+      real*8 :: bctkddb
       character (len=8) :: fnm
 
       ifnum = 0
@@ -66,7 +66,7 @@
         fforgp = 0.
         fnm = ""
 
-        read (107,5000,iostat=eof) it, fnm, ffminn, ffminp, fforgn,     &
+        read (107,5000,iostat=eof) it, fnm, ffminn, ffminp, fforgn,     
      &     fforgp, ffnh3n, bctpdb, bctlpdb, bctkddb 
 
         if (eof < 0) exit

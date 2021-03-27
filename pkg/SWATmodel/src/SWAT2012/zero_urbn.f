@@ -16,9 +16,9 @@
       abstinit = 0.
       iabstr = 0.
       
-!!      subdaily sediment modeling by J.Jeong
+!! subdaily sediment modeling by J.Jeong
       hhsedy=0.
-      spl_eros = 0.
+      eros_spl = 0.
       rill_mult = 0.
       eros_expo = 0.
       sig_g = 0.
@@ -59,7 +59,7 @@
       ft_k = 0.
       ft_dp = 0.
       ft_dc = 0.
-      ft_por = 0.4      
+      ft_por = 0.4 
       tss_den = 0.
       ft_alp = 0.
       sub_ha_imp = 0.
@@ -81,13 +81,13 @@
       dtp_iyr = 0
       dtp_numweir = 0
       dtp_numstage = 0
-      stp_stagdis = 0
+      dtp_stagdis = 0
       dtp_reltype = 0
       dtp_onoff = 0
       dtp_evrsv = 0.
       dtp_inflvol = 0.
       dtp_totwrwid = 0.
-      dtp_parm = 0.
+      dtp_lwratio = 0.
       dtp_wdep = 0.
       dtp_totdep = 0.
       dtp_watdepact = 0.
@@ -107,6 +107,9 @@
       dtp_coef1 = 0.
       dtp_coef2 = 0.
       dtp_coef3 = 0.
+      dtp_dummy1 = 0.
+      dtp_dummy2 = 0.
+      dtp_dummy3 = 0.
       dtp_wdratio = 0.
       dtp_depweir = 0.
       dtp_diaweir = 0.
@@ -143,7 +146,7 @@
       hrnopcp = 100.
       ri_sed_cumul = 0.
       irmmdt = 0.
-      subdr_kg = 0.
+      subdr_km = 0.
       subdr_ickm = 0.
       num_noirr = 0
       ri_qloss = 0
@@ -174,11 +177,14 @@
       wtp_pmann = 0.
       wtp_ploss = 0.
       sub_cn2 = 0.   
-         wtp_dp = 0.
+      wtp_dp = 0.
         wtp_sedi = 0.
-        wtp_sede = 0.       
+        wtp_sede = 0.  
         wtp_qi = 0.
       ovrlnd_dt = 0.
+      bmp_recharge = 0.
+      sfsedmean = 0.
+      sfsedstdev = 0.
         
       return
       end

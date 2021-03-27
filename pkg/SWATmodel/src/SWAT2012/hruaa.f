@@ -157,9 +157,9 @@
 
       use parm
 
-      real, intent (in) :: years
+      real*8, intent (in) :: years
       integer :: j, sb, ii, iflag
-      real, dimension (mhruo) :: pdvas, pdvs
+      real*8, dimension (mhruo) :: pdvas, pdvs
       character (len=4) :: cropname
 
       do j = 1, nhru
@@ -265,7 +265,8 @@
         pdvas(77) = hruaao(70,j)
 !!      latq contribution
         pdvas(78) = hruaao(71,j)
-
+!!      phos due to crack flow (tvap)
+        pdvas(79) = hruaao(72,j)
 
 
         if (ipdvas(1) > 0) then
@@ -281,24 +282,24 @@
         endif
 
           if (iscen == 1 .and. isproj == 0) then
-          write (28,1000) cropname, j, subnum(j), hruno(j), sb,         &
-     &             nmgt(j), years, hru_km(j), (pdvs(ii), ii = 1, itots)
+          write (28,1000) cropname, j, subnum(j), hruno(j), sb,         
+     &        nmgt(j), years, hru_km(j), (pdvs(ii), ii = 1, itots)
           else if (isproj == 1) then
-          write (21,1000) cropname, j, subnum(j), hruno(j),             &
-     &          sb, nmgt(j), years, hru_km(j), (pdvs(ii), ii = 1, itots)
+          write (21,1000) cropname, j, subnum(j), hruno(j),             
+     &    sb, nmgt(j), years, hru_km(j), (pdvs(ii), ii = 1, itots)
           else if (iscen == 1 .and. isproj == 2) then
-          write (28,2000) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,2000) cropname, j, subnum(j), hruno(j), sb,         
      &    nmgt(j), years, hru_km(j), (pdvs(ii), ii = 1, itots), iyr
           endif
         else
           if (iscen == 1 .and. isproj == 0) then
-          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         
      &            nmgt(j), years, hru_km(j), (pdvas(ii), ii = 1, mhruo)
           else if (isproj == 1) then
-          write (21,1001) cropname, j, subnum(j), hruno(j),             &
+          write (21,1001) cropname, j, subnum(j), hruno(j),             
      &         sb, nmgt(j), years, hru_km(j), (pdvas(ii), ii = 1, mhruo)
           else if (iscen == 1 .and. isproj == 2) then
-          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         &
+          write (28,1001) cropname, j, subnum(j), hruno(j), sb,         
      &    nmgt(j), years, hru_km(j), (pdvas(ii), ii = 1, mhruo), iyr
           endif
         end if
@@ -308,12 +309,10 @@
       return
 
 1000  format (a4,i5,1x,a5,a4,i5,1x,i4,1x,f4.1,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,8e10.3,2f10.3)
+     *e10.5,1x,e10.5,8e10.3,3f10.3)
 2000  format (a4,i5,1x,a5,a4,i5,1x,i4,1x,f4.1,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,5e10.3,2f10.3,1x,i4)
+     *e10.5,1x,e10.5,5e10.3,6f10.3,1x,i4)
 1001  format (a4,i7,1x,a5,a4,i5,1x,i4,1x,f4.1,e10.5,66f10.3,1x,
-     *e10.5,1x,e10.5,5e10.3,2f10.3,1x,i4)
-!! 1000 format (a4,i4,a5,a4,i5,1x,i4,1x,f4.1,e10.5,66f10.3,1x,
-!!     *e10.5,1x,e10.5,5e10.3,1x,i4)
-!! 2000 format (a4,i5,1x,i8,1x,i4,1x,i4,1x,f4.1,e10.5,73f10.3,1x,i4)
+     *e10.5,1x,e10.5,8e10.3,3f10.3,1x,i4)
+      
       end

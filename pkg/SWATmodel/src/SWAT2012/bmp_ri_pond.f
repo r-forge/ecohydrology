@@ -1,4 +1,4 @@
-      subroutine ri_pond(kk,riflw,rised)
+      subroutine bmp_ri_pond(kk,riflw,rised)
 
 !!    ~ ~ ~ PURPOSE ~ ~ ~
 !!    this subroutine routes water through a retention irrigation pond in the subbasin
@@ -36,12 +36,12 @@
       implicit none
      
       integer :: sb, kk, ii
-      real :: tsa,mxvol,pdia,ksat,dp,sub_ha,mxh,hweir,phead,pipeflow
-      real :: qin,qout,qpnd,sweir,hpnd,qet
-      real :: qweir, qseep,qpipe,qpndi,decayexp,splw,qpump
-      real :: sedconc,sedpndi, sedpnde,ksed,td,sedpump
-      real, dimension(3,0:nstep), intent(in out) :: riflw,rised
-      real, dimension(0:nstep) :: inflw,insed,outflw,outsed
+      real*8 :: tsa,mxvol,pdia,ksat,dp,sub_ha,mxh,hweir,phead,pipeflow
+      real*8 :: qin,qout,qpnd,sweir,hpnd,qet
+      real*8 :: qweir, qseep,qpipe,qpndi,decayexp,splw,qpump
+      real*8 :: sedconc,sedpndi, sedpnde,ksed,td,sedpump
+      real*8, dimension(4,0:nstep), intent(in out) :: riflw,rised
+      real*8, dimension(0:nstep) :: inflw,insed,outflw,outsed
       
       sb = inum1
       sub_ha = da_ha * sub_fr(sb)
@@ -90,7 +90,9 @@
          
          !Transmission loss through infiltration 
          qseep = ksat * tsa / 1000./ 60. * idt !m^3
-                        
+         bmp_recharge(sb) = bmp_recharge(sb) 
+     &                         + qseep / (sub_ha*10000.- tsa) *1000.
+                       
          !Evapotranspiration loss
          qet = ri_evrsv(sb,kk) * tsa * pet_day / 1000. / 1440. * idt !m^3
          
@@ -104,7 +106,7 @@
           
          !Estimate TSS removal due to sedimentation
          if (sedconc>12.) then ! assume 12mg/l as equilibrium concentration, , Huber et al. 2006
-           ksed = min(134.8,41.1 * hpnd ** (-0.999))  !decay coefficient, Huber et al. 2006
+           ksed = min(134.8,41.1 * hpnd ** -0.999)  !decay coefficient, Huber et al. 2006
            td = 1. / nstep !detention time, day
            sedconc = (sedconc - 12.) * exp(-ksed * td) + 12.
          endif
@@ -120,6 +122,7 @@
          riflw(1,ii) = qin / (sub_ha *10000. - tsa) * 1000.  !mm
          riflw(2,ii) = outflw(ii) / (sub_ha *10000. - tsa) * 1000. 
          riflw(3,ii) = qpump / (sub_ha *10000. - tsa) * 1000. 
+         riflw(4,ii) = qseep / (sub_ha *10000. - tsa) * 1000. 
          rised(3,:) = sedpump 
          rised(2,:) = outsed(:)
       End do
@@ -132,6 +135,4 @@
       ri_sedi(sb,kk) = sedpnde
 
       return
-      end subroutine
-   
-
+      end subroutine bmp_ri_pond

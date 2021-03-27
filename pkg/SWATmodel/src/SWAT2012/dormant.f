@@ -85,15 +85,15 @@
 
       use parm
 
-      real :: resnew
+      real*8 :: resnew
       integer :: j
 
       !!by zhang
       !!====================
 
-      real :: BLG1, BLG2, BLG3,  CLG, sf
-      real :: sol_min_n,  resnew_n, resnew_ne
-      real :: LMF, LSF, LSLF, LSNF,LMNF 
+      real*8 :: BLG1, BLG2, BLG3,  CLG, sf
+      real*8 :: sol_min_n,  resnew_n, resnew_ne
+      real*8 :: LMF, LSF, LSLF, LSNF,LMNF 
       orgc_f = 0.
       BLG1 = 0.
       BLG2 = 0.
@@ -119,7 +119,7 @@
 
 !! check for beginning of dormant season
       if (idc(idplt(j)) == 1 .or. idc(idplt(j)) == 4) return
-      if (idorm(j) == 0 .and. dayl(j)-dormhr(j) < daylmn(hru_sub(j)))   &
+      if (idorm(j) == 0 .and. dayl(j)-dormhr(j) < daylmn(hru_sub(j)))   
      &                                                              then
 
         select case (idc(idplt(j)))
@@ -176,47 +176,47 @@
      &              EXP(BLG1-BLG2*phuacc(j)))
 
                 !if (k == 1) then
-                    sf = 0.05
+               sf = 0.05
                 !else
-                    !sf = 0.1
-                !end if      
+               !sf = 0.1
+                !end if 
 
                !kg/ha  
-                sol_min_n = 0.      
+                sol_min_n = 0. 
                 sol_min_n = (sol_no3(1,j)+sol_nh3(1,j))
-                                
+                           
                 resnew = bio_ms(j) * bio_leaf(idplt(j)) 
-                resnew_n = resnew * pltfr_n(j)             
-                  resnew_ne = resnew_n + sf * sol_min_n
-                      !Not sure 1000 should be here or not!
-                  !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
-                  RLN = (resnew * CLG/(resnew_n+1.E-5))
-                  RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
-                  
-                  LMF = 0.85 - 0.018 * RLN
-                  if (LMF <0.01) then
-                      LMF = 0.01
-                  else
-                      if (LMF >0.7) then
-                          LMF = 0.7
-                      end if
-                  end if              
+                resnew_n = resnew * pltfr_n(j)        
+             resnew_ne = resnew_n + sf * sol_min_n
+                 !Not sure 1000 should be here or not!
+             !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
+             RLN = (resnew * CLG/(resnew_n+1.E-5))
+             RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
+             
+             LMF = 0.85 - 0.018 * RLN
+             if (LMF <0.01) then
+                 LMF = 0.01
+             else
+                 if (LMF >0.7) then
+                     LMF = 0.7
+                 end if
+             end if         
                 !if ((resnew * CLG/(resnew_n+1.E-5)) < 47.22) then
-                    !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
+               !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
                 !else
-                    !    LMF = 0.
-                !end if       
+               !    LMF = 0.
+                !end if  
 
                 LSF =  1 - LMF  
-                
+           
                 sol_LM(1,j) = sol_LM(1,j) + LMF * resnew
                 sol_LS(1,j) = sol_LS(1,j) + LSF * resnew
-                
+           
                 !here a simplified assumption of 0.5 LSL
                 LSLF = 0.0
                 LSLF = CLG          
                 
-                sol_LSL(1,j) = sol_LSL(1,j) + RLR* LSF * resnew                
+                sol_LSL(1,j) = sol_LSL(1,j) + RLR* LSF * resnew           
                 sol_LSC(1,j) = sol_LSC(1,j) + 0.42*LSF * resnew  
                 
                 sol_LSLC(1,j) = sol_LSLC(1,j) + RLR*0.42*LSF * resnew
@@ -225,17 +225,17 @@
                 !X3 = MIN(X6,0.42*LSF * resnew/150) 
                 
                 if (resnew_ne >= (0.42 * LSF * resnew /150)) then
-                   sol_LSN(1,j) = sol_LSN(1,j)+0.42*LSF* resnew / 150
-                   sol_LMN(1,j) = sol_LMN(1,j) + resnew_ne - 
+                sol_LSN(1,j) = sol_LSN(1,j) + 0.42 * LSF * resnew / 150
+                sol_LMN(1,j) = sol_LMN(1,j) + resnew_ne - 
      &                         (0.42 * LSF * resnew / 150) + 1.E-25
                 else
-                     sol_LSN(1,j) = sol_LSN(1,j) + resnew_ne
-                     sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
-                end if      
-              
-                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5)      
-                
-                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew      
+                sol_LSN(1,j) = sol_LSN(1,j) + resnew_ne
+                sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
+                end if 
+         
+                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5) 
+           
+                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew 
                 !LMNF = sol_LMN(1,j)/(sol_LM(1,j) + 1.E-5)           
                 
                 !update no3 and nh3 in soil
@@ -307,49 +307,49 @@
      &              EXP(BLG1-BLG2*phuacc(j)))
 
                 !if (k == 1) then
-                    sf = 0.05
+               sf = 0.05
                 !else
-                    !sf = 0.1
-                !end if      
+               !sf = 0.1
+                !end if 
 
                !kg/ha  
-                sol_min_n = 0.      
+                sol_min_n = 0. 
                 sol_min_n = (sol_no3(1,j)+sol_nh3(1,j))
-                                
+                           
                 resnew = bm_dieoff(idplt(j)) * bio_ms(j) 
-                resnew_n = bm_dieoff(idplt(j)) * plantn(j)             
-                  resnew_ne = resnew_n + sf * sol_min_n
-                      !Not sure 1000 should be here or not!
-                  !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
-                  RLN = (resnew * CLG/(resnew_n+1.E-5))
-                  RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
-                  
-                  LMF = 0.85 - 0.018 * RLN
-                  if (LMF <0.01) then
-                      LMF = 0.01
-                  else
-                      if (LMF >0.7) then
-                          LMF = 0.7
-                      end if
-                  end if              
+                resnew_n = bm_dieoff(idplt(j)) * plantn(j)        
+             resnew_ne = resnew_n + sf * sol_min_n
+                 !Not sure 1000 should be here or not!
+             !RLN = 1000*(resnew * CLG/(resnew_n+1.E-5))
+             RLN = (resnew * CLG/(resnew_n+1.E-5))
+             RLR = MIN(.8, resnew * CLG/1000/(resnew/1000+1.E-5))
+             
+             LMF = 0.85 - 0.018 * RLN
+             if (LMF <0.01) then
+                 LMF = 0.01
+             else
+                 if (LMF >0.7) then
+                     LMF = 0.7
+                 end if
+             end if         
                 !if ((resnew * CLG/(resnew_n+1.E-5)) < 47.22) then
-                    !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
+               !    LMF = 0.85 - 0.018 * (resnew * CLG/(resnew_n+1.E-5))
                 !else
-                    !    LMF = 0.
-                !end if       
+               !    LMF = 0.
+                !end if  
 
                 LSF =  1 - LMF  
-                
+           
                 sol_LM(1,j) = sol_LM(1,j) + LMF * resnew
                 sol_LS(1,j) = sol_LS(1,j) + LSF * resnew
-                
+           
 
                 
                 !here a simplified assumption of 0.5 LSL
                 !LSLF = 0.0
                 !LSLF = CLG          
                 
-                sol_LSL(1,j) = sol_LSL(1,j) + RLR*resnew                
+                sol_LSL(1,j) = sol_LSL(1,j) + RLR*resnew           
                 sol_LSC(1,j) = sol_LSC(1,j) + 0.42*LSF * resnew  
                 
                 sol_LSLC(1,j) = sol_LSLC(1,j) + RLR*0.42*resnew
@@ -358,17 +358,17 @@
                 !X3 = MIN(X6,0.42*LSF * resnew/150) 
                 
                 if (resnew_ne >= (0.42 * LSF * resnew /150)) then
-                   sol_LSN(1,j) =sol_LSN(1,j)+0.42*LSF * resnew / 150
-                     sol_LMN(1,j) = sol_LMN(1,j) + resnew_ne - 
+                sol_LSN(1,j) = sol_LSN(1,j) + 0.42 * LSF * resnew / 150
+                sol_LMN(1,j) = sol_LMN(1,j) + resnew_ne - 
      &                         (0.42 * LSF * resnew / 150) + 1.E-25
                 else
-                     sol_LSN(1,j) = sol_LSN(1,j) + resnew_ne
-                     sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
-                end if      
-              
-                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5)      
-                
-                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew      
+                sol_LSN(1,j) = sol_LSN(1,j) + resnew_ne
+                sol_LMN(1,j) = sol_LMN(1,j) + 1.E-25
+                end if 
+         
+                !LSNF = sol_LSN(1,j)/(sol_LS(1,j)+1.E-5) 
+           
+                sol_LMC(1,j) = sol_LMC(1,j) + 0.42 * LMF * resnew 
                 !LMNF = sol_LMN(1,j)/(sol_LM(1,j) + 1.E-5)           
                 
                 !update no3 and nh3 in soil
@@ -381,24 +381,24 @@
 
             sol_rsd(1,j) = sol_rsd(1,j) + resnew
             sol_rsd(1,j) = Max(sol_rsd(1,j),0.)
-            sol_fon(1,j) = sol_fon(1,j) +                               &
+            sol_fon(1,j) = sol_fon(1,j) +                               
      &         bm_dieoff(idplt(j)) * plantn(j)
-            sol_fop(1,j) = sol_fop(1,j) +                               &
+            sol_fop(1,j) = sol_fop(1,j) +                               
      &         bm_dieoff(idplt(j)) * plantp(j)
-            bio_hv(icr(j),j) = bio_ms(j) *                              & 
-     &        bm_dieoff(idplt(j)) +                                     &
-     &          bio_hv(icr(j),j)
-            bio_yrms(j) = bio_yrms(j) + bio_ms(j) *                     &
+            bio_hv(icr(j),j) = bio_ms(j) *                              
+     &        bm_dieoff(idplt(j)) +                                     
+     &     bio_hv(icr(j),j)
+            bio_yrms(j) = bio_yrms(j) + bio_ms(j) *                     
      &         bm_dieoff(idplt(j)) / 1000.
-            bio_ms(j) = (1. - bm_dieoff(idplt(j))) *                    &
+            bio_ms(j) = (1. - bm_dieoff(idplt(j))) *                    
      &         bio_ms(j)
-            plantn(j) = (1. - bm_dieoff(idplt(j))) *                    &
+            plantn(j) = (1. - bm_dieoff(idplt(j))) *                    
      &         plantn(j)
-            plantp(j) = (1. - bm_dieoff(idplt(j))) *                    &
+            plantp(j) = (1. - bm_dieoff(idplt(j))) *                    
      &         plantp(j)
             strsw(j) = 1.
-!            laiday(j) = alai_min(idplt(j))
-!            phuacc(j) = 0.
+             laiday(j) = alai_min(idplt(j))
+             phuacc(j) = 0.
 !            ncrops(icr(j),j) = ncrops(icr(j),j) + 1
 
           !! beginning of cool season annual dormant period
@@ -409,7 +409,8 @@
             end if 
           end select
            if (imgt == 1) then
-            write (143, 1000) subnum(j), hruno(j), iyr, i_mo, iida, 
+            write (143,1000) subnum(j), hruno(j), iyr, i_mo, iida,
+     *       hru_km(j),
      *       cpnm(idplt(j)),"START-DORM", phubase(j), phuacc(j), 
      *       sol_sw(j),bio_ms(j), sol_rsd(1,j), sol_sumno3(j),
      *       sol_sumsolp(j)
@@ -418,7 +419,7 @@
           end if
 
 !! check if end of dormant period
-        if (idorm(j) == 1 .and. dayl(j)-dormhr(j) >= daylmn(hru_sub(j)))&
+        if (idorm(j) == 1 .and. dayl(j)-dormhr(j) >= daylmn(hru_sub(j)))
      &                                                              then
 
           select case (idc(idplt(j)))
@@ -435,7 +436,8 @@
             end select
             
             if (imgt == 1) then
-                 write (143,1000) subnum(j), hruno(j), iyr, i_mo, iida, 
+                 write (143,1000) subnum(j), hruno(j), iyr, i_mo, iida,
+     *       hru_km(j),
      *       cpnm(idplt(j)), "END-DORM", phubase(j), phuacc(j), 
      *       sol_sw(j), bio_ms(j), sol_rsd(1,j), sol_sumno3(j),
      *       sol_sumsolp(j)
@@ -443,6 +445,6 @@
 
         end if
 
-1000  format (a5,1x,a4,3i6,2a15,7f10.2)
+1000  format (a5,1x,a4,3i6,1x,e10.5,1x,2a15,7f10.2)
       return
       end

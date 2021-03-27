@@ -44,10 +44,10 @@
 !!    Intrinsic: Log     
 
 !!    ~ ~ ~ ~ ~ ~ END SPECIFICATIONS ~ ~ ~ ~ ~ ~
-      real :: xx
+      real*8 :: xx
 
-      real, intent (in) :: x1, x2, x3, x4
-      real, intent (out) :: x5, x6
+      real*8, intent (in) :: x1, x2, x3, x4
+      real*8, intent (out) :: x5, x6
       
       xx = 0.0
       x5 = 0.0
@@ -56,7 +56,6 @@
       xx = Log(x3/x1 - x3)
       x6 = (xx - Log(x4/x2 - x4)) / (x4 - x3)
       x5 = xx + (x3 * x6)
-
 
       return
       end

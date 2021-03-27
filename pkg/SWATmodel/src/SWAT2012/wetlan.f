@@ -138,11 +138,11 @@
       use parm
 
       integer :: j, iseas
-      real :: vol, cnv, sed, wetsa, xx, phosk, nitrok, tpco
-      real :: wetsani, wetsili, wetclai, wetsagi, wetlagi
-      real :: san, sil, cla, sag, lag, inised, finsed,setsed,remsetsed
-      real :: wetsano, wetsilo, wetclao, wetsago, wetlago
-      real :: qdayi, latqi
+      real*8 :: vol, cnv, sed, wetsa, xx, phosk, nitrok, tpco
+      real*8 :: wetsani, wetsili, wetclai, wetsagi, wetlagi
+        real*8 :: san, sil, cla, sag, lag, inised, finsed,setsed,remsetsed
+      real*8 :: wetsano, wetsilo, wetclao, wetsago, wetlago
+      real*8 :: qdayi, latqi
       
 
       j = 0
@@ -175,7 +175,7 @@
 
         !! calculate water balance for day
         wetsa = 0.
-        wetsa = bw1(j) * wet_vol(j) ** bw2(j)
+        wetsa = hru_fr(j) * bw1(j) * wet_vol(j) ** bw2(j)
 
         wetev = 10. * evwet(j) * pet_day * wetsa
         wetsep = wet_k(j) * wetsa * 240.
@@ -303,7 +303,7 @@
           if (sed_stl(j) < 1.e-6) sed_stl(j) = 0.0
           inised = wet_sed(j)
           if (wet_sed(j) > wet_nsed(j)) then
-            wet_sed(j) = (wet_sed(j) - wet_nsed(j)) * sed_stl(j) +      &
+            wet_sed(j) = (wet_sed(j) - wet_nsed(j)) * sed_stl(j) +      
      &                                                       wet_nsed(j)
           end if
           finsed = wet_sed(j)
@@ -329,7 +329,7 @@
                 remsetsed = remsetsed - wet_sag(j)
                 wet_sag(j) = 0.
                 if (wet_sil(j) >= remsetsed) then
-                    wet_sil(j) = wet_sil(j) - remsetsed
+               wet_sil(j) = wet_sil(j) - remsetsed
                   remsetsed = 0.
                 else
                   remsetsed = remsetsed - wet_sil(j)
@@ -364,7 +364,7 @@
           lagyld(j) = lagyld(j) + wetlago
 
           !! net change in amount of sediment in wetland for day
-          wetsedc = vol * sed + wetsedi - wetsedo - wet_sed(j) *        &
+          wetsedc = vol * sed + wetsedi - wetsedo - wet_sed(j) *        
      &                                                        wet_vol(j)
           !! determine settling rate for nutrients
           !! part of equation 29.1.3 in SWAT manual
@@ -402,7 +402,7 @@
           if (wet_solpg(j) < 1.e-6) wet_solpg(j) = 0.0
 
           tpco = 0.
-          tpco = 1.e+6 * (wet_solp(j) + wet_orgp(j) + wet_psed(j) +     &
+          tpco = 1.e+6 * (wet_solp(j) + wet_orgp(j) + wet_psed(j) +     
      &                            wet_solpg(j)) / (wet_vol(j) + wetflwo)
           chlaco = 0.
           wet_chla(j) = 0.
@@ -440,7 +440,6 @@
           wet_solpg(j) = wet_solpg(j) * (1. - yy)
           wet_chla(j) = wet_chla(j) * (1. - yy)
 
-
         end if
 
         !! add impoundment seepage to shallow aquifer 
@@ -448,7 +447,7 @@
 !        shallst(j) = shallst(j) + wetsep / cnv
 
         !! compute seepage depth for HRU water balance
-        twlwet = wetsep / cnv
+        twlwet(j) = wetsep / cnv
 
       end if
 
