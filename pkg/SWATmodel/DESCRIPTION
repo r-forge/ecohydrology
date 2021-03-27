@@ -1,7 +1,7 @@
 Package: SWATmodel
 Version: 0.6.01
-Title: A multi-OS implementation of the TAMU SWAT model
-Author: Fuka, DR, Walter, MT, Steenhuis, TS, and Easton, ZM
+Title: A Multi-OS Implementation of the TAMU SWAT Model
+Author: Fuka, DR and Easton, ZM
 Maintainer: Daniel Fuka <drfuka@vt.edu>
 Depends: R (>= 2.10), EcoHydRology, data.table
 Description: The Soil and Water Assessment Tool is a river basin or
