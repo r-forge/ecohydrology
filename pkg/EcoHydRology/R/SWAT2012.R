@@ -9,7 +9,7 @@ SWAT2012<-function (hist_wx=NULL,elev=100,rch=3) {
       cat(pcp_head, sprintf("%s%005.1f\n", format(hist_wx$DATE, "%Y%j"), hist_wx$PRECIP), file = "pcp.pcp", sep = "")
       print("built new pcp.pcp and tmp.tmp files, make sure they are correct in file.cio")
     }
-    libarch = if (nzchar(version$arch)) paste("libs", version$arch, sep = "/") else "libs"
+    libarch = if (nzchar(base::version$arch)) paste("libs", base::version$arch, sep = "/") else "libs"
     swatbin <- "rswat2012.exe"
     system(shQuote(paste(path.package("SWATmodel"),libarch,swatbin, sep = "/")))
 
