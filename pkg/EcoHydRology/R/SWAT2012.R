@@ -1,4 +1,4 @@
-SWAT2005<-function (hist_wx=NULL,elev=100,rch=3) {
+SWAT2012<-function (hist_wx=NULL,elev=100,rch=3) {
     Sys.setenv(GFORTRAN_STDIN_UNIT = -1)
     Sys.setenv(GFORTRAN_STDOUT_UNIT = -1)
     Sys.setenv(GFORTRAN_STDERR_UNIT = -1)
@@ -10,7 +10,7 @@ SWAT2005<-function (hist_wx=NULL,elev=100,rch=3) {
       print("built new pcp.pcp and tmp.tmp files, make sure they are correct in file.cio")
     }
     libarch = if (nzchar(version$arch)) paste("libs", version$arch, sep = "/") else "libs"
-    swatbin <- "rswat2005.exe"
+    swatbin <- "rswat2012.exe"
     system(shQuote(paste(path.package("SWATmodel"),libarch,swatbin, sep = "/")))
 
     start_year = read.fortran(textConnection(readLines("file.cio")[9]), "f20")
