@@ -1,14 +1,14 @@
-\name{SWAT2005}
-\alias{SWAT2005}
+\name{SWAT2012}
+\alias{SWAT2012}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-This runs the SWAT2005 executable in the current directory.
+This runs the SWAT2012 executable in the current directory.
 }
 \description{
-This function runs the SWAT2005 executable in the current directory.
+This function runs the SWAT2012 executable in the current directory.
 }
 \usage{
-SWAT2005(hist_wx,elev,rch)
+SWAT2012(hist_wx,elev,rch)
 }
 \arguments{
   \item{hist_wx}{
