@@ -1,5 +1,5 @@
-testSWAT2005=function(){
-runSWAT2005=function (hist_wx = NULL, elev = 100, rch = 3) {
+testSWAT2012=function(){
+runSWAT2012=function (hist_wx = NULL, elev = 100, rch = 3) {
      Sys.setenv(GFORTRAN_STDIN_UNIT = -1)
      Sys.setenv(GFORTRAN_STDOUT_UNIT = -1)
      Sys.setenv(GFORTRAN_STDERR_UNIT = -1)
@@ -18,7 +18,7 @@ runSWAT2005=function (hist_wx = NULL, elev = 100, rch = 3) {
      libarch = if (nzchar(version$arch)) 
          paste("libs", version$arch, sep = "/")
      else "libs"
-     swatbin <- "rswat2005.exe"
+     swatbin <- "rswat2012.exe"
      system(shQuote(paste(path.package("SWATmodel"), libarch, swatbin, sep = "/")))
      start_year = read.fortran(textConnection(readLines("file.cio")[9]), 
          "f20")
@@ -48,11 +48,11 @@ for (file in names(swat_general)) {
    cat(unlist(swat_general[file]), file = file, sep = "\n")
 }
 
-test=runSWAT2005()
+test=runSWAT2012()
 if(sum(test$FLOW_OUTcms) < 200){
   print("Your computer is having SWAT array issues, please contact drf28@cornell.edu as we would like to figure why this is happening.\n")
   } else {
-  print("Your computer CPU test out OK for SWAT2005.\n")
+  print("Your computer CPU test out OK for SWAT2012.\n")
   }
   
 file.remove(list.files("../testswat/"))
