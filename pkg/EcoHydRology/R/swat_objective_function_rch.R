@@ -9,7 +9,7 @@ swat_objective_function_rch=function (x, calib_range, calib_params, flowgage, rc
   setwd(tmpdir)
   file.remove(list.files(pattern="output."))
   alter_files(calib_params)
-  libarch = if (nzchar(version$arch)) paste("libs", version$arch, sep = "/") else "libs"
+  libarch = if (nzchar(base::version$arch)) paste("libs", base::version$arch, sep = "/") else "libs"
   swatbin <- "rswat2012.exe"
   junkout=system(shQuote(paste(path.package("SWATmodel"), libarch, swatbin, sep = "/")),intern = T)
   start_year = read.fortran(textConnection(readLines("file.cio")[9]), "f20")
