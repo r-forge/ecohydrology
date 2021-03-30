@@ -18,7 +18,9 @@ swat_objective_function_rch=function (x, calib_range, calib_params, flowgage, rc
   test2 = subset(outdata, outdata$RCH == rch)
   test3 = merge(flowgage$flowdata, test2, all = F)
   test3$Qm3ps = test3$flow/3600/24
-  NS = NSeff(test3$Qm3ps, test3$FLOW_OUTcms,"../")}
+  NS = NSeff(test3$Qm3ps, test3$FLOW_OUTcms)
+  print(NS)
+  if(save_results){file.copy(list.files(),"../")}
   file.remove(list.files())
   setwd("../")
   file.remove(tmpdir)
