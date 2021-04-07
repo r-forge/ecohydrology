@@ -61,6 +61,7 @@ Roja Kaveh Garna rojakaveh@vt.edu, Zachary M. Easton, Daniel R. Fuka
 \examples{
 # Using the latitude and longitude of USGS 04282650 
 # LITTLE OTTER CREEK AT FERRISBURG, VT.
+\dontrun{
 flowgage_id="04282650" 
 flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",
     end_date = "2022-01-01")
@@ -73,4 +74,5 @@ points(LOCFer$date,LOCFer$tmaxDis-0.5,col="red")
 points(LOCFer$date,LOCFer$tminDis+1,col="blue")
 legend("topleft",legend = c("prcpDis","tmaxDis-0.5","tminDis+1"),
     col = c("black","red","blue"),lty = 1:2, cex = 0.7)
+}
 }
