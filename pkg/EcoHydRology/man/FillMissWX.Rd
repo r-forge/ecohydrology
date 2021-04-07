@@ -59,23 +59,18 @@ Roja Kaveh Garna rojakaveh@vt.edu, Zachary M. Easton, Daniel R. Fuka
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-Using the latitude and longitude of USGS 04282650 LITTLE OTTER CREEK AT FERRISBURG, VT.
+# Using the latitude and longitude of USGS 04282650 
+# LITTLE OTTER CREEK AT FERRISBURG, VT.
 flowgage_id="04282650" 
-flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",end_date
-                       = "2022-01-01")
-LOCFer=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,StnRadius=30,date_min="2010-01-01",date_max="2021-01-01")
+flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",
+    end_date = "2022-01-01")
+LOCFer=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
+    StnRadius=30,date_min="2010-01-01",date_max="2021-01-01")
 #View(LOCFer)
-plot(LOCFer$date,LOCFer$prcpDis, xlab="Date", ylab = "Distance (km)", ylim=c(0,30))
+plot(LOCFer$date,LOCFer$prcpDis, xlab="Date", 
+    ylab = "Distance (km)",ylim=c(0,30))
 points(LOCFer$date,LOCFer$tmaxDis-0.5,col="red")
 points(LOCFer$date,LOCFer$tminDis+1,col="blue")
-legend("topleft",legend = c("prcpDis","tmaxDis-0.5","tminDis+1"),col = c("black","red","blue"),lty = 1:2, cex = 0.7)
+legend("topleft",legend = c("prcpDis","tmaxDis-0.5","tminDis+1"),
+    col = c("black","red","blue"),lty = 1:2, cex = 0.7)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory (show via RShowDoc("KEYWORDS")):
-% \keyword{ ~kwd1 }
-% \keyword{ ~kwd2 }
-% Use only one keyword per line.
-% For non-standard keywords, use \concept instead of \keyword:
-% \concept{ ~cpt1 }
-% \concept{ ~cpt2 }
-% Use only one concept per line.
