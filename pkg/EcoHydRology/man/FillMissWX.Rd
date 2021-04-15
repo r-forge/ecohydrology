@@ -67,12 +67,12 @@ flowgage=get_usgs_gage(flowgage_id,begin_date = "2010-01-01",
     end_date = "2022-01-01")
 LOCFer=FillMissWX(declat=flowgage$declat, declon=flowgage$declon,
     StnRadius=30,date_min="2010-01-01",date_max="2021-01-01")
-#View(LOCFer)
+View(LOCFer)
 plot(LOCFer$date,LOCFer$prcpDis, xlab="Date", 
-    ylab = "Distance (km)",ylim=c(0,30))
-points(LOCFer$date,LOCFer$tmaxDis-0.5,col="red")
-points(LOCFer$date,LOCFer$tminDis+1,col="blue")
-legend("topleft",legend = c("prcpDis","tmaxDis-0.5","tminDis+1"),
-    col = c("black","red","blue"),lty = 1:2, cex = 0.7)
+     ylab = "Distance (km)",ylim=c(0,30))
+points(LOCFer$date,LOCFer$tmaxDis-0.5,col="red",pch=3,cex=.3)
+points(LOCFer$date,LOCFer$tminDis+.5,col="blue",pch=4,cex=.3)
+legend("topleft",legend = c("prcpDis","tmaxDis-0.5","tminDis+0.5"),
+       col = c("black","red","blue"),lty = 1:2, cex = 0.7)
 }
 }
