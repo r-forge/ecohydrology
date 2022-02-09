@@ -11,7 +11,7 @@ runSWAT2012<-function (hist_wx=NULL,elev=100,rch=3) {
     }
     libarch = if (nzchar(version$arch)) paste("libs", version$arch, sep = "/") else "libs"
     swatbin <- "rswat2012.exe"
-    system(shQuote(paste(path.package("SWATmodel"),libarch,swatbin, sep = "/")))
+    system(shQuote(paste(path.package("SWATmodel"),libarch,swatbin, sep = "/")),ignore.stderr=TRUE)
 
     start_year = read.fortran(textConnection(readLines("file.cio")[9]), "f20")
     temp = readLines(file("output.rch"))
