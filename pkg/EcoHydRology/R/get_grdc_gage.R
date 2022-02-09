@@ -1,5 +1,5 @@
 #### Functions
-get_grdc_gage=function(filename=filename){  
+get_grdc_gage=function(filename=grdcfilename){  
   # A function to make a data object similar to EcoHydrology::get_usgs_gage  
   #filename="1577050_Q_Day.Cmd.txt"
   print(filename)
