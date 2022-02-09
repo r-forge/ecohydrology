@@ -19,10 +19,26 @@ swat_objective_function_rch=function (x, calib_range, calib_params, flowgage, rc
   test3 = merge(flowgage$flowdata, test2, all = F)
   NS = NSeff(test3$Qm3ps, test3$FLOW_OUTcms)
   print(NS)
-  if(save_results){file.copy(list.files(),"../")}
+  if(save_results){
+    swatsqlite()
+    for(diffname in grep("output|unixorig",grep(paste0(unique(calib_params[,1]),
+						       collapse = "|"),list.files(),value=TRUE),
+			 invert = TRUE,value=TRUE)){
+      if(length(grep("calib",diffname))>0){next}
+      junk1=readLines(diffname)
+      junk2=readLines(paste0("../",diffname))
+      difflocs=as.numeric(strsplit(paste0(as.data.frame(strsplit(ses(junk1,junk2),split = "c"))[2,],collapse = ","),split=",")[[1]])
+      if(length(difflocs)>0){
+	write(diffname,"calibdiffs.txt",append=TRUE)
+	write(paste0(diffname,":",junk1[difflocs]," < ",junk2[difflocs]),"calibdiffs.txt",append=TRUE)
+      }
+    }
+    calibdir=paste0("../calib",format(Sys.time(),format="%Y%m%d%H%M"))
+    dir.create(calibdir)
+    file.copy(list.files(),calibdir)
+  }
   file.remove(list.files())
   setwd("../")
   file.remove(tmpdir)
   return(abs(NS - 1))
 }
-
