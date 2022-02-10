@@ -5,9 +5,11 @@ get_grdc_gage=function(filename=grdcfilename){
   print(filename)
   nskipline = grep("YYYY-MM-DD", readLines(filename))[2]-1
   gaugeno <- strsplit(filename, '[.]')[[1]][1]
-  gaugetab <- cbind(fread(filename, header = T, skip = nskipline, sep=";",colClasses = c('character', 'character', 'numeric')), GRDC_Info = gaugeno)%>%
-    setnames('YYYY-MM-DD', 'dates') %>%
-    setorder(GRDC_Info, dates)
+  gaugetmp = cbind(fread(filename, header = T, skip = nskipline, sep=";",
+      colClasses = c('character', 'character', 'numeric')), GRDC_Info = gaugeno)
+  gaugetab <- gaugetmp %>%
+	   setnames('YYYY-MM-DD', 'dates') %>%
+	   setorder(GRDC_Info, dates)
   gaugetab$dates=as.Date(gaugetab$dates)
   if(length(gaugetab$dates)<100){return("not enough data")}
   # GRDC-No.:              1577050"     
