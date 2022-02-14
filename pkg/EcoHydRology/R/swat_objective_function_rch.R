@@ -20,7 +20,7 @@ swat_objective_function_rch=function (x, calib_range, calib_params, flowgage, rc
   NS = NSeff(test3$Qm3ps, test3$FLOW_OUTcms)
   print(NS)
   if(save_results){
-    swatsqlite()
+    SWAToutput()
     for(diffname in grep("output|unixorig",grep(paste0(unique(calib_params[,1]),
 						       collapse = "|"),list.files(),value=TRUE),
 			 invert = TRUE,value=TRUE)){
