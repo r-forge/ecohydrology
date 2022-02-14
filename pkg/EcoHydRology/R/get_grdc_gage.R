@@ -31,7 +31,7 @@ get_grdc_gage=function(filename=grdcfilename){
   nskipline = grep("Longitude", readLines(filename),useBytes = TRUE)[1]-1
   GRDC_Longitude=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
   # Catchment area (km\xb2):      119.0"                                                                          
-  nskipline = grep("Catchment", gsub("\xb2","",readLines(filename),useBytes = TRUE))[1]-1
+  nskipline = grep("Catchment", gsub("\xb2","",readLines(filename),useBytes = TRUE),useBytes = TRUE)[1]-1
   GRDC_Catchment_area=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
   # Altitude (m ASL):        1860.0"                                                                              
   nskipline = grep("Altitude", readLines(filename),useBytes = TRUE)[1]-1
