@@ -8,6 +8,8 @@ get_grdc_gage=function(filename=grdcfilename){
   gaugetmp = fread(filename, header = T, skip = nskipline, sep=";",
     colClasses = c('character', 'character', 'numeric'))
   gaugetmp$GRDC_Info = gaugeno
+  print(head(gaugetmp))
+  GRDC_Info=gaugetmp$GRDC_Info
   gaugetab <- gaugetmp %>%
 	setnames('YYYY-MM-DD', 'dates') %>%
 	setorder(GRDC_Info, dates)
