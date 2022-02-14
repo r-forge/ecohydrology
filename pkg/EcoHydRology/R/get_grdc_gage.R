@@ -40,7 +40,7 @@ get_grdc_gage=function(filename=grdcfilename){
   nskipline = grep("Next downstream station:", readLines(filename))[1]-1
   GRDC_Next_downstream_station=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
 
-  head(gaugetab)
+  print(head(gaugetab))
   gaugetab=gaugetab[!(gaugetab$Value %in% c(-999, -99, -9999, 99, 999, 9999))]
 
   GRDC_mindate=min(gaugetab$dates)
