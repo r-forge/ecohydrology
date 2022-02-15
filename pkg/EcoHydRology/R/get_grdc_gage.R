@@ -11,7 +11,7 @@ get_grdc_gage=function(filename=grdcfilename){
   gaugetab <- setnames(gaugetab,'YYYY-MM-DD', 'dates')
   gaugetab <- setorder(gaugetab,GRDC_Info, dates)
   gaugetab$dates=as.Date(gaugetab$dates)
-  if(length(gaugetab$dates)<100){return("not enough data")}
+  if(length(gaugetab$dates)<100){return(NULL)}
   # GRDC-No.:              1577050"     
   nskipline = grep("GRDC-No", readLines(filename),useBytes = TRUE)[1]-1
   GRDC_No=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
