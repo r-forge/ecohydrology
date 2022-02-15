@@ -3,6 +3,7 @@ get_grdc_gage=function(filename=grdcfilename){
   # A function to make a data object similar to EcoHydrology::get_usgs_gage  
   #filename="1577050_Q_Day.Cmd.txt"
   print(filename)
+  if(length(readLines(filename))<100){return(NULL)}
   nskipline = grep("YYYY-MM-DD", readLines(filename),useBytes = TRUE)[2]-1
   gaugeno <- strsplit(filename, '[.]')[[1]][1]
   gaugetab = fread(filename, header = T, skip = nskipline, sep=";",
@@ -11,7 +12,6 @@ get_grdc_gage=function(filename=grdcfilename){
   gaugetab <- setnames(gaugetab,'YYYY-MM-DD', 'dates')
   gaugetab <- setorder(gaugetab,GRDC_Info, dates)
   gaugetab$dates=as.Date(gaugetab$dates)
-  if(length(gaugetab$dates)<100){return(NULL)}
   # GRDC-No.:              1577050"     
   nskipline = grep("GRDC-No", readLines(filename),useBytes = TRUE)[1]-1
   GRDC_No=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
