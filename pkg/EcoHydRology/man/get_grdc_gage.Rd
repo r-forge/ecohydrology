@@ -1,10 +1,10 @@
-\name{get_usgs_gage}
-\alias{get_usgs_gage}
+\name{get_grdc_gage}
+\alias{get_grdc_gage}
 \title{
 A function to grab daily stream flow measurements from GRDC Daily files
 }
 \description{
-A function to grab daily stream flow measurements from a GRDC Daily Flow file and makes a list metadata + data object similar to EcoHydrology::get_usgs_gage.
+A function to grab daily stream flow measurements from a GRDC Daily Flow file and makes a list metadata + data object similar to EcoHydrology::get_grdc_gage.
 }
 \usage{
 get_grdc_gage(filename=grdcfilename){  
