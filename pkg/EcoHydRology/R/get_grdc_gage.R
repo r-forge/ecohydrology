@@ -1,44 +1,44 @@
 #### Functions
-get_grdc_gage=function(filename=grdcfilename){  
+get_grdc_gage=function(lfilename=grdcfilename){  
   # A function to make a data object similar to EcoHydrology::get_usgs_gage  
-  #filename="1577050_Q_Day.Cmd.txt"
-  print(filename)
-  if(length(readLines(filename))<100){return(NULL)}
-  nskipline = grep("YYYY-MM-DD", readLines(filename),useBytes = TRUE)[2]-1
-  gaugeno <- strsplit(filename, '[.]')[[1]][1]
-  gaugetab = fread(filename, header = T, skip = nskipline, sep=";",
+  #lfilename="1577050_Q_Day.Cmd.txt"
+  print(lfilename)
+  if(length(readLines(lfilename))<100){return(NULL)}
+  nskipline = grep("YYYY-MM-DD", readLines(lfilename),useBytes = TRUE)[2]-1
+  gaugeno <- strsplit(lfilename, '[.]')[[1]][1]
+  gaugetab = fread(lfilename, header = T, skip = nskipline, sep=";",
     colClasses = c('character', 'character', 'numeric'))
   gaugetab$GRDC_Info=gaugeno
   gaugetab <- setnames(gaugetab,'YYYY-MM-DD', 'dates')
   gaugetab <- setorder(gaugetab,GRDC_Info, dates)
   gaugetab$dates=as.Date(gaugetab$dates)
   # GRDC-No.:              1577050"     
-  nskipline = grep("GRDC-No", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_No=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
+  nskipline = grep("GRDC-No", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_No=as.numeric(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2])
   # River:                 HOLETA SHET'"                                                                          
-  nskipline = grep("River:", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_River=str_trim(as.character(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2]))
+  nskipline = grep("River:", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_River=str_trim(as.character(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2]))
   # Station:               NEAR HOLETTA"                                                                          
-  nskipline = grep("Station:", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_Station=str_trim(as.character(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2]))
+  nskipline = grep("Station:", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_Station=str_trim(as.character(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2]))
   # Country:               ET"                                                                                    
-  nskipline = grep("Country:", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_Country=str_trim(as.character(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2]))
+  nskipline = grep("Country:", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_Country=str_trim(as.character(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2]))
   # Latitude (DD):       9.08"                                                                                    
-  nskipline = grep("Latitude", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_Latitude=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
+  nskipline = grep("Latitude", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_Latitude=as.numeric(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2])
   # Longitude (DD):      38.52"                                                                                   
-  nskipline = grep("Longitude", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_Longitude=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
+  nskipline = grep("Longitude", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_Longitude=as.numeric(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2])
   # Catchment area (km\xb2):      119.0"                                                                          
-  nskipline = grep("Catchment", gsub("\xb2","",readLines(filename),useBytes = TRUE),useBytes = TRUE)[1]-1
-  GRDC_Catchment_area=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
+  nskipline = grep("Catchment", gsub("\xb2","",readLines(lfilename),useBytes = TRUE),useBytes = TRUE)[1]-1
+  GRDC_Catchment_area=as.numeric(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2])
   # Altitude (m ASL):        1860.0"                                                                              
-  nskipline = grep("Altitude", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_Altitude=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
+  nskipline = grep("Altitude", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_Altitude=as.numeric(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2])
   # Next downstream station:      1577600"           
-  nskipline = grep("Next downstream station:", readLines(filename),useBytes = TRUE)[1]-1
-  GRDC_Next_downstream_station=as.numeric(strsplit(read_lines(filename,n_max = 1,skip=nskipline),":")[[1]][2])
+  nskipline = grep("Next downstream station:", readLines(lfilename),useBytes = TRUE)[1]-1
+  GRDC_Next_downstream_station=as.numeric(strsplit(read_lines(lfilename,n_max = 1,skip=nskipline),":")[[1]][2])
 
   gaugetab=gaugetab[!(gaugetab$Value %in% c(-999, -99, -9999, 99, 999, 9999)),]
 
