@@ -37,5 +37,4 @@ Daniel R Fuka
 flowgage_id="04216500"
 flowgage=get_usgs_gage(flowgage_id)
 
-## The function is currently defined as
 }

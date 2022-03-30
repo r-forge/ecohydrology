@@ -1,6 +1,5 @@
 \name{FillMissWX}
 \alias{FillMissWX}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 A function to fill missing weather data.
 }
@@ -12,7 +11,6 @@ A function to fill missing weather data with closest GHCN data based on inverse 
 \usage{
 FillMissWX(declat, declon, StnRadius, minstns, date_min, date_max, targElev, method, alfa)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{declat}{
 Latitude of the location. Southern latitudes should be given as negative values.
@@ -43,7 +41,6 @@ The power in IDW equation, if method=“IDW”. The default value is 2.
 }
 }
 \details{
-%%  ~~ If necessary, more details than the description above ~~
 }
 \value{
 A dataframe of daily weather data that has been filled with the closest GHCN data to minimize the number of NA's.  
@@ -64,13 +61,10 @@ Menne, M.J., I. Durre, R.S. Vose, B.E. Gleason, and T.G. Houston, 2012: An overv
 Roja Kaveh Garna rojakaveh@vt.edu, Zachary M. Easton, Daniel R. Fuka 
 }
 \note{
-%%  ~~further notes~~
 }
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
 # Using the latitude and longitude of USGS 04282650 
