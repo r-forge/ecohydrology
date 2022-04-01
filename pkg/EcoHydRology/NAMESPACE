@@ -6,6 +6,9 @@ import(
   operators,
   topmodel,
   DEoptim,
+  rnoaa,
+  lubridate,
+  ggplot2,
   XML
 )
 importFrom("graphics", "axis", "barplot", "lines", "mtext", "par", "plot")
